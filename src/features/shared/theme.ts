@@ -18,9 +18,9 @@ export const theme = {
     textPrimary: '#1a2e26',
     textSecondary: '#5a6e65',
     textMuted: '#94a39b',
-    badge: '#10b981',
+    badge: '#00a86b',
     badgeText: '#ffffff',
-    statusSuccess: '#10b981',
+    statusSuccess: '#00a86b',
     statusWarning: '#f59e0b',
     statusDanger: '#ef4444',
     statusInfo: '#3b82f6',
@@ -47,7 +47,7 @@ export const theme = {
     xxl: '48px',
   },
   typography: {
-    fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+    fontFamily: "'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
   },
 } as const;
 

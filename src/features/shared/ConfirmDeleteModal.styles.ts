@@ -51,7 +51,7 @@ export const TextContent = styled.div`
     display: flex;
     flex-direction: column;
     gap: 6px;
-    padding-right: 24px; // Espaço para o botão de fechar não sobrepor
+    padding-right: 24px;
 `;
 
 export const ModalTitle = styled.h2`
