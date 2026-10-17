@@ -1,7 +1,7 @@
 import styled from 'styled-components';
 
 export const MainContentWrapper = styled.main`
-  margin-left: 260px;
+  margin-left: 280px;
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -16,23 +16,26 @@ export const MainContentWrapper = styled.main`
   }
 `;
 
-export const DashboardArea = styled.div`
-  padding: 24px 0 40px 0;
+export const GoalsPageArea = styled.div`
+  padding: 24px 0 24px 0;
   width: 100%;
-  max-width: 1400px;
-  margin: 76px auto 0 auto;
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 28px;
+  justify-content: space-between;
+  gap: 24px;
+
+  @media (min-width: 1720px) and (min-height: 900px) {
+    gap: clamp(24px, 2.8vh, 36px);
+  }
 
   @media (max-width: 900px) {
-    margin-top: 76px;
     padding: 16px 0 24px 0;
+    justify-content: flex-start;
   }
 `;
 
-export const DashboardHeader = styled.div`
+export const GoalsHeader = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -44,7 +47,19 @@ export const DashboardHeader = styled.div`
   }
 `;
 
-export const DashboardTitle = styled.h2`
+export const GoalsTitle = styled.h1`
+  font-size: 26px;
+  font-weight: 700;
+  color: ${({ theme }) => theme.colors.textPrimary};
+  margin-bottom: 4px;
+  letter-spacing: -0.5px;
+
+  @media (max-width: 868px) {
+    font-size: 20px;
+  }
+`;
+
+export const GoalsSubtitle = styled.p`
   font-size: 14px;
   font-weight: 500;
   color: ${({ theme }) => theme.colors.textSecondary};
@@ -64,7 +79,8 @@ export const ViewSelector = styled.div`
   gap: 15px;
   align-items: center;
   justify-content: center;
-  margin-top: 10px;
+  margin-top: auto;
+  padding-top: 16px;
 
   button {
     background: none;
@@ -103,6 +119,7 @@ export const AddButton = styled.button`
   cursor: pointer;
   font-size: 14px;
   font-weight: 600;
+  border: none;
   transition: all 0.2s ease;
   display: flex;
   align-items: center;
@@ -127,6 +144,16 @@ export const CardGrid = styled.div`
   gap: 24px;
   justify-content: center;
 
+  @media (min-width: 1720px) {
+    grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+    gap: 26px;
+  }
+
+  @media (min-width: 2100px) {
+    grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+    gap: 30px;
+  }
+
   @media (max-width: 768px) {
     grid-template-columns: 1fr;
   }
@@ -135,16 +162,4 @@ export const CardGrid = styled.div`
 export const GoalCardWrapper = styled.div`
   cursor: pointer;
   width: 100%;
-`;
-
-export const GreetingText = styled.h1`
-  font-size: 26px;
-  font-weight: 700;
-  color: ${({ theme }) => theme.colors.textPrimary};
-  margin-bottom: 4px;
-  letter-spacing: -0.5px;
-
-  @media (max-width: 868px) {
-    font-size: 20px;
-  }
 `;

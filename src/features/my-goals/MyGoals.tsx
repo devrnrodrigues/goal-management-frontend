@@ -1,452 +1,508 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import { Plus, ChevronLeft, ChevronRight } from 'lucide-react';
-import { Sidebar, Header } from '../layout';
-import { GoalCard, GoalDetailView, AddGoalModal, UpdateGoalModal } from './components';
+import { 
+    GoalCard, 
+    GoalDetailView, 
+    AddGoalModal, 
+    UpdateGoalModal,
+    GoalStatsBar,
+} from './components';
+import { useCardsPerPage } from './hooks';
 import { ConfirmDeleteModal } from '../shared';
-import { DashboardOverview } from '../dashboard';
 import {
-    MainContentWrapper,
-    DashboardArea,
-    DashboardHeader,
-    DashboardTitle,
-    SectionTitle,
-    ViewSelector,
+    GoalsPageArea,
+    GoalsHeader,
+    GoalsTitle,
+    GoalsSubtitle,
     AddButton,
     CardGrid,
     GoalCardWrapper,
-    GreetingText
+    ViewSelector,
 } from './MyGoals.styles';
 
-interface SubTask {
+export interface SubTask {
     id: string;
     title: string;
     description?: string;
     completed: boolean;
 }
 
-interface Task {
+export interface Task {
+    id?: string;
     category: string;
     title: string;
     progress: number;
     description: string;
     deadline?: string;
+    status?: string;
+    priority?: string;
     subtasks?: SubTask[];
 }
 
 const initialTasks: Task[] = [
     { 
-        category: 'Engenharia de Software', 
-        title: 'Frontend', 
-        progress: 49, 
-        description: 'Domínio de conceitos avançados de interface, otimização de performance web, arquiteturas modernas e renderização no lado do servidor para aplicações escaláveis.',
+        id: 'goal-checkout',
+        category: 'Engenharia de Produto', 
+        title: 'Novo Checkout Transacional', 
+        progress: 71, 
+        status: 'Revisão final',
+        priority: 'Alta prioridade',
+        description: 'Redesenho completo do fluxo de pagamento para reduzir abandono de carrinho, com suporte a Pix instantâneo, carteiras digitais e fallback automático.',
+        deadline: '30/11/2026',
+        subtasks: [
+            { id: '1', title: 'Integração com gateway de pagamentos;', description: 'Conexão segura com adquirentes e split de pagamentos.', completed: true },
+            { id: '2', title: 'Validação de antifraude e risco;', description: 'Regras de pontuação de score de compradores.', completed: true },
+            { id: '3', title: 'Implementação do fluxo de fallback de cartão;', description: 'Retentativas inteligentes em caso de indisponibilidade.', completed: true },
+            { id: '4', title: 'Testes de carga com 50k requisições/min;', description: 'Validação de stress e latência do endpoint.', completed: true },
+            { id: '5', title: 'Homologação com equipe de Finanças;', description: 'Conciliação bancária e extratos automáticos.', completed: true },
+            { id: '6', title: 'Auditoria de conformidade PCI-DSS;', description: 'Certificação de segurança no armazenamento de dados.', completed: false },
+            { id: '7', title: 'Rollout progressivo de 10% para produção;', description: 'Canary release monitorado por feature flag.', completed: false },
+        ]
+    },
+    { 
+        id: 'goal-design-system',
+        category: 'Design System', 
+        title: 'Design System Core v2', 
+        progress: 50, 
+        status: 'Em desenvolvimento',
+        priority: 'Média prioridade',
+        description: 'Unificação da biblioteca de componentes visuais, tokens globais de acessibilidade e documentação interativa para todos os squads de produto.',
         deadline: '15/12/2026',
         subtasks: [
-            { id: '1', title: 'Gerenciamento de estado;', description: 'Estudar Redux Toolkit, Zustand e Context API para aplicações robustas.', completed: true },
-            { id: '2', title: 'Testes de Frontend;', description: 'Aprender Jest e React Testing Library para garantir a qualidade.', completed: true },
-            { id: '3', title: 'Performance Web;', description: '', completed: true },
-            { id: '4', title: 'Segurança no Frontend (XSS, CSRF);', description: 'Entender vulnerabilidades comuns e como preveni-las.', completed: true },
-            { id: '5', title: 'SSR / SSG;', description: '', completed: false },
-            { id: '6', title: 'Microfrontends;', description: 'Modularização de aplicações grandes com Module Federation.', completed: false },
-            { id: '7', title: 'Interface de Usuário (UI);', description: '', completed: false },
-            { id: '8', title: 'Experiência de Usuário (UX);', description: 'Foco na jornada do usuário e acessibilidade (a11y).', completed: false },
-            { id: '9', title: 'Usabilidade;', description: '', completed: false },
-            { id: '10', title: 'Responsividade;', description: 'Mobile-first e adaptação para múltiples dispositivos.', completed: false },
+            { id: '1', title: 'Mapeamento dos tokens de cor e tipografia;', description: 'Variáveis semânticas de temas claro e escuro.', completed: true },
+            { id: '2', title: 'Componentes base (Button, Input, Modal);', description: 'Padronização de propriedades e estados interativos.', completed: true },
+            { id: '3', title: 'Auditoria de acessibilidade WCAG AAA;', description: 'Garantia de contraste, navegação por teclado e leitor de tela.', completed: false },
+            { id: '4', title: 'Publicação do pacote NPM interno;', description: 'Versionamento semântico com documentação no Storybook.', completed: false },
         ]
     },
     { 
-        category: 'Engenharia de Software', 
-        title: 'Backend', 
-        progress: 39, 
-        description: '',
-        deadline: '20/11/2026',
+        id: 'goal-kubernetes',
+        category: 'Infraestrutura & Cloud', 
+        title: 'Migração para Kubernetes', 
+        progress: 60, 
+        status: 'Homologação',
+        priority: 'Alta prioridade',
+        description: 'Modernização da infraestrutura em nuvem para clusters EKS com autoscaling horizontal, esteiras automatizadas e monitoramento distribuído.',
+        deadline: '20/12/2026',
         subtasks: [
-            { id: '1', title: 'Node.js;', description: 'Entender o event loop e arquitetura assíncrona.', completed: true },
-            { id: '2', title: 'Express;', description: '', completed: true },
-            { id: '3', title: 'JWT Auth;', description: 'Implementação de autenticação baseada em tokens.', completed: true },
-            { id: '4', title: 'REST APIs;', description: '', completed: false },
-            { id: '5', title: 'GraphQL;', description: 'Consultas flexíveis e tipagem estática com Apollo.', completed: false },
-            { id: '6', title: 'Microservices;', description: '', completed: false },
-            { id: '7', title: 'Docker;', description: 'Containerização de ambientes de desenvolvimento e produção.', completed: false },
-            { id: '8', title: 'Swagger;', description: '', completed: false },
-            { id: '9', title: 'Redis;', description: 'Cache em memória para alta performance.', completed: false },
-            { id: '10', title: 'Testes unitários;', description: '', completed: false },
+            { id: '1', title: 'Provisionamento de clusters via Terraform;', description: 'Infraestrutura como código replicável entre ambientes.', completed: true },
+            { id: '2', title: 'Configuração de esteiras CI/CD;', description: 'Pipelines automatizados no GitHub Actions com zero downtime.', completed: true },
+            { id: '3', title: 'Implementação de observabilidade;', description: 'Dashboards no Grafana e alertas em tempo real no Slack.', completed: true },
+            { id: '4', title: 'Configuração de ingress e certificados SSL;', description: 'Roteamento seguro e balanceamento de carga.', completed: false },
+            { id: '5', title: 'Testes de failover e recuperação;', description: 'Simulação de queda de zona de disponibilidade.', completed: false },
         ]
     },
     { 
-        category: 'Engenharia de Software', 
-        title: 'Banco de Dados', 
-        progress: 19, 
-        description: 'Modelagem relacional e não relacional, estratégias eficientes de indexação, transações seguras e otimização contínua de consultas.',
-        deadline: '10/10/2026',
+        id: 'goal-onboarding',
+        category: 'Growth & Operações', 
+        title: 'Onboarding do Cliente', 
+        progress: 50, 
+        status: 'Em progresso',
+        priority: 'Média prioridade',
+        description: 'Otimização do fluxo de ativação dos novos clientes corporativos reduzindo o tempo médio de setup inicial de 7 dias para menos de 24 horas.',
+        deadline: '10/01/2027',
         subtasks: [
-            { id: '1', title: 'SQL básico;', description: 'Comandos DDL, DML e consultas básicas.', completed: true },
-            { id: '2', title: 'PostgreSQL;', description: '', completed: true },
-            { id: '3', title: 'Indexes;', description: 'Melhoria de performance em buscas complexas.', completed: false },
-            { id: '4', title: 'Transações;', description: '', completed: false },
-            { id: '5', title: 'NoSQL;', description: 'Conceitos de bancos orientados a documentos.', completed: false },
-            { id: '6', title: 'MongoDB;', description: '', completed: false },
-            { id: '7', title: 'Redis cache;', description: 'Armazenamento chave-valor de alta velocidade.', completed: false },
-            { id: '8', title: 'Modelagem ER;', description: '', completed: false },
-            { id: '9', title: 'Migrations;', description: 'Controle de versão do esquema do banco de dados.', completed: false },
-            { id: '10', title: 'Backup e Restore;', description: '', completed: false },
+            { id: '1', title: 'Pesquisa de usabilidade com clientes ativos;', description: 'Identificação dos principais pontos de atrito no cadastro.', completed: true },
+            { id: '2', title: 'Simplificação do formulário de compliance;', description: 'Envio assíncrono de documentos com OCR automático.', completed: true },
+            { id: '3', title: 'Automação de e-mails de boas-vindas;', description: 'Trilhas personalizadas de engajamento inicial.', completed: false },
+            { id: '4', title: 'Painel de métricas de conversão e ativação;', description: 'Acompanhamento do funil de onboarding em tempo real.', completed: false },
         ]
     },
     { 
-        category: 'Engenharia de Software', 
-        title: 'Nuvem', 
-        progress: 49, 
-        description: '',
-        deadline: '05/01/2027',
+        id: 'goal-data-warehouse',
+        category: 'Data & Analytics', 
+        title: 'Data Warehouse & BI', 
+        progress: 25, 
+        status: 'Planejamento',
+        priority: 'Baixa prioridade',
+        description: 'Construção de pipelines de dados em tempo real e dashboards executivos para acompanhamento das principais métricas de faturamento e engajamento.',
+        deadline: '05/02/2027',
         subtasks: [
-            { id: '1', title: 'AWS básico;', description: 'Visão geral dos principais serviços da Amazon Web Services.', completed: true },
-            { id: '2', title: 'EC2;', description: '', completed: true },
-            { id: '3', title: 'S3 buckets;', description: 'Gerenciamento de objetos e arquivos estáticos.', completed: true },
-            { id: '4', title: 'IAM;', description: '', completed: true },
-            { id: '5', title: 'Serverless;', description: 'Computação sem servidor para redução de custos.', completed: false },
-            { id: '6', title: 'Lambda;', description: '', completed: false },
-            { id: '7', title: 'CloudFront;', description: 'CDN para entrega rápida de conteúdo global.', completed: false },
-            { id: '8', title: 'Route 53;', description: '', completed: false },
-            { id: '9', title: 'Docker Swarm;', description: 'Orquestração simples de containers.', completed: false },
-            { id: '10', title: 'Kubernetes;', description: '', completed: false },
+            { id: '1', title: 'Definição de modelo dimensional e schemas;', description: 'Estruturação de tabelas fatos e dimensões no BigQuery.', completed: true },
+            { id: '2', title: 'Configuração de conectores CDC;', description: 'Captura contínua de alterações no banco transacional.', completed: false },
+            { id: '3', title: 'Criação de DAGs no Apache Airflow;', description: 'Orquestração e agendamento dos jobs de ETL diários.', completed: false },
+            { id: '4', title: 'Dashboard de receita recorrente (MRR);', description: 'Painel consolidado para acompanhamento da diretoria.', completed: false },
         ]
     },
     { 
-        category: 'Engenharia de Software', 
-        title: 'Versionamento', 
-        progress: 57, 
-        description: 'Fluxos avançados de controle de versão utilizando Git, integração contínua e revisões de código estruturadas.',
-        deadline: '30/09/2026',
+        id: 'goal-mobile-e2e',
+        category: 'Qualidade de Software', 
+        title: 'Automação E2E Mobile', 
+        progress: 33, 
+        status: 'Prazo final',
+        priority: 'Alta prioridade',
+        description: 'Cobertura de testes automatizados de ponta a ponta para os fluxos críticos de autenticação e transações dos aplicativos iOS e Android.',
+        deadline: '28/10/2026',
         subtasks: [
-            { id: '1', title: 'Git init;', description: 'Configuração inicial e comandos essenciais.', completed: true },
-            { id: '2', title: 'Branching;', description: '', completed: true },
-            { id: '3', title: 'Rebase;', description: 'Manutenção de um histórico linear e limpo.', completed: true },
-            { id: '4', title: 'Cherry-pick;', description: '', completed: true },
-            { id: '5', title: 'Git flow;', description: 'Estratégia de ramificação para equipes.', completed: true },
-            { id: '6', title: 'GitHub Actions;', description: '', completed: false },
-            { id: '7', title: 'Pull Requests;', description: 'Boas práticas de abertura e descrição.', completed: false },
-            { id: '8', title: 'Code Review;', description: '', completed: false },
-            { id: '9', title: 'Submodules;', description: 'Gerenciamento de dependências entre repositórios.', completed: false },
-            { id: '10', title: 'Git hooks;', description: '', completed: false },
+            { id: '1', title: 'Configuração do ambiente Appium;', description: 'Setup de emuladores e runners no cluster de testes.', completed: true },
+            { id: '2', title: 'Scripts de login e biometria;', description: 'Validação de FaceID, TouchID e tokens 2FA.', completed: false },
+            { id: '3', title: 'Fluxo completo de compra e contratação;', description: 'Cenários críticos de ponta a ponta na esteira de release.', completed: false },
         ]
     },
     { 
-        category: 'Engenharia de Software', 
-        title: 'Testes', 
-        progress: 27, 
-        description: '',
+        id: 'goal-security-audit',
+        category: 'Segurança da Informação', 
+        title: 'Auditoria SOC 2 e LGPD', 
+        progress: 75, 
+        status: 'Revisão final',
+        priority: 'Alta prioridade',
+        description: 'Implementação e validação de controles de acesso, criptografia de dados em repouso e conformidade com diretrizes regulatórias.',
         deadline: '18/11/2026',
         subtasks: [
-            { id: '1', title: 'Jest;', description: 'Framework de testes em JavaScript.', completed: true },
-            { id: '2', title: 'Vitest;', description: '', completed: true },
-            { id: '3', title: 'React Testing Library;', description: 'Testes focados no comportamento do usuário.', completed: false },
-            { id: '4', title: 'Cypress;', description: '', completed: false },
-            { id: '5', title: 'Playwright;', description: 'Automação moderna para testes E2E.', completed: false },
-            { id: '6', title: 'TDD;', description: '', completed: false },
-            { id: '7', title: 'Mocking;', description: 'Simulação de APIs e funções isoladas.', completed: false },
-            { id: '8', title: 'Coverage;', description: '', completed: false },
-            { id: '9', title: 'E2E testing;', description: 'Validação de fluxos completos de ponta a ponta.', completed: false },
-            { id: '10', title: 'Integration tests;', description: '', completed: false },
+            { id: '1', title: 'Revisão dos logs de auditoria e retenção;', description: 'Centralização de logs em bucket imutável com KMS.', completed: true },
+            { id: '2', title: 'Testes de intrusão e varredura de vulnerabilidades;', description: 'Análise DAST e SAST em todas as aplicações.', completed: true },
+            { id: '3', title: 'Política de senhas e gestão de identidades IAM;', description: 'Aplicação de MFA obrigatório e rotação de chaves.', completed: true },
+            { id: '4', title: 'Relatório executivo para certificação externa;', description: 'Evidências formais para os auditores independentes.', completed: false },
+        ]
+    },
+    { 
+        id: 'goal-ai-copilot',
+        category: 'Inteligência Artificial', 
+        title: 'Copiloto de Atendimento', 
+        progress: 40, 
+        status: 'Em desenvolvimento',
+        priority: 'Média prioridade',
+        description: 'Assistente inteligente baseado em LLM integrado ao suporte para triagem de chamados e respostas preditivas de nível 1.',
+        deadline: '22/01/2027',
+        subtasks: [
+            { id: '1', title: 'Fine-tuning do modelo com base de conhecimento;', description: 'Treinamento contextualizado com FAQs e manuais.', completed: true },
+            { id: '2', title: 'Desenvolvimento do middleware com cache semântico;', description: 'Redução de custos e latência de inferência.', completed: true },
+            { id: '3', title: 'Testes de respostas e guardrails de segurança;', description: 'Prevenção contra prompt injection e alucinações.', completed: false },
+            { id: '4', title: 'Integração com ferramenta de suporte ao cliente;', description: 'Conector com o painel de atendimento dos agentes.', completed: false },
+            { id: '5', title: 'Validação de taxa de resolução com equipe de CX;', description: 'Métricas de CSAT e tempo de primeira resposta.', completed: false },
+        ]
+    },
+    { 
+        id: 'goal-billing-engine',
+        category: 'Fintech & Cobrança', 
+        title: 'Motor de Faturamento Recorrente', 
+        progress: 60, 
+        status: 'Homologação',
+        priority: 'Alta prioridade',
+        description: 'Novo motor de cobrança e conciliação para planos de assinatura com régua de cobrança inteligente e retry com IA.',
+        deadline: '05/12/2026',
+        subtasks: [
+            { id: '1', title: 'Modelagem do esquema de precificação por uso;', description: 'Suporte a planos híbridos com metering por evento.', completed: true },
+            { id: '2', title: 'Automação de faturas fiscais e emissão de NF-e;', description: 'Integração com prefeituras e SEFAZ.', completed: true },
+            { id: '3', title: 'Régua de retentativas inteligentes de pagamento;', description: 'Otimização de horários de cobrança para reduzir churn.', completed: true },
+            { id: '4', title: 'Dashboard de conciliação financeira;', description: 'Relatórios automáticos para o time de controladoria.', completed: false },
+            { id: '5', title: 'Rollout piloto com 50 contas corporativas;', description: 'Validação assistida de faturamento em produção.', completed: false },
+        ]
+    },
+    { 
+        id: 'goal-performance-web',
+        category: 'Engenharia de Performance', 
+        title: 'Otimização de Core Web Vitals', 
+        progress: 75, 
+        status: 'Em progresso',
+        priority: 'Média prioridade',
+        description: 'Melhoria de métricas LCP, FID e CLS em toda a aplicação para acelerar o carregamento e melhorar a experiência do usuário.',
+        deadline: '12/11/2026',
+        subtasks: [
+            { id: '1', title: 'Code-splitting de rotas e carregamento assíncrono;', description: 'Diminuição do bundle principal para menos de 150kb.', completed: true },
+            { id: '2', title: 'Compressão e conversão de assets visuais;', description: 'Adoção de WebP e AVIF com srcset responsivo.', completed: true },
+            { id: '3', title: 'Otimização de cache HTTP e CDN Edge;', description: 'Políticas de stale-while-revalidate nas bordas.', completed: true },
+            { id: '4', title: 'Auditoria de pontuação no Lighthouse acima de 95;', description: 'Garantia de pontuação verde em mobile e desktop.', completed: false },
         ]
     },
 ];
 
 export const MyGoals: React.FC = () => {
-    const [sidebarOpen, setSidebarOpen] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
     const [tasks, setTasks] = useState<Task[]>(initialTasks);
-    const [selectedTaskIndex, setSelectedTaskIndex] = useState<number | null>(null);
+    const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
     
     const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
     const [goalToEdit, setGoalToEdit] = useState<Task | null>(null);
-    const [editingIndex, setEditingIndex] = useState<number | null>(null);
 
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-    const [deletingIndex, setDeletingIndex] = useState<number | null>(null);
+    const [goalToDeleteId, setGoalToDeleteId] = useState<string | null>(null);
 
-    const cardsPerPage = 6;
+    const totalGoals = tasks.length;
+    const inProgressGoals = tasks.filter((t) => 
+        t.status === 'Em progresso' || 
+        t.status === 'Em desenvolvimento' || 
+        t.status === 'Homologação' || 
+        t.status === 'Revisão final'
+    ).length;
+    const urgentGoals = tasks.filter((t) => t.status === 'Prazo final' || t.status === 'Prazo Final').length;
+    const averageProgress = totalGoals > 0 
+        ? Math.round(tasks.reduce((acc, t) => acc + t.progress, 0) / totalGoals) 
+        : 0;
+
+    const cardsPerPage = useCardsPerPage();
     const totalPages = Math.ceil(tasks.length / cardsPerPage) || 1;
+
+    useEffect(() => {
+        if (currentPage > totalPages) {
+            setCurrentPage(totalPages);
+        }
+    }, [totalPages, currentPage]);
 
     const startIndex = (currentPage - 1) * cardsPerPage;
     const currentTasks = tasks.slice(startIndex, startIndex + cardsPerPage);
 
+    const selectedTask = selectedTaskId !== null 
+        ? tasks.find((t) => t.id === selectedTaskId) || null 
+        : null;
+
     const handlePrev = () => {
-        if (currentPage > 1) setCurrentPage(currentPage - 1);
+        if (currentPage > 1) setCurrentPage((p) => p - 1);
     };
 
     const handleNext = () => {
-        if (currentPage < totalPages) setCurrentPage(currentPage + 1);
+        if (currentPage < totalPages) setCurrentPage((p) => p + 1);
     };
 
     const handleCreateTask = (newTask: Task) => {
-        setTasks([newTask, ...tasks]);
+        const created: Task = {
+            ...newTask,
+            id: newTask.id || `goal-${Date.now()}`,
+        };
+        setTasks([created, ...tasks]);
         setCurrentPage(1);
     };
 
-    const handleOpenEditModal = (absoluteIndex: number) => {
-        setEditingIndex(absoluteIndex);
-        setGoalToEdit(tasks[absoluteIndex]);
+    const handleOpenEditModal = (task: Task) => {
+        setGoalToEdit(task);
         setIsUpdateModalOpen(true);
     };
 
     const handleUpdateGoal = (updatedTask: Task) => {
-        if (editingIndex !== null) {
-            const updatedTasks = [...tasks];
-            const oldTask = updatedTasks[editingIndex];
+        if (goalToEdit) {
+            setTasks((prev) => 
+                prev.map((t) => {
+                    if (t.id !== goalToEdit.id) return t;
 
-            const subtasks = updatedTask.subtasks || oldTask.subtasks || [];
-            const total = subtasks.length;
-            const completed = subtasks.filter((st) => st.completed).length;
-            const progress = total > 0 ? Math.round((completed / total) * 100) : oldTask.progress;
+                    const subtasks = updatedTask.subtasks || t.subtasks || [];
+                    const total = subtasks.length;
+                    const completed = subtasks.filter((st) => st.completed).length;
+                    const progress = total > 0 ? Math.round((completed / total) * 100) : t.progress;
 
-            updatedTasks[editingIndex] = {
-                ...updatedTask,
-                subtasks,
-                progress,
-            };
-
-            setTasks(updatedTasks);
+                    return {
+                        ...updatedTask,
+                        id: t.id,
+                        subtasks,
+                        progress,
+                    };
+                })
+            );
         }
         setIsUpdateModalOpen(false);
         setGoalToEdit(null);
-        setEditingIndex(null);
     };
 
-    const handleOpenDeleteModal = (absoluteIndex: number) => {
-        setDeletingIndex(absoluteIndex);
+    const handleOpenDeleteModal = (taskId: string) => {
+        setGoalToDeleteId(taskId);
         setIsDeleteModalOpen(true);
     };
 
     const handleConfirmDelete = () => {
-        if (deletingIndex !== null) {
-            const updatedTasks = tasks.filter((_, idx) => idx !== deletingIndex);
-            setTasks(updatedTasks);
-            if (selectedTaskIndex === deletingIndex) {
-                setSelectedTaskIndex(null);
-            } else if (selectedTaskIndex !== null && selectedTaskIndex > deletingIndex) {
-                setSelectedTaskIndex(selectedTaskIndex - 1);
+        if (goalToDeleteId !== null) {
+            setTasks((prev) => prev.filter((t) => t.id !== goalToDeleteId));
+            if (selectedTaskId === goalToDeleteId) {
+                setSelectedTaskId(null);
             }
         }
         setIsDeleteModalOpen(false);
-        setDeletingIndex(null);
+        setGoalToDeleteId(null);
     };
 
     const handleUpdateSingleTask = (updatedSubtask: SubTask) => {
-        if (selectedTaskIndex !== null) {
-            const updatedTasks = [...tasks];
-            const currentTask = updatedTasks[selectedTaskIndex];
-            const subtasksList = currentTask.subtasks || [];
-
-            const newSubtasks = subtasksList.map((st) => 
-                st.id === updatedSubtask.id ? updatedSubtask : st
+        if (selectedTaskId !== null) {
+            setTasks((prev) => 
+                prev.map((t) => {
+                    if (t.id !== selectedTaskId) return t;
+                    const subtasksList = t.subtasks || [];
+                    const newSubtasks = subtasksList.map((st) => 
+                        st.id === updatedSubtask.id ? updatedSubtask : st
+                    );
+                    const total = newSubtasks.length;
+                    const completed = newSubtasks.filter((st) => st.completed).length;
+                    const newProgress = total > 0 ? Math.round((completed / total) * 100) : 0;
+                    return { ...t, subtasks: newSubtasks, progress: newProgress };
+                })
             );
-
-            const total = newSubtasks.length;
-            const completed = newSubtasks.filter((st) => st.completed).length;
-            const newProgress = total > 0 ? Math.round((completed / total) * 100) : 0;
-
-            updatedTasks[selectedTaskIndex] = {
-                ...currentTask,
-                subtasks: newSubtasks,
-                progress: newProgress,
-            };
-
-            setTasks(updatedTasks);
         }
     };
 
     const handleUpdateGoalTasks = (updatedSubtasks: SubTask[]) => {
-        if (selectedTaskIndex !== null) {
-            const updatedTasks = [...tasks];
-            const currentTask = updatedTasks[selectedTaskIndex];
-
-            const total = updatedSubtasks.length;
-            const completed = updatedSubtasks.filter((st) => st.completed).length;
-            const newProgress = total > 0 ? Math.round((completed / total) * 100) : 0;
-
-            updatedTasks[selectedTaskIndex] = {
-                ...currentTask,
-                subtasks: updatedSubtasks,
-                progress: newProgress,
-            };
-
-            setTasks(updatedTasks);
+        if (selectedTaskId !== null) {
+            setTasks((prev) => 
+                prev.map((t) => {
+                    if (t.id !== selectedTaskId) return t;
+                    const total = updatedSubtasks.length;
+                    const completed = updatedSubtasks.filter((st) => st.completed).length;
+                    const newProgress = total > 0 ? Math.round((completed / total) * 100) : 0;
+                    return { ...t, subtasks: updatedSubtasks, progress: newProgress };
+                })
+            );
         }
     };
 
     const handleAddSubtasks = (newSubtasks: SubTask[]) => {
-        if (selectedTaskIndex !== null) {
-            const updatedTasks = [...tasks];
-            const currentTask = updatedTasks[selectedTaskIndex];
-            const existingSubtasks = currentTask.subtasks || [];
-            
-            const combinedSubtasks = [...existingSubtasks, ...newSubtasks];
-            const total = combinedSubtasks.length;
-            const completed = combinedSubtasks.filter((st) => st.completed).length;
-            const newProgress = total > 0 ? Math.round((completed / total) * 100) : 0;
-
-            updatedTasks[selectedTaskIndex] = {
-                ...currentTask,
-                subtasks: combinedSubtasks,
-                progress: newProgress,
-            };
-
-            setTasks(updatedTasks);
+        if (selectedTaskId !== null) {
+            setTasks((prev) => 
+                prev.map((t) => {
+                    if (t.id !== selectedTaskId) return t;
+                    const combined = [...(t.subtasks || []), ...newSubtasks];
+                    const total = combined.length;
+                    const completed = combined.filter((st) => st.completed).length;
+                    const newProgress = total > 0 ? Math.round((completed / total) * 100) : 0;
+                    return { ...t, subtasks: combined, progress: newProgress };
+                })
+            );
         }
     };
 
     const handleToggleSubtask = (subtaskId: string) => {
-        if (selectedTaskIndex !== null) {
-            const updatedTasks = [...tasks];
-            const currentTask = updatedTasks[selectedTaskIndex];
-            const subtasksList = currentTask.subtasks || [];
-
-            const updatedSubtasks = subtasksList.map((st) => 
-                st.id === subtaskId ? { ...st, completed: !st.completed } : st
+        if (selectedTaskId !== null) {
+            setTasks((prev) => 
+                prev.map((t) => {
+                    if (t.id !== selectedTaskId) return t;
+                    const subtasksList = t.subtasks || [];
+                    const updated = subtasksList.map((st) => 
+                        st.id === subtaskId ? { ...st, completed: !st.completed } : st
+                    );
+                    const total = updated.length;
+                    const completed = updated.filter((st) => st.completed).length;
+                    const newProgress = total > 0 ? Math.round((completed / total) * 100) : 0;
+                    return { ...t, subtasks: updated, progress: newProgress };
+                })
             );
-
-            const total = updatedSubtasks.length;
-            const completed = updatedSubtasks.filter((st) => st.completed).length;
-            const newProgress = total > 0 ? Math.round((completed / total) * 100) : 0;
-
-            updatedTasks[selectedTaskIndex] = {
-                ...currentTask,
-                subtasks: updatedSubtasks,
-                progress: newProgress,
-            };
-
-            setTasks(updatedTasks);
         }
     };
 
     const handleDeleteSubtask = (subtaskId: string) => {
-        if (selectedTaskIndex !== null) {
-            const updatedTasks = [...tasks];
-            const currentTask = updatedTasks[selectedTaskIndex];
-            const subtasksList = currentTask.subtasks || [];
-
-            const updatedSubtasks = subtasksList.filter((st) => st.id !== subtaskId);
-
-            const total = updatedSubtasks.length;
-            const completed = updatedSubtasks.filter((st) => st.completed).length;
-            const newProgress = total > 0 ? Math.round((completed / total) * 100) : 0;
-
-            updatedTasks[selectedTaskIndex] = {
-                ...currentTask,
-                subtasks: updatedSubtasks,
-                progress: newProgress,
-            };
-
-            setTasks(updatedTasks);
+        if (selectedTaskId !== null) {
+            setTasks((prev) => 
+                prev.map((t) => {
+                    if (t.id !== selectedTaskId) return t;
+                    const subtasksList = t.subtasks || [];
+                    const updated = subtasksList.filter((st) => st.id !== subtaskId);
+                    const total = updated.length;
+                    const completed = updated.filter((st) => st.completed).length;
+                    const newProgress = total > 0 ? Math.round((completed / total) * 100) : 0;
+                    return { ...t, subtasks: updated, progress: newProgress };
+                })
+            );
         }
     };
 
     return (
-        <>
-            <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
-            <MainContentWrapper>
-                <Header onToggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
-                
-                <AnimatePresence mode="wait">
-                    {selectedTaskIndex !== null ? (
-                        <GoalDetailView 
-                            key="task-view"
-                            task={tasks[selectedTaskIndex]} 
-                            onClose={() => setSelectedTaskIndex(null)} 
-                            onAddTasks={handleAddSubtasks}
-                            onUpdateTasks={handleUpdateGoalTasks}
-                            onUpdateSingleTask={handleUpdateSingleTask}
-                            onToggleSubtask={handleToggleSubtask}
-                            onDeleteTask={() => handleOpenDeleteModal(selectedTaskIndex)}
-                            onDeleteSubtask={handleDeleteSubtask}
+        <GoalsPageArea>
+            <AnimatePresence mode="wait">
+                {selectedTask ? (
+                    <GoalDetailView 
+                        key="task-view"
+                        task={selectedTask} 
+                        onClose={() => setSelectedTaskId(null)} 
+                        onAddTasks={handleAddSubtasks}
+                        onUpdateTasks={handleUpdateGoalTasks}
+                        onUpdateSingleTask={handleUpdateSingleTask}
+                        onToggleSubtask={handleToggleSubtask}
+                        onDeleteTask={() => handleOpenDeleteModal(selectedTask.id || '')}
+                        onDeleteSubtask={handleDeleteSubtask}
+                    />
+                ) : (
+                    <>
+                        <GoalsHeader>
+                            <div>
+                                <GoalsTitle>Minhas metas</GoalsTitle>
+                                <GoalsSubtitle>
+                                    Acompanhe o progresso, gerencie squads e prazos das metas corporativas.
+                                </GoalsSubtitle>
+                            </div>
+                            <AddButton type="button" onClick={() => setIsModalOpen(true)}>
+                                <Plus size={16} /> Adicionar meta
+                            </AddButton>
+                        </GoalsHeader>
+
+                        <GoalStatsBar 
+                            totalGoals={totalGoals}
+                            inProgressGoals={inProgressGoals}
+                            urgentGoals={urgentGoals}
+                            averageProgress={averageProgress}
                         />
-                    ) : (
-                        <DashboardArea key="dashboard-grid">
-                            <DashboardHeader>
-                                <div>
-                                    <GreetingText>Olá, Renan Rodrigues!</GreetingText>
-                                    <DashboardTitle>Acompanhe e gerencie a evolução de suas metas</DashboardTitle>
-                                </div>
-                                <AddButton onClick={() => setIsModalOpen(true)}>
-                                    <Plus size={16} /> Adicionar Meta
-                                </AddButton>
-                            </DashboardHeader>
 
-                            <DashboardOverview />
+                        <CardGrid id="cardGrid">
+                            {currentTasks.map((task) => (
+                                <GoalCardWrapper 
+                                    key={task.id || task.title} 
+                                    onClick={() => setSelectedTaskId(task.id || null)} 
+                                >
+                                    <GoalCard
+                                        category={task.category}
+                                        title={task.title}
+                                        progress={task.progress}
+                                        description={task.description}
+                                        deadline={task.deadline}
+                                        status={task.status}
+                                        priority={task.priority}
+                                        onEdit={() => handleOpenEditModal(task)}
+                                        onDelete={() => handleOpenDeleteModal(task.id || '')}
+                                    />
+                                </GoalCardWrapper>
+                            ))}
+                        </CardGrid>
 
-                            <SectionTitle>Metas Cadastradas</SectionTitle>
+                        <ViewSelector>
+                            <button 
+                                id="prevBtn" 
+                                type="button"
+                                onClick={handlePrev} 
+                                disabled={currentPage === 1}
+                            >
+                                <ChevronLeft size={16} /> Voltar
+                            </button>
+                            <span id="pageIndicator">{currentPage} / {totalPages}</span>
+                            <button 
+                                id="nextBtn" 
+                                type="button"
+                                onClick={handleNext} 
+                                disabled={currentPage === totalPages}
+                            >
+                                Próximo <ChevronRight size={16} />
+                            </button>
+                        </ViewSelector>
+                    </>
+                )}
+            </AnimatePresence>
 
-                            <CardGrid id="cardGrid">
-                                {currentTasks.map((task, index) => {
-                                    const absoluteIndex = startIndex + index;
+            <AnimatePresence>
+                {isModalOpen && (
+                    <AddGoalModal 
+                        isOpen={isModalOpen} 
+                        onClose={() => setIsModalOpen(false)} 
+                        onAddGoal={handleCreateTask} 
+                    />
+                )}
 
-                                    return (
-                                        <GoalCardWrapper 
-                                            key={`${task.title}-${absoluteIndex}`} 
-                                            onClick={() => setSelectedTaskIndex(absoluteIndex)} 
-                                        >
-                                            <GoalCard
-                                                category={task.category}
-                                                title={task.title}
-                                                progress={task.progress}
-                                                description={task.description}
-                                                deadline={task.deadline}
-                                                onEdit={() => handleOpenEditModal(absoluteIndex)}
-                                                onDelete={() => handleOpenDeleteModal(absoluteIndex)}
-                                            />
-                                        </GoalCardWrapper>
-                                    );
-                                })}
-                            </CardGrid>
+                {isUpdateModalOpen && goalToEdit && (
+                    <UpdateGoalModal
+                        isOpen={isUpdateModalOpen}
+                        onClose={() => {
+                            setIsUpdateModalOpen(false);
+                            setGoalToEdit(null);
+                        }}
+                        onUpdateGoal={handleUpdateGoal}
+                        initialGoal={goalToEdit}
+                    />
+                )}
 
-                            <ViewSelector>
-                                <button id="prevBtn" onClick={handlePrev} disabled={currentPage === 1}>
-                                    <ChevronLeft size={16} /> Voltar
-                                </button>
-                                <span id="pageIndicator">{currentPage} / {totalPages}</span>
-                                <button id="nextBtn" onClick={handleNext} disabled={currentPage === totalPages}>
-                                    Próximo <ChevronRight size={16} />
-                                </button>
-                            </ViewSelector>
-                        </DashboardArea>
-                    )}
-                </AnimatePresence>
-
-                <AnimatePresence>
-                    {isModalOpen && (
-                        <AddGoalModal 
-                            isOpen={isModalOpen} 
-                            onClose={() => setIsModalOpen(false)} 
-                            onAddGoal={handleCreateTask} 
-                        />
-                    )}
-
-                    {isUpdateModalOpen && (
-                        <UpdateGoalModal
-                            isOpen={isUpdateModalOpen}
-                            onClose={() => {
-                                setIsUpdateModalOpen(false);
-                                setGoalToEdit(null);
-                                setEditingIndex(null);
-                            }}
-                            onUpdateGoal={handleUpdateGoal}
-                            initialGoal={goalToEdit}
-                        />
-                    )}
-
-                    {isDeleteModalOpen && (
-                        <ConfirmDeleteModal
-                            isOpen={isDeleteModalOpen}
-                            onClose={() => {
-                                setIsDeleteModalOpen(false);
-                                setDeletingIndex(null);
-                            }}
-                            onConfirm={handleConfirmDelete}
-                        />
-                    )}
-                </AnimatePresence>
-            </MainContentWrapper>
-        </>
+                {isDeleteModalOpen && (
+                    <ConfirmDeleteModal
+                        isOpen={isDeleteModalOpen}
+                        onClose={() => {
+                            setIsDeleteModalOpen(false);
+                            setGoalToDeleteId(null);
+                        }}
+                        onConfirm={handleConfirmDelete}
+                    />
+                )}
+            </AnimatePresence>
+        </GoalsPageArea>
     );
 };
