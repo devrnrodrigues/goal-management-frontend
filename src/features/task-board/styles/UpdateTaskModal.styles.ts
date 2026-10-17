@@ -110,7 +110,7 @@ export const Label = styled.label`
     gap: 6px;
 
     svg {
-        color: #2E7D32;
+        color: ${({ theme }) => theme.colors.primary};
     }
 `;
 
@@ -134,7 +134,7 @@ export const Input = styled.input`
     }
 
     &:focus {
-        border: 1px solid #2E7D32;
+        border: 1px solid ${({ theme }) => theme.colors.primary};
     }
 `;
 
@@ -160,7 +160,7 @@ export const TextArea = styled.textarea`
     }
 
     &:focus {
-        border: 1px solid #2E7D32;
+        border: 1px solid ${({ theme }) => theme.colors.primary};
     }
 `;
 
@@ -208,10 +208,7 @@ export const CancelButton = styled.button`
 `;
 
 export const SubmitButton = styled.button`
-    background: 
-            radial-gradient(circle at 80% 20%, rgba(168, 230, 29, 0.4) 0%, transparent 50%),
-            radial-gradient(circle at 20% 80%, rgba(46, 125, 50, 0.6) 0%, transparent 60%),
-            linear-gradient(135deg, #0b1a0f 0%, #112a17 50%, #050d08 100%);
+    background: ${({ theme }) => theme.colors.primary};
     border: none;
     color: white;
     padding: 9px 20px;
@@ -219,6 +216,10 @@ export const SubmitButton = styled.button`
     cursor: pointer;
     font-size: 14px;
     font-weight: 500;
-    box-shadow: 0 4px 6px -1px rgba(46, 125, 50, 0.2);
+    transition: all 0.2s;
+    box-shadow: 0 4px 6px -1px rgba(0, 168, 107, 0.25);
 
+    &:hover {
+        background: ${({ theme }) => theme.colors.primaryHover};
+    }
 `;
