@@ -38,7 +38,7 @@ export const HeaderActionBtn = styled.span<{ $isDelete?: boolean }>`
     transition: color 0.2s ease, transform 0.2s ease;
 
     &:hover {
-        color: ${({ $isDelete }) => ($isDelete ? '#D32F2F' : '#2E7D32')};
+        color: ${({ $isDelete, theme }) => ($isDelete ? '#D32F2F' : theme.colors.primary)};
         transform: scale(1.1);
     }
 `;
@@ -51,7 +51,7 @@ export const BackBtn = styled.span`
     transition: color 0.2s ease, transform 0.2s ease;
 
     &:hover {
-        color: #2E7D32;
+        color: ${({ theme }) => theme.colors.primary};
         transform: scale(1.1);
     }
 `;
@@ -122,8 +122,8 @@ export const StyledCheckbox = styled.div<{ $checked: boolean }>`
     width: 20px;
     height: 20px;
     border-radius: 6px;
-    border: 2px solid ${({ $checked }) => ($checked ? '#2E7D32' : '#BDBDBD')};
-    background: ${({ $checked }) => ($checked ? '#2E7D32' : 'transparent')};
+    border: 2px solid ${({ $checked, theme }) => ($checked ? theme.colors.primary : '#BDBDBD')};
+    background: ${({ $checked, theme }) => ($checked ? theme.colors.primary : 'transparent')};
     display: flex;
     align-items: center;
     justify-content: center;
@@ -137,8 +137,8 @@ export const StyledCheckbox = styled.div<{ $checked: boolean }>`
     }
 
     &:hover {
-        border-color: #2E7D32;
-        box-shadow: 0 0 5px rgba(46, 125, 50, 0.3);
+        border-color: ${({ theme }) => theme.colors.primary};
+        box-shadow: 0 0 5px rgba(0, 168, 107, 0.3);
     }
 `;
 
@@ -162,7 +162,7 @@ export const EditTitleInput = styled.input`
     }
 
     &:focus {
-        border-color: #2E7D32;
+        border-color: ${({ theme }) => theme.colors.primary};
     }
 `;
 
@@ -186,7 +186,7 @@ export const ActionIconBtn = styled.span<{ $isDelete?: boolean }>`
     transition: color 0.2s ease, transform 0.2s ease;
 
     &:hover {
-        color: ${({ $isDelete }) => ($isDelete ? '#D32F2F' : '#2E7D32')};
+        color: ${({ $isDelete, theme }) => ($isDelete ? '#D32F2F' : theme.colors.primary)};
         transform: scale(1.1);
     }
 `;
@@ -219,7 +219,7 @@ export const TextAreaInput = styled.textarea`
     }
 
     &:focus {
-        border-color: #2E7D32;
+        border-color: ${({ theme }) => theme.colors.primary};
     }
 `;
 
@@ -278,7 +278,7 @@ export const ProgressBar = styled.div`
 
 export const ProgressFill = styled.div<{ $width: number }>`
     width: ${({ $width }) => `${$width}%`};
-    background-color: #66BB6A;
+    background-color: ${({ theme }) => theme.colors.primary};
     height: 100%;
     transition: width 0.4s;
 `;
@@ -297,8 +297,8 @@ export const AddButtonContainer = styled.div`
 
 export const AddButton = styled.button`
     background: transparent;
-    color: #2E7D32;
-    border: 1px solid #2E7D32;
+    color: ${({ theme }) => theme.colors.primary};
+    border: 1px solid ${({ theme }) => theme.colors.primary};
     padding: 8px 20px;
     border-radius: 4px;
     cursor: pointer;
