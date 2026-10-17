@@ -1,7 +1,8 @@
 import styled from 'styled-components';
+import { motion } from 'framer-motion';
 
 export const SidebarContainer = styled.aside<{ $isOpen: boolean }>`
-  width: 260px;
+  width: 280px;
   background-color: ${({ theme }) => theme.colors.sidebarBg};
   display: flex;
   flex-direction: column;
@@ -40,10 +41,10 @@ export const SidebarOverlay = styled.div<{ $isOpen: boolean }>`
 `;
 
 export const HeaderSection = styled.div`
-  padding: 28px 24px 20px 28px;
+  padding: 36px 24px 28px 28px;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 20px;
 `;
 
 export const BrandContainer = styled.div`
@@ -53,8 +54,8 @@ export const BrandContainer = styled.div`
 `;
 
 export const BrandLogoWrapper = styled.div`
-  width: 40px;
-  height: 40px;
+  width: 42px;
+  height: 42px;
   border-radius: ${({ theme }) => theme.radii.md};
   background-color: rgba(255, 255, 255, 0.2);
   display: flex;
@@ -64,9 +65,10 @@ export const BrandLogoWrapper = styled.div`
 `;
 
 export const BrandTitle = styled.h1`
-  font-size: 20px;
+  font-size: 19px;
   font-weight: 700;
   letter-spacing: -0.3px;
+  white-space: nowrap;
   color: ${({ theme }) => theme.colors.sidebarText};
 `;
 
@@ -83,13 +85,63 @@ export const NavList = styled.ul`
   list-style: none;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 14px;
   flex: 1;
   padding-left: 16px;
+  margin-bottom: 28px;
+
+  @media (max-width: 900px) {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
 `;
 
 export const NavListItem = styled.li`
   position: relative;
+`;
+
+export const ActiveNavIndicator = styled(motion.div)`
+  position: absolute;
+  inset: 0;
+  border-radius: 32px 0 0 32px;
+  background-color: ${({ theme }) => theme.colors.sidebarActiveBg};
+  z-index: 1;
+  pointer-events: none;
+
+  &::before {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: -24px;
+    width: 24px;
+    height: 24px;
+    background: transparent;
+    border-bottom-right-radius: 24px;
+    box-shadow: 8px 8px 0 8px ${({ theme }) => theme.colors.sidebarActiveBg};
+    pointer-events: none;
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    bottom: -24px;
+    width: 24px;
+    height: 24px;
+    background: transparent;
+    border-top-right-radius: 24px;
+    box-shadow: 8px -8px 0 8px ${({ theme }) => theme.colors.sidebarActiveBg};
+    pointer-events: none;
+  }
+
+  @media (max-width: 900px) {
+    border-radius: ${({ theme }) => theme.radii.full};
+
+    &::before,
+    &::after {
+      display: none;
+    }
+  }
 `;
 
 export const NavButton = styled.button<{ $isActive: boolean }>`
@@ -97,50 +149,27 @@ export const NavButton = styled.button<{ $isActive: boolean }>`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 13px 20px 13px 18px;
-  border-radius: 28px 0 0 28px;
-  background-color: ${({ $isActive, theme }) =>
-    $isActive ? theme.colors.sidebarActiveBg : 'transparent'};
+  padding: 18px 20px 18px 20px;
+  border-radius: 32px 0 0 32px;
+  background-color: transparent;
   color: ${({ $isActive, theme }) =>
     $isActive ? theme.colors.sidebarActiveText : theme.colors.sidebarText};
-  font-size: 14px;
+  font-size: 15px;
   font-weight: ${({ $isActive }) => ($isActive ? '600' : '500')};
-  transition: all 0.2s ease-in-out;
+  transition: color 0.2s ease-in-out;
   position: relative;
+  z-index: 2;
 
   &:hover {
     background-color: ${({ $isActive, theme }) =>
-      $isActive ? theme.colors.sidebarActiveBg : theme.colors.sidebarItemHover};
+      $isActive ? 'transparent' : theme.colors.sidebarItemHover};
     color: ${({ $isActive, theme }) =>
       $isActive ? theme.colors.sidebarActiveText : theme.colors.sidebarText};
   }
 
-  &::before {
-    content: '';
-    display: ${({ $isActive }) => ($isActive ? 'block' : 'none')};
-    position: absolute;
-    right: 0;
-    top: -20px;
-    width: 20px;
-    height: 20px;
-    background: transparent;
-    border-bottom-right-radius: 20px;
-    box-shadow: 6px 6px 0 6px ${({ theme }) => theme.colors.sidebarActiveBg};
-    pointer-events: none;
-  }
-
-  &::after {
-    content: '';
-    display: ${({ $isActive }) => ($isActive ? 'block' : 'none')};
-    position: absolute;
-    right: 0;
-    bottom: -20px;
-    width: 20px;
-    height: 20px;
-    background: transparent;
-    border-top-right-radius: 20px;
-    box-shadow: 6px -6px 0 6px ${({ theme }) => theme.colors.sidebarActiveBg};
-    pointer-events: none;
+  @media (max-width: 900px) {
+    border-radius: ${({ theme }) => theme.radii.full};
+    padding: 16px 20px;
   }
 `;
 
@@ -160,6 +189,7 @@ export const NavIconWrapper = styled.div<{ $isActive: boolean }>`
 
 export const NavLabel = styled.span`
   letter-spacing: -0.2px;
+  white-space: nowrap;
 `;
 
 export const ChevronWrapper = styled.div`

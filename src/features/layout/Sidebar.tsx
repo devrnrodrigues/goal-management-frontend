@@ -45,9 +45,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
             <BrandLogoWrapper>
               <Compass size={24} />
             </BrandLogoWrapper>
-            <BrandTitle>MetaFlow</BrandTitle>
+            <BrandTitle>Gestão de metas</BrandTitle>
           </BrandContainer>
-          <SectionBadge>Painel de Gestão</SectionBadge>
+          <SectionBadge>Painel de gestão</SectionBadge>
         </HeaderSection>
 
         <NavList>
@@ -67,7 +67,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             <a href="#">Privacidade</a>
             <a href="#">Termos</a>
           </FooterLinks>
-          <AppVersion>MetaFlow v1.0 &copy; 2026</AppVersion>
+          <AppVersion>Gestão de Metas v1.0 &copy; 2026</AppVersion>
         </FooterSection>
       </SidebarContainer>
     </>

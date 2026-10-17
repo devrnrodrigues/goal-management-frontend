@@ -3,6 +3,7 @@ import { ChevronRight } from 'lucide-react';
 import type { NavItemConfig } from './types';
 import {
   NavListItem,
+  ActiveNavIndicator,
   NavButton,
   NavItemLeft,
   NavIconWrapper,
@@ -29,6 +30,16 @@ export const SidebarNavItem: React.FC<SidebarNavItemProps> = ({
 
   return (
     <NavListItem>
+      {isActive && (
+        <ActiveNavIndicator
+          layoutId="activeNavIndicator"
+          transition={{
+            type: 'spring',
+            stiffness: 350,
+            damping: 30,
+          }}
+        />
+      )}
       <NavButton
         type="button"
         $isActive={isActive}
@@ -37,13 +48,13 @@ export const SidebarNavItem: React.FC<SidebarNavItemProps> = ({
       >
         <NavItemLeft>
           <NavIconWrapper $isActive={isActive}>
-            <IconComponent size={19} />
+            <IconComponent size={23} />
           </NavIconWrapper>
           <NavLabel>{item.label}</NavLabel>
         </NavItemLeft>
         {!isActive && (
           <ChevronWrapper>
-            <ChevronRight size={16} />
+            <ChevronRight size={19} />
           </ChevronWrapper>
         )}
       </NavButton>

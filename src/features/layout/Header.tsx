@@ -3,6 +3,7 @@ import { Search, Bell, Menu, ChevronDown } from 'lucide-react';
 import type { HeaderProps } from './types';
 import {
   HeaderContainer,
+  HeaderContentWrapper,
   HeaderLeft,
   MenuToggleButton,
   SearchWrapper,
@@ -25,57 +26,59 @@ export const Header: React.FC<HeaderProps> = ({
   onSearchChange,
   notificationCount = 2,
   userName = 'Renan Rodrigues',
-  userRole = 'Gestor de Metas',
+  userRole = 'Gestor de metas',
   avatarUrl = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80',
 }) => {
   return (
     <HeaderContainer>
-      <HeaderLeft>
-        <MenuToggleButton
-          type="button"
-          onClick={onToggleSidebar}
-          aria-label="Alternar menu lateral"
-        >
-          <Menu size={20} />
-        </MenuToggleButton>
+      <HeaderContentWrapper>
+        <HeaderLeft>
+          <MenuToggleButton
+            type="button"
+            onClick={onToggleSidebar}
+            aria-label="Alternar menu lateral"
+          >
+            <Menu size={20} />
+          </MenuToggleButton>
 
-        <SearchWrapper>
-          <SearchIconWrapper>
-            <Search size={18} />
-          </SearchIconWrapper>
-          <SearchInput
-            type="text"
-            placeholder="Pesquisar metas, categorias ou prazos..."
-            value={searchQuery}
-            onChange={onSearchChange}
-          />
-        </SearchWrapper>
-      </HeaderLeft>
+          <SearchWrapper>
+            <SearchIconWrapper>
+              <Search size={18} />
+            </SearchIconWrapper>
+            <SearchInput
+              type="text"
+              placeholder="Pesquisar metas, categorias ou prazos..."
+              value={searchQuery}
+              onChange={onSearchChange}
+            />
+          </SearchWrapper>
+        </HeaderLeft>
 
-      <HeaderRight>
-        <PeriodSelectorButton type="button">
-          <span>Este Mês</span>
-          <ChevronDown size={14} />
-        </PeriodSelectorButton>
+        <HeaderRight>
+          <PeriodSelectorButton type="button">
+            <span>Este mês</span>
+            <ChevronDown size={14} />
+          </PeriodSelectorButton>
 
-        <NotificationButton
-          type="button"
-          aria-label={`Notificações: ${notificationCount} não lidas`}
-        >
-          <Bell size={18} />
-          {notificationCount > 0 && (
-            <NotificationBadge>{notificationCount}</NotificationBadge>
-          )}
-        </NotificationButton>
+          <NotificationButton
+            type="button"
+            aria-label={`Notificações: ${notificationCount} não lidas`}
+          >
+            <Bell size={18} />
+            {notificationCount > 0 && (
+              <NotificationBadge>{notificationCount}</NotificationBadge>
+            )}
+          </NotificationButton>
 
-        <UserProfileWrapper>
-          <UserAvatar src={avatarUrl} alt={userName} />
-          <UserInfoContainer>
-            <UserNameText>{userName}</UserNameText>
-            <UserRoleText>{userRole}</UserRoleText>
-          </UserInfoContainer>
-        </UserProfileWrapper>
-      </HeaderRight>
+          <UserProfileWrapper>
+            <UserAvatar src={avatarUrl} alt={userName} />
+            <UserInfoContainer>
+              <UserNameText>{userName}</UserNameText>
+              <UserRoleText>{userRole}</UserRoleText>
+            </UserInfoContainer>
+          </UserProfileWrapper>
+        </HeaderRight>
+      </HeaderContentWrapper>
     </HeaderContainer>
   );
 };

@@ -2,12 +2,11 @@ import { useState } from 'react';
 import {
   LayoutDashboard,
   Target,
-  CheckCircle2,
-  FolderKanban,
+  Kanban,
   CalendarDays,
-  ListTodo,
+  Activity,
+  CheckCircle2,
   BarChart3,
-  Trophy,
 } from 'lucide-react';
 import type { NavItemConfig } from '../types';
 
@@ -17,43 +16,38 @@ export const useSidebarNav = (initialActiveId = 'dashboard') => {
   const navItems: NavItemConfig[] = [
     {
       id: 'dashboard',
-      label: 'Visão Geral',
+      label: 'Visão geral',
       icon: LayoutDashboard,
     },
     {
       id: 'goals',
-      label: 'Minhas Metas',
+      label: 'Minhas metas',
       icon: Target,
     },
     {
-      id: 'completed',
+      id: 'task-board',
+      label: 'Quadro de tarefas',
+      icon: Kanban,
+    },
+    {
+      id: 'recent-activity',
+      label: 'Atividades recentes',
+      icon: Activity,
+    },
+    {
+      id: 'calendar',
+      label: 'Calendário',
+      icon: CalendarDays,
+    },
+    {
+      id: 'completed-goals',
       label: 'Concluídas',
       icon: CheckCircle2,
     },
     {
-      id: 'categories',
-      label: 'Categorias',
-      icon: FolderKanban,
-    },
-    {
-      id: 'calendar',
-      label: 'Prazos & Agenda',
-      icon: CalendarDays,
-    },
-    {
-      id: 'habits',
-      label: 'Hábitos diários',
-      icon: ListTodo,
-    },
-    {
       id: 'reports',
-      label: 'Evolução',
+      label: 'Relatórios',
       icon: BarChart3,
-    },
-    {
-      id: 'achievements',
-      label: 'Conquistas',
-      icon: Trophy,
     },
   ];
 

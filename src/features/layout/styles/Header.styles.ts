@@ -4,15 +4,23 @@ export const HeaderContainer = styled.header`
   position: fixed;
   top: 0;
   right: 0;
-  left: 260px;
+  left: 280px;
   height: 76px;
   background-color: ${({ theme }) => theme.colors.background};
+  border-bottom: 1px solid ${({ theme }) => theme.colors.border};
   display: flex;
   align-items: center;
-  justify-content: space-between;
   padding: 0 ${({ theme }) => theme.spacing.xl};
   z-index: 100;
   transition: left 0.3s ease-in-out;
+
+  @media (min-width: 1720px) {
+    padding: 0 40px;
+  }
+
+  @media (min-width: 2100px) {
+    padding: 0 48px;
+  }
 
   @media (max-width: 900px) {
     left: 0;
@@ -20,12 +28,20 @@ export const HeaderContainer = styled.header`
   }
 `;
 
+export const HeaderContentWrapper = styled.div`
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 100%;
+`;
+
 export const HeaderLeft = styled.div`
   display: flex;
   align-items: center;
   gap: ${({ theme }) => theme.spacing.md};
   flex: 1;
-  max-width: 480px;
+  max-width: 600px;
 `;
 
 export const MenuToggleButton = styled.button`
@@ -56,6 +72,14 @@ export const SearchWrapper = styled.div`
   max-width: 380px;
   box-shadow: ${({ theme }) => theme.shadows.card};
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
+
+  @media (min-width: 1720px) {
+    max-width: 440px;
+  }
+
+  @media (min-width: 2100px) {
+    max-width: 500px;
+  }
 
   &:focus-within {
     border-color: ${({ theme }) => theme.colors.primary};
