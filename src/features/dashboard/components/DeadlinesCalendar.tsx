@@ -4,6 +4,7 @@ import type { DeadlinesCalendarProps } from './DeadlinesCalendar.types';
 import { CalendarDayItem } from './CalendarDayItem';
 import {
   CalendarCardContainer,
+  CalendarTopSection,
   CalendarHeader,
   MonthTitle,
   CalendarNavArrow,
@@ -66,37 +67,39 @@ export const DeadlinesCalendar: React.FC<DeadlinesCalendarProps> = ({
 
   return (
     <CalendarCardContainer>
-      <CalendarHeader>
-        <CalendarNavArrow type="button" aria-label="Mês anterior">
-          <ChevronLeft size={16} />
-        </CalendarNavArrow>
-        <MonthTitle>Outubro 2026</MonthTitle>
-        <CalendarNavArrow type="button" aria-label="Próximo mês">
-          <ChevronRight size={16} />
-        </CalendarNavArrow>
-      </CalendarHeader>
+      <CalendarTopSection>
+        <CalendarHeader>
+          <CalendarNavArrow type="button" aria-label="Mês anterior">
+            <ChevronLeft size={16} />
+          </CalendarNavArrow>
+          <MonthTitle>Outubro 2026</MonthTitle>
+          <CalendarNavArrow type="button" aria-label="Próximo mês">
+            <ChevronRight size={16} />
+          </CalendarNavArrow>
+        </CalendarHeader>
 
-      <WeekDaysRow>
-        {weekDays.map((wd) => (
-          <WeekDayLabel key={wd}>{wd}</WeekDayLabel>
-        ))}
-      </WeekDaysRow>
+        <WeekDaysRow>
+          {weekDays.map((wd) => (
+            <WeekDayLabel key={wd}>{wd}</WeekDayLabel>
+          ))}
+        </WeekDaysRow>
 
-      <DaysGrid>
-        {daysInGrid.map((cell, idx) => (
-          <CalendarDayItem
-            key={`${cell.day}-${idx}`}
-            day={cell.day}
-            isCurrentMonth={cell.isCurrent}
-            isSelected={cell.isCurrent && cell.day === selectedDay}
-            hasDeadline={cell.isCurrent && deadlineDays.has(cell.day)}
-            onSelect={onSelectDay}
-          />
-        ))}
-      </DaysGrid>
+        <DaysGrid>
+          {daysInGrid.map((cell, idx) => (
+            <CalendarDayItem
+              key={`${cell.day}-${idx}`}
+              day={cell.day}
+              isCurrentMonth={cell.isCurrent}
+              isSelected={cell.isCurrent && cell.day === selectedDay}
+              hasDeadline={cell.isCurrent && deadlineDays.has(cell.day)}
+              onSelect={onSelectDay}
+            />
+          ))}
+        </DaysGrid>
+      </CalendarTopSection>
 
       <UpcomingSection>
-        <UpcomingHeader>Prazos Próximos</UpcomingHeader>
+        <UpcomingHeader>Prazos próximos</UpcomingHeader>
         {deadlines.map((item) => (
           <DeadlineItem key={item.title}>
             <DeadlineTitle title={item.title}>{item.title}</DeadlineTitle>

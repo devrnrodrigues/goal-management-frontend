@@ -29,8 +29,8 @@ export const GoalHeroCard: React.FC<GoalHeroCardProps> = ({
   return (
     <HeroCardContainer>
       <HeroHeader>
-        <HeroBadge>Meta Prioritária</HeroBadge>
-        <HeroSubtitle>Foco Principal • {goal.category}</HeroSubtitle>
+        <HeroBadge>Meta prioritária</HeroBadge>
+        <HeroSubtitle>Foco principal • {goal.category}</HeroSubtitle>
       </HeroHeader>
 
       <CarouselSection>

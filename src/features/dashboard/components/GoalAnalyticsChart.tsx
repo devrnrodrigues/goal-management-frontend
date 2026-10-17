@@ -14,16 +14,16 @@ export const GoalAnalyticsChart: React.FC<GoalAnalyticsChartProps> = ({ data }) 
   const theme = useTheme();
 
   const maxValue = 20;
-  const chartHeight = 180;
-  const chartWidth = 650;
-  const horizontalOffset = 40;
+  const chartHeight = 210;
+  const chartWidth = 1100;
+  const horizontalOffset = 50;
   const usableWidth = chartWidth - horizontalOffset;
   const stepX = usableWidth / data.length;
 
   return (
     <ChartCardContainer>
       <ChartHeader>
-        <ChartTitle>Evolução de Metas</ChartTitle>
+        <ChartTitle>Evolução de metas</ChartTitle>
         <LegendContainer>
           <LegendItem $color={theme.colors.primary}>Planejado</LegendItem>
           <LegendItem $color={theme.colors.statusWarning}>Concluído</LegendItem>
@@ -35,7 +35,6 @@ export const GoalAnalyticsChart: React.FC<GoalAnalyticsChartProps> = ({ data }) 
           viewBox={`0 0 ${chartWidth} ${chartHeight + 40}`}
           width="100%"
           height="100%"
-          preserveAspectRatio="none"
         >
           {[0, 5, 10, 15, 20].map((val) => {
             const y = chartHeight - (val / maxValue) * chartHeight + 10;
@@ -64,30 +63,30 @@ export const GoalAnalyticsChart: React.FC<GoalAnalyticsChartProps> = ({ data }) 
 
           {data.map((item, idx) => {
             const x = horizontalOffset + idx * stepX + stepX / 2;
-            const barWidth = 7;
+            const barWidth = 9;
             const plannedHeight = (item.planned / maxValue) * chartHeight;
             const completedHeight = (item.completed / maxValue) * chartHeight;
 
             return (
               <g key={item.month}>
                 <rect
-                  x={x - barWidth - 1}
+                  x={x - barWidth - 2}
                   y={chartHeight - plannedHeight + 10}
                   width={barWidth}
                   height={plannedHeight}
                   fill={theme.colors.primary}
-                  rx="3"
+                  rx="4"
                 >
                   <title>{`${item.month} - Planejado: ${item.planned}`}</title>
                 </rect>
 
                 <rect
-                  x={x + 1}
+                  x={x + 2}
                   y={chartHeight - completedHeight + 10}
                   width={barWidth}
                   height={completedHeight}
                   fill={theme.colors.statusWarning}
-                  rx="3"
+                  rx="4"
                 >
                   <title>{`${item.month} - Concluído: ${item.completed}`}</title>
                 </rect>

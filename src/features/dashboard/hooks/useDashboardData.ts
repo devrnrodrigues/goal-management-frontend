@@ -51,7 +51,7 @@ export const useDashboardData = () => {
   const metrics: DashboardMetric[] = [
     {
       id: 'm-1',
-      title: 'Metas Ativas',
+      title: 'Metas ativas',
       value: 12,
       subtitle: '+2 adicionadas este mês',
       icon: Target,
@@ -59,7 +59,7 @@ export const useDashboardData = () => {
     },
     {
       id: 'm-2',
-      title: 'Taxa de Sucesso',
+      title: 'Taxa de sucesso',
       value: '84%',
       subtitle: '+12% vs. mês anterior',
       icon: TrendingUp,
@@ -67,7 +67,7 @@ export const useDashboardData = () => {
     },
     {
       id: 'm-3',
-      title: 'Ações de Hoje',
+      title: 'Ações de hoje',
       value: '6/8',
       subtitle: '75% concluídas hoje',
       icon: ListTodo,
@@ -75,7 +75,7 @@ export const useDashboardData = () => {
     },
     {
       id: 'm-4',
-      title: 'Metas em Atenção',
+      title: 'Metas em atenção',
       value: 2,
       subtitle: 'Prazos nos próximos 7 dias',
       icon: AlertTriangle,
@@ -91,7 +91,7 @@ export const useDashboardData = () => {
     },
     {
       id: 'm-6',
-      title: 'Metas Concluídas',
+      title: 'Metas concluídas',
       value: 28,
       subtitle: '+5 no último trimestre',
       icon: Trophy,

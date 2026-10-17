@@ -8,25 +8,41 @@ export const CalendarCardContainer = styled.section`
   border: 1px solid ${({ theme }) => theme.colors.borderLight};
   display: flex;
   flex-direction: column;
+  justify-content: space-between;
   height: 100%;
+
+  @media (min-width: 1720px) and (min-height: 900px) {
+    padding: clamp(24px, 2.8vh, 36px);
+  }
+`;
+
+export const CalendarTopSection = styled.div`
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  justify-content: space-between;
 `;
 
 export const CalendarHeader = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 20px;
+  margin-bottom: clamp(16px, 1.8vh, 22px);
 `;
 
 export const MonthTitle = styled.h3`
   font-size: 15px;
   font-weight: 700;
   color: ${({ theme }) => theme.colors.primary};
+
+  @media (min-width: 1720px) {
+    font-size: 16px;
+  }
 `;
 
 export const CalendarNavArrow = styled.button`
-  width: 28px;
-  height: 28px;
+  width: 30px;
+  height: 30px;
   border-radius: ${({ theme }) => theme.radii.full};
   background-color: transparent;
   display: flex;
@@ -45,19 +61,27 @@ export const WeekDaysRow = styled.div`
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   text-align: center;
-  margin-bottom: 8px;
+  margin-bottom: clamp(8px, 1.2vh, 14px);
 `;
 
 export const WeekDayLabel = styled.span`
   font-size: 11px;
   font-weight: 600;
   color: ${({ theme }) => theme.colors.textMuted};
+
+  @media (min-width: 1720px) {
+    font-size: 12px;
+  }
 `;
 
 export const DaysGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  row-gap: 6px;
+  row-gap: 8px;
+
+  @media (min-width: 1720px) {
+    row-gap: clamp(8px, 1.3vh, 14px);
+  }
 `;
 
 export const DayCell = styled.button<{
@@ -84,6 +108,18 @@ export const DayCell = styled.button<{
   position: relative;
   transition: all 0.2s ease;
 
+  @media (min-width: 1720px) {
+    width: 38px;
+    height: 38px;
+    font-size: 13px;
+  }
+
+  @media (min-width: 2100px) {
+    width: 44px;
+    height: 44px;
+    font-size: 14px;
+  }
+
   &:hover {
     background-color: ${({ $isSelected, theme }) =>
       $isSelected ? theme.colors.primary : theme.colors.primaryLight};
@@ -108,9 +144,9 @@ export const DayCell = styled.button<{
 `;
 
 export const UpcomingSection = styled.div`
-  margin-top: 18px;
+  margin-top: clamp(14px, 2vh, 22px);
   border-top: 1px solid ${({ theme }) => theme.colors.borderLight};
-  padding-top: 14px;
+  padding-top: clamp(12px, 1.8vh, 18px);
 `;
 
 export const UpcomingHeader = styled.div`
@@ -118,14 +154,23 @@ export const UpcomingHeader = styled.div`
   font-weight: 700;
   color: ${({ theme }) => theme.colors.textSecondary};
   margin-bottom: 8px;
+
+  @media (min-width: 1720px) {
+    font-size: 13px;
+  }
 `;
 
 export const DeadlineItem = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 6px 0;
-  font-size: 11px;
+  padding: 8px 0;
+  font-size: 12px;
+
+  @media (min-width: 1720px) {
+    padding: clamp(8px, 1.1vh, 12px) 0;
+    font-size: 13px;
+  }
 `;
 
 export const DeadlineTitle = styled.span`
@@ -134,7 +179,15 @@ export const DeadlineTitle = styled.span`
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 170px;
+  max-width: 230px;
+
+  @media (min-width: 1720px) {
+    max-width: 300px;
+  }
+
+  @media (min-width: 2100px) {
+    max-width: 380px;
+  }
 `;
 
 export const DeadlineBadge = styled.span`
@@ -142,6 +195,10 @@ export const DeadlineBadge = styled.span`
   font-weight: 600;
   color: ${({ theme }) => theme.colors.primary};
   background-color: ${({ theme }) => theme.colors.primaryLight};
-  padding: 2px 8px;
+  padding: 3px 10px;
   border-radius: ${({ theme }) => theme.radii.full};
+
+  @media (min-width: 1720px) {
+    font-size: 11px;
+  }
 `;

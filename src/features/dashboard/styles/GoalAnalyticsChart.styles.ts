@@ -8,7 +8,12 @@ export const ChartCardContainer = styled.section`
   border: 1px solid ${({ theme }) => theme.colors.borderLight};
   display: flex;
   flex-direction: column;
+  justify-content: space-between;
   height: 100%;
+
+  @media (min-width: 1720px) and (min-height: 900px) {
+    padding: clamp(24px, 2.8vh, 36px);
+  }
 `;
 
 export const ChartHeader = styled.div`
@@ -58,4 +63,10 @@ export const SvgContainer = styled.div`
   flex: 1;
   min-height: 220px;
   position: relative;
+  display: flex;
+  align-items: center;
+
+  @media (min-width: 1720px) and (min-height: 900px) {
+    min-height: clamp(260px, 32vh, 420px);
+  }
 `;
