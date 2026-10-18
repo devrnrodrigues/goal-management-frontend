@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Search, Bell, Menu, ChevronDown } from 'lucide-react';
 import type { HeaderProps } from './types';
 import {
@@ -22,13 +22,25 @@ import {
 
 export const Header: React.FC<HeaderProps> = ({
   onToggleSidebar,
-  searchQuery = '',
+  searchQuery,
   onSearchChange,
   notificationCount = 2,
   userName = 'Renan Rodrigues',
   userRole = 'Gestor de metas',
   avatarUrl = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80',
 }) => {
+  const [internalQuery, setInternalQuery] = useState('');
+
+  const isControlled = searchQuery !== undefined && onSearchChange !== undefined;
+  const currentQuery = isControlled ? searchQuery : internalQuery;
+
+  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (!isControlled) {
+      setInternalQuery(event.target.value);
+    }
+    onSearchChange?.(event);
+  };
+
   return (
     <HeaderContainer>
       <HeaderContentWrapper>
@@ -47,9 +59,9 @@ export const Header: React.FC<HeaderProps> = ({
             </SearchIconWrapper>
             <SearchInput
               type="text"
-              placeholder="Pesquisar metas, categorias ou prazos..."
-              value={searchQuery}
-              onChange={onSearchChange}
+              placeholder="Pesquisar"
+              value={currentQuery}
+              onChange={handleInputChange}
             />
           </SearchWrapper>
         </HeaderLeft>

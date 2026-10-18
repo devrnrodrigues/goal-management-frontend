@@ -97,7 +97,7 @@ export const SearchInput = styled.input`
   border: none;
   background: transparent;
   width: 100%;
-  font-size: 14px;
+  font-size: clamp(13px, 0.15vw + 12px, 15px);
   color: ${({ theme }) => theme.colors.textPrimary};
   outline: none;
 
@@ -124,7 +124,7 @@ export const PeriodSelectorButton = styled.button`
   border: 1px solid ${({ theme }) => theme.colors.border};
   border-radius: ${({ theme }) => theme.radii.full};
   padding: 8px 14px;
-  font-size: 13px;
+  font-size: clamp(12px, 0.15vw + 11px, 14px);
   font-weight: 500;
   color: ${({ theme }) => theme.colors.textSecondary};
   box-shadow: ${({ theme }) => theme.shadows.card};
@@ -169,7 +169,7 @@ export const NotificationBadge = styled.span`
   border-radius: ${({ theme }) => theme.radii.full};
   background-color: ${({ theme }) => theme.colors.badge};
   color: ${({ theme }) => theme.colors.badgeText};
-  font-size: 10px;
+  font-size: clamp(9px, 0.1vw + 9px, 11px);
   font-weight: 700;
   display: flex;
   align-items: center;
@@ -211,12 +211,12 @@ export const UserInfoContainer = styled.div`
 `;
 
 export const UserNameText = styled.span`
-  font-size: 14px;
+  font-size: clamp(13px, 0.15vw + 12px, 15px);
   font-weight: 600;
   color: ${({ theme }) => theme.colors.textPrimary};
 `;
 
 export const UserRoleText = styled.span`
-  font-size: 11px;
+  font-size: clamp(11px, 0.1vw + 10px, 12px);
   color: ${({ theme }) => theme.colors.textMuted};
 `;
