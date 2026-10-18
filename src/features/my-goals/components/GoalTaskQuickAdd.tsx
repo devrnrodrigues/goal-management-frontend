@@ -60,7 +60,7 @@ export const GoalTaskQuickAdd: React.FC<GoalTaskQuickAddProps> = ({
           ref={inputRef}
           type="text"
           value={title}
-          placeholder="Nova tarefa..."
+          placeholder="Nova tarefa"
           onChange={(e) => onChangeTitle(e.target.value)}
           onFocus={handleFocus}
           onKeyDown={handleKeyDown}
@@ -72,7 +72,7 @@ export const GoalTaskQuickAdd: React.FC<GoalTaskQuickAddProps> = ({
           <QuickAddTextArea
             rows={2}
             value={description}
-            placeholder="Descrição (opcional)..."
+            placeholder="Descrição (opcional)"
             onChange={(e) => onChangeDescription(e.target.value)}
           />
           <QuickAddActions>

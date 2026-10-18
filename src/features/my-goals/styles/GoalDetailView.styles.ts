@@ -9,21 +9,10 @@ export const ViewContainer = styled.div`
 `;
 
 export const WorkspaceGrid = styled.div`
-  display: grid;
-  grid-template-columns: 1fr 380px;
-  gap: 24px;
-  align-items: start;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
   width: 100%;
-
-  @media (max-width: 1080px) {
-    grid-template-columns: 1fr 320px;
-    gap: 18px;
-  }
-
-  @media (max-width: 960px) {
-    grid-template-columns: 1fr;
-    gap: 20px;
-  }
 `;
 
 export const TaskListSection = styled.div`
@@ -127,6 +116,7 @@ export const ClearSearchButton = styled.button`
   }
 `;
 
+
 export const BulkActionButton = styled.button`
   display: inline-flex;
   align-items: center;
@@ -140,6 +130,7 @@ export const BulkActionButton = styled.button`
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
+  white-space: nowrap;
 
   &:hover {
     background: ${({ theme }) => theme.colors.primaryLight};

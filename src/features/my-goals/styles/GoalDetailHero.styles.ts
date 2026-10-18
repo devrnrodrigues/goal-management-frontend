@@ -144,13 +144,13 @@ export const AvatarFallback = styled.div`
 `;
 
 export const ProgressCard = styled.div`
-  background: linear-gradient(135deg, #f8fbf9 0%, #ffffff 100%);
+  background: ${({ theme }) => theme.colors.background};
   border: none;
   border-radius: 14px;
-  padding: 10px 14px;
+  padding: 12px 14px;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
   box-shadow: 0 2px 8px rgba(0, 168, 107, 0.04);
 `;
 
@@ -191,16 +191,3 @@ export const ProgressFillBar = styled.div<{ $percent: number }>`
   transition: width 0.4s ease;
 `;
 
-export const ProgressStatsRow = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  font-size: 11px;
-  color: ${({ theme }) => theme.colors.textMuted};
-  font-weight: 500;
-`;
-
-export const StatHighlight = styled.strong`
-  color: ${({ theme }) => theme.colors.textPrimary};
-  font-weight: 700;
-`;

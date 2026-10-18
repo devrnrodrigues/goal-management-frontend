@@ -8,7 +8,6 @@ import { useGoalDetail } from '../hooks';
 import { GoalDetailHero } from './GoalDetailHero';
 import { GoalTaskQuickAdd } from './GoalTaskQuickAdd';
 import { GoalTaskItem } from './GoalTaskItem';
-import { GoalTaskInspector } from './GoalTaskInspector';
 import {
   ViewContainer,
   WorkspaceGrid,
@@ -56,9 +55,6 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
     setFilterStatus,
     searchQuery,
     setSearchQuery,
-    selectedSubtaskId,
-    activeSubtask,
-    handleSelectSubtask,
     isQuickAddOpen,
     setIsQuickAddOpen,
     quickTitle,
@@ -75,11 +71,6 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
     handleOpenDeleteModal,
     handleCloseDeleteModal,
     handleConfirmDelete,
-    inspectorTitle,
-    setInspectorTitle,
-    inspectorDescription,
-    setInspectorDescription,
-    handleSaveInspector,
     handleToggleSubtaskClick,
     filteredSubtasks,
     totalCount,
@@ -111,8 +102,6 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
         <GoalDetailHero
           task={task}
           onClose={onClose}
-          completedCount={completedCount}
-          totalCount={totalCount}
           progressPercent={progressPercent}
         />
 
@@ -144,12 +133,19 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
               </FilterTabsGroup>
 
               <ControlsRightGroup>
+                <BulkActionButton
+                  type="button"
+                  onClick={() => setIsUpdateTaskModalOpen(true)}
+                >
+                  <Layers size={14} /> Editar
+                </BulkActionButton>
+
                 <SearchBox>
                   <Search size={14} />
                   <SearchInput
                     type="text"
                     value={searchQuery}
-                    placeholder="Buscar tarefa..."
+                    placeholder="Buscar tarefa"
                     onChange={(e) => setSearchQuery(e.target.value)}
                   />
                   {searchQuery && (
@@ -161,13 +157,6 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
                     </ClearSearchButton>
                   )}
                 </SearchBox>
-
-                <BulkActionButton
-                  type="button"
-                  onClick={() => setIsUpdateTaskModalOpen(true)}
-                >
-                  <Layers size={14} /> Em lote
-                </BulkActionButton>
               </ControlsRightGroup>
             </ControlsBar>
 
@@ -188,10 +177,9 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
                   <GoalTaskItem
                     key={subtask.id}
                     subtask={subtask}
-                    isSelected={selectedSubtaskId === subtask.id}
-                    onSelect={() => handleSelectSubtask(subtask.id)}
                     onToggle={() => handleToggleSubtaskClick(subtask.id)}
-                    onDelete={() => handleOpenDeleteModal(subtask.id)}
+                    onDelete={() => onDeleteSubtask?.(subtask.id)}
+                    onUpdate={onUpdateSingleTask}
                   />
                 ))}
               </TasksListWrapper>
@@ -209,24 +197,6 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
               </EmptyStateBox>
             )}
           </TaskListSection>
-
-          <GoalTaskInspector
-            activeSubtask={activeSubtask}
-            title={inspectorTitle}
-            onChangeTitle={setInspectorTitle}
-            description={inspectorDescription}
-            onChangeDescription={setInspectorDescription}
-            onSave={handleSaveInspector}
-            onClose={() => handleSelectSubtask(selectedSubtaskId || '')}
-            onToggleStatus={() =>
-              activeSubtask && handleToggleSubtaskClick(activeSubtask.id)
-            }
-            onDelete={() =>
-              activeSubtask && handleOpenDeleteModal(activeSubtask.id)
-            }
-            progressPercent={progressPercent}
-            pendingCount={pendingCount}
-          />
         </WorkspaceGrid>
       </ViewContainer>
 

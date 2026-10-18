@@ -20,23 +20,17 @@ import {
   ProgressPercentage,
   ProgressTrack,
   ProgressFillBar,
-  ProgressStatsRow,
-  StatHighlight,
 } from '../styles/GoalDetailHero.styles';
 
 interface GoalDetailHeroProps {
   task: Task;
   onClose: () => void;
-  completedCount: number;
-  totalCount: number;
   progressPercent: number;
 }
 
 export const GoalDetailHero: React.FC<GoalDetailHeroProps> = ({
   task,
   onClose,
-  completedCount,
-  totalCount,
   progressPercent,
 }) => {
   return (
@@ -88,14 +82,6 @@ export const GoalDetailHero: React.FC<GoalDetailHeroProps> = ({
           <ProgressTrack>
             <ProgressFillBar $percent={progressPercent} />
           </ProgressTrack>
-
-          <ProgressStatsRow>
-            <span>
-              <StatHighlight>{completedCount}</StatHighlight> de{' '}
-              <StatHighlight>{totalCount}</StatHighlight> concluídas
-            </span>
-            <span>{totalCount - completedCount} pendentes</span>
-          </ProgressStatsRow>
         </ProgressCard>
       </HeroMainGrid>
     </HeroContainer>
