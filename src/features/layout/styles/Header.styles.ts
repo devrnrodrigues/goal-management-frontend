@@ -30,6 +30,7 @@ export const HeaderContainer = styled.header`
 
 export const HeaderContentWrapper = styled.div`
   width: 100%;
+  min-width: 0;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -41,6 +42,7 @@ export const HeaderLeft = styled.div`
   align-items: center;
   gap: ${({ theme }) => theme.spacing.md};
   flex: 1;
+  min-width: 0;
   max-width: 600px;
 `;
 
@@ -69,6 +71,7 @@ export const SearchWrapper = styled.div`
   padding: 8px 16px;
   gap: 10px;
   width: 100%;
+  min-width: 0;
   max-width: 380px;
   box-shadow: ${({ theme }) => theme.shadows.card};
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
