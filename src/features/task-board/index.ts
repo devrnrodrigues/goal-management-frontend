@@ -1,2 +1,4 @@
-export { AddTaskModal } from './components/AddTaskModal';
-export { UpdateTaskModal } from './components/UpdateTaskModal';
+export { TaskBoard } from './TaskBoard';
+export { useTaskBoard } from './useTaskBoard';
+export * from './types';
+export * from './components';
