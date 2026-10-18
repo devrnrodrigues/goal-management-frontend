@@ -83,14 +83,14 @@ export const StatInfo = styled.div`
 `;
 
 export const StatValue = styled.span`
-  font-size: 22px;
+  font-size: clamp(20px, 0.4vw + 18px, 26px);
   font-weight: 700;
   color: ${({ theme }) => theme.colors.textPrimary};
   line-height: 1.2;
 `;
 
 export const StatLabel = styled.span`
-  font-size: 13px;
+  font-size: clamp(12px, 0.1vw + 11px, 14px);
   color: ${({ theme }) => theme.colors.textSecondary};
   font-weight: 500;
 `;

@@ -46,7 +46,7 @@ export const SearchBox = styled.div`
     border: none;
     background: transparent;
     outline: none;
-    font-size: 13px;
+    font-size: clamp(12px, 0.15vw + 11px, 14px);
     color: ${({ theme }) => theme.colors.textPrimary};
     width: 100%;
 
@@ -57,7 +57,7 @@ export const SearchBox = styled.div`
 `;
 
 export const ResultsCountText = styled.span`
-  font-size: 13px;
+  font-size: clamp(12px, 0.15vw + 11px, 14px);
   font-weight: 500;
   color: ${({ theme }) => theme.colors.textSecondary};
 `;
@@ -79,7 +79,7 @@ export const FilterChip = styled.button<{ $isActive: boolean }>`
   background-color: ${({ $isActive, theme }) => ($isActive ? theme.colors.primaryLight : 'transparent')};
   color: ${({ $isActive, theme }) => ($isActive ? theme.colors.primaryDark : theme.colors.textSecondary)};
   font-weight: ${({ $isActive }) => ($isActive ? '600' : '500')};
-  font-size: 12px;
+  font-size: clamp(11px, 0.15vw + 10px, 13px);
   padding: 6px 14px;
   border-radius: ${({ theme }) => theme.radii.full};
   cursor: pointer;

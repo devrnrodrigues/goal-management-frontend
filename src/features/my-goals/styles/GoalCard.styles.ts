@@ -15,7 +15,7 @@ export const CardContainer = styled(motion.div)`
     width: 100%;
     height: 350px;
     border-radius: 30px;
-    padding: 34px 34px 26px 34px;
+    padding: 38px 36px 34px 36px;
     color: ${({ theme }) => theme.colors.textPrimary};
     box-shadow: ${({ theme }) => theme.shadows.card};
     border: 1px solid ${({ theme }) => theme.colors.borderLight};
@@ -29,7 +29,7 @@ export const CardContainer = styled(motion.div)`
 
     @media (min-width: 1720px) and (min-height: 900px) {
         height: clamp(360px, 33vh, 410px);
-        padding: clamp(28px, 2.8vh, 36px) 34px 26px 34px;
+        padding: clamp(34px, 3.2vh, 42px) 38px 36px 38px;
     }
 
     @media (min-width: 2100px) and (min-height: 1000px) {
@@ -51,7 +51,7 @@ export const TooltipContainer = styled(motion.div)<{ $x: number; $y: number }>`
     color: white;
     padding: 6px 12px;
     border-radius: ${({ theme }) => theme.radii.sm};
-    font-size: 12px;
+    font-size: clamp(11px, 0.1vw + 10px, 13px);
     font-weight: 600;
     letter-spacing: 0.3px;
     z-index: 100;
@@ -79,7 +79,7 @@ export const CardHeaderContent = styled.div`
 `;
 
 export const CardCategory = styled.span`
-    font-size: 12px;
+    font-size: clamp(11px, 0.15vw + 10px, 13px);
     font-weight: 600;
     color: ${({ theme }) => theme.colors.textSecondary};
     letter-spacing: 0.5px;
@@ -87,7 +87,7 @@ export const CardCategory = styled.span`
 `;
 
 export const CardTitle = styled.h3`
-    font-size: 22px;
+    font-size: clamp(18px, 0.4vw + 14px, 24px);
     font-weight: 700;
     color: ${({ theme }) => theme.colors.textPrimary};
     letter-spacing: -0.4px;
@@ -200,12 +200,84 @@ export const StatusIconWrapper = styled.div`
 `;
 
 export const StatusBadgeTitle = styled.span`
-    font-size: 13px;
+    font-size: clamp(12px, 0.15vw + 11px, 14px);
     font-weight: 600;
     color: ${({ theme }) => theme.colors.textPrimary};
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+`;
+
+export const StatusBadgeWrapper = styled.div`
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-end;
+    flex-shrink: 0;
+`;
+
+export const StatusBadgePill = styled(motion.div)<{ $variant?: StatusVariant; $isLong?: boolean }>`
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 5px 12px;
+    border-radius: ${({ theme }) => theme.radii.full};
+    cursor: ${({ $isLong }) => ($isLong ? 'pointer' : 'default')};
+    user-select: none;
+    white-space: nowrap;
+    border: 1px solid transparent;
+    box-shadow: none;
+    background-color: ${({ $variant }) => {
+        switch ($variant) {
+            case 'planning':
+                return '#f1f5f9';
+            case 'development':
+                return '#eff6ff';
+            case 'in_progress':
+                return '#ecfeff';
+            case 'homologation':
+                return '#faf5ff';
+            case 'qa':
+                return '#fffbeb';
+            case 'review':
+                return '#ecfdf5';
+            case 'urgent':
+                return '#fee2e2';
+            case 'done':
+                return '#ecfdf5';
+            default:
+                return '#ecfdf5';
+        }
+    }};
+`;
+
+export const StatusBadgeFooterIcon = styled.div`
+    width: 20px;
+    height: 20px;
+    border-radius: ${({ theme }) => theme.radii.full};
+    background-color: ${({ theme }) => theme.colors.surface};
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #111111;
+    flex-shrink: 0;
+
+    svg {
+        width: 12px;
+        height: 12px;
+    }
+`;
+
+export const StatusBadgePillText = styled(motion.span)<{ $isLong?: boolean; $isExpanded?: boolean }>`
+    font-size: clamp(11px, 0.15vw + 10px, 13px);
+    font-weight: 600;
+    color: ${({ theme }) => theme.colors.textPrimary};
+    white-space: nowrap;
+    display: inline-block;
+    overflow: hidden;
+    text-overflow: ${({ $isLong, $isExpanded }) => ($isLong && !$isExpanded ? 'ellipsis' : 'clip')};
+    max-width: ${({ $isLong, $isExpanded }) => ($isLong ? ($isExpanded ? '280px' : '84px') : 'none')};
+    transition: max-width 0.28s cubic-bezier(0.4, 0, 0.2, 1);
 `;
 
 export const CardDivider = styled.div`
@@ -220,13 +292,15 @@ export const CardFooter = styled.div`
     justify-content: space-between;
     align-items: center;
     width: 100%;
+    position: relative;
+    gap: 8px;
 `;
 
 export const CalendarBadge = styled.div`
     display: flex;
     align-items: center;
     gap: 8px;
-    font-size: 13px;
+    font-size: clamp(12px, 0.15vw + 11px, 14px);
     color: ${({ theme }) => theme.colors.textSecondary};
     font-weight: 500;
 
@@ -239,8 +313,10 @@ export const PriorityBadge = styled.div<{ $priority?: string }>`
     display: flex;
     align-items: center;
     gap: 7px;
-    font-size: 13px;
+    font-size: clamp(12px, 0.15vw + 11px, 14px);
     font-weight: 600;
+    white-space: nowrap;
+    flex-shrink: 0;
     color: ${({ $priority, theme }) => {
         if ($priority === 'Alta prioridade') return theme.colors.statusDanger;
         if ($priority === 'Média prioridade') return theme.colors.statusWarning;
@@ -283,7 +359,7 @@ export const AvatarMoreBadge = styled.div`
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 11px;
+    font-size: clamp(10px, 0.1vw + 9px, 12px);
     font-weight: 700;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
 `;
@@ -322,7 +398,7 @@ export const CardDescriptionContainer = styled.div`
 `;
 
 export const CardDescriptionText = styled.p`
-    font-size: 15px;
+    font-size: clamp(13px, 0.2vw + 12px, 16px);
     font-weight: 400;
     line-height: 1.5;
     color: ${({ theme }) => theme.colors.textPrimary};
@@ -330,6 +406,6 @@ export const CardDescriptionText = styled.p`
 `;
 
 export const NoDescriptionText = styled.span`
-    font-size: 13px;
+    font-size: clamp(12px, 0.1vw + 11px, 14px);
     color: ${({ theme }) => theme.colors.textMuted};
 `;
