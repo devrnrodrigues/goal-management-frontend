@@ -28,13 +28,13 @@ export const PlaceholderIconWrapper = styled.div`
 `;
 
 export const PlaceholderTitle = styled.h2`
-  font-size: 20px;
+  font-size: clamp(18px, 0.4vw + 16px, 24px);
   font-weight: 700;
   color: ${({ theme }) => theme.colors.textPrimary};
 `;
 
 export const PlaceholderDescription = styled.p`
-  font-size: 14px;
+  font-size: clamp(13px, 0.2vw + 12px, 15px);
   color: ${({ theme }) => theme.colors.textSecondary};
   max-width: 420px;
   line-height: 1.5;
@@ -47,7 +47,7 @@ export const PlaceholderActionBtn = styled.button`
   padding: 10px 20px;
   border-radius: ${({ theme }) => theme.radii.full};
   border: none;
-  font-size: 14px;
+  font-size: clamp(13px, 0.2vw + 12px, 15px);
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
