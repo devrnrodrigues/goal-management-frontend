@@ -31,13 +31,9 @@ export const CalendarHeader = styled.div`
 `;
 
 export const MonthTitle = styled.h3`
-  font-size: 15px;
+  font-size: clamp(14px, 0.2vw + 13px, 17px);
   font-weight: 700;
   color: ${({ theme }) => theme.colors.primary};
-
-  @media (min-width: 1720px) {
-    font-size: 16px;
-  }
 `;
 
 export const CalendarNavArrow = styled.button`
@@ -65,13 +61,9 @@ export const WeekDaysRow = styled.div`
 `;
 
 export const WeekDayLabel = styled.span`
-  font-size: 11px;
+  font-size: clamp(10px, 0.15vw + 9px, 12px);
   font-weight: 600;
   color: ${({ theme }) => theme.colors.textMuted};
-
-  @media (min-width: 1720px) {
-    font-size: 12px;
-  }
 `;
 
 export const DaysGrid = styled.div`
@@ -96,7 +88,7 @@ export const DayCell = styled.button<{
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 12px;
+  font-size: clamp(11px, 0.15vw + 10px, 13px);
   font-weight: ${({ $isSelected }) => ($isSelected ? '700' : '500')};
   background-color: ${({ $isSelected, theme }) =>
     $isSelected ? theme.colors.primary : 'transparent'};
@@ -111,13 +103,11 @@ export const DayCell = styled.button<{
   @media (min-width: 1720px) {
     width: 38px;
     height: 38px;
-    font-size: 13px;
   }
 
   @media (min-width: 2100px) {
     width: 44px;
     height: 44px;
-    font-size: 14px;
   }
 
   &:hover {
@@ -150,14 +140,10 @@ export const UpcomingSection = styled.div`
 `;
 
 export const UpcomingHeader = styled.div`
-  font-size: 12px;
+  font-size: clamp(11px, 0.15vw + 10px, 13px);
   font-weight: 700;
   color: ${({ theme }) => theme.colors.textSecondary};
   margin-bottom: 8px;
-
-  @media (min-width: 1720px) {
-    font-size: 13px;
-  }
 `;
 
 export const DeadlineItem = styled.div`
@@ -165,11 +151,10 @@ export const DeadlineItem = styled.div`
   align-items: center;
   justify-content: space-between;
   padding: 8px 0;
-  font-size: 12px;
+  font-size: clamp(11px, 0.15vw + 10px, 13px);
 
   @media (min-width: 1720px) {
     padding: clamp(8px, 1.1vh, 12px) 0;
-    font-size: 13px;
   }
 `;
 
@@ -191,14 +176,10 @@ export const DeadlineTitle = styled.span`
 `;
 
 export const DeadlineBadge = styled.span`
-  font-size: 10px;
+  font-size: clamp(10px, 0.1vw + 9px, 12px);
   font-weight: 600;
   color: ${({ theme }) => theme.colors.primary};
   background-color: ${({ theme }) => theme.colors.primaryLight};
   padding: 3px 10px;
   border-radius: ${({ theme }) => theme.radii.full};
-
-  @media (min-width: 1720px) {
-    font-size: 11px;
-  }
 `;

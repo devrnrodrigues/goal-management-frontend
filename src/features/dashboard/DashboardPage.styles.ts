@@ -32,19 +32,15 @@ export const DashboardHeaderWrapper = styled.div`
 `;
 
 export const DashboardGreetingTitle = styled.h1`
-  font-size: 26px;
+  font-size: clamp(20px, 1.2vw + 16px, 28px);
   font-weight: 700;
   color: ${({ theme }) => theme.colors.textPrimary};
   margin-bottom: 4px;
   letter-spacing: -0.5px;
-
-  @media (max-width: 868px) {
-    font-size: 20px;
-  }
 `;
 
 export const DashboardGreetingSubtitle = styled.p`
-  font-size: 14px;
+  font-size: clamp(13px, 0.2vw + 12px, 15px);
   font-weight: 500;
   color: ${({ theme }) => theme.colors.textSecondary};
 `;
@@ -55,7 +51,7 @@ export const QuickGoToButton = styled.button`
   padding: 10px 22px;
   border-radius: ${({ theme }) => theme.radii.full};
   cursor: pointer;
-  font-size: 14px;
+  font-size: clamp(13px, 0.2vw + 12px, 15px);
   font-weight: 600;
   border: none;
   transition: all 0.2s ease;

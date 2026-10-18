@@ -3,7 +3,7 @@ import styled from 'styled-components';
 export const HeroCardContainer = styled.section`
   background-color: ${({ theme }) => theme.colors.surface};
   border-radius: ${({ theme }) => theme.radii.xl};
-  padding: ${({ theme }) => theme.spacing.lg};
+  padding: 28px 24px;
   box-shadow: ${({ theme }) => theme.shadows.card};
   border: 1px solid ${({ theme }) => theme.colors.borderLight};
   display: flex;
@@ -11,7 +11,12 @@ export const HeroCardContainer = styled.section`
   justify-content: space-between;
   position: relative;
   overflow: hidden;
-  min-height: 250px;
+  min-height: 300px;
+
+  @media (min-width: 1720px) {
+    padding: 32px 28px;
+    min-height: 328px;
+  }
 `;
 
 export const HeroHeader = styled.div`
@@ -21,7 +26,7 @@ export const HeroHeader = styled.div`
 
 export const HeroBadge = styled.span`
   color: ${({ theme }) => theme.colors.primary};
-  font-size: 13px;
+  font-size: clamp(12px, 0.2vw + 11px, 15px);
   font-weight: 700;
   letter-spacing: 0.2px;
   display: block;
@@ -29,7 +34,7 @@ export const HeroBadge = styled.span`
 
 export const HeroSubtitle = styled.span`
   color: ${({ theme }) => theme.colors.textSecondary};
-  font-size: 12px;
+  font-size: clamp(11px, 0.15vw + 10px, 13px);
   font-weight: 500;
 `;
 
@@ -42,29 +47,35 @@ export const CarouselSection = styled.div`
 `;
 
 export const CarouselNavButton = styled.button`
-  width: 34px;
-  height: 34px;
+  width: 32px;
+  height: 32px;
   border-radius: ${({ theme }) => theme.radii.full};
-  background-color: ${({ theme }) => theme.colors.surface};
-  border: 1px solid ${({ theme }) => theme.colors.border};
-  color: ${({ theme }) => theme.colors.textSecondary};
+  background-color: transparent;
+  border: none;
+  color: ${({ theme }) => theme.colors.textMuted};
   display: flex;
   align-items: center;
   justify-content: center;
+  cursor: pointer;
   transition: all 0.2s ease;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
   flex-shrink: 0;
+  opacity: 0.75;
 
   &:hover {
     color: ${({ theme }) => theme.colors.primary};
-    border-color: ${({ theme }) => theme.colors.primary};
     background-color: ${({ theme }) => theme.colors.primaryLight};
+    opacity: 1;
+    transform: scale(1.1);
+  }
+
+  &:active {
+    transform: scale(0.95);
   }
 `;
 
 export const GoalAvatarWrapper = styled.div`
-  width: 76px;
-  height: 76px;
+  width: 92px;
+  height: 92px;
   border-radius: ${({ theme }) => theme.radii.full};
   background: linear-gradient(135deg, ${({ theme }) => theme.colors.primaryLight} 0%, rgba(0, 168, 107, 0.15) 100%);
   border: 3px solid ${({ theme }) => theme.colors.surface};
@@ -82,17 +93,17 @@ export const GoalInfoSection = styled.div`
 `;
 
 export const GoalTitle = styled.h3`
-  font-size: 16px;
+  font-size: clamp(16px, 0.3vw + 14px, 20px);
   font-weight: 700;
   color: ${({ theme }) => theme.colors.primary};
-  margin-bottom: 2px;
+  margin-bottom: 3px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 `;
 
 export const GoalMetaText = styled.span`
-  font-size: 12px;
+  font-size: clamp(11px, 0.15vw + 10px, 13px);
   color: ${({ theme }) => theme.colors.textSecondary};
   font-weight: 500;
 `;
@@ -108,14 +119,14 @@ export const ProgressHeader = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 11px;
+  font-size: clamp(11px, 0.1vw + 10px, 12px);
   font-weight: 600;
   color: ${({ theme }) => theme.colors.textSecondary};
 `;
 
 export const ProgressBarTrack = styled.div`
   width: 100%;
-  height: 6px;
+  height: 8px;
   background-color: ${({ theme }) => theme.colors.borderLight};
   border-radius: ${({ theme }) => theme.radii.full};
   overflow: hidden;
@@ -130,7 +141,7 @@ export const ProgressBarFill = styled.div<{ $progress: number }>`
 `;
 
 export const StepNotice = styled.div`
-  font-size: 11px;
+  font-size: clamp(11px, 0.1vw + 10px, 12px);
   color: ${({ theme }) => theme.colors.textMuted};
   text-align: center;
   margin-top: 4px;

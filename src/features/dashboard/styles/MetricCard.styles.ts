@@ -3,7 +3,8 @@ import styled from 'styled-components';
 export const CardContainer = styled.div`
   background-color: ${({ theme }) => theme.colors.surface};
   border-radius: ${({ theme }) => theme.radii.xl};
-  padding: 20px 22px;
+  padding: 32px 26px;
+  min-height: 140px;
   box-shadow: ${({ theme }) => theme.shadows.card};
   border: 1px solid ${({ theme }) => theme.colors.borderLight};
   display: flex;
@@ -11,6 +12,11 @@ export const CardContainer = styled.div`
   justify-content: space-between;
   gap: ${({ theme }) => theme.spacing.md};
   transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+  @media (min-width: 1720px) {
+    padding: 36px 30px;
+    min-height: 154px;
+  }
 
   &:hover {
     transform: translateY(-2px);
@@ -24,7 +30,7 @@ export const MetricInfo = styled.div`
 `;
 
 export const MetricValue = styled.span`
-  font-size: 26px;
+  font-size: clamp(28px, 1.2vw + 18px, 38px);
   font-weight: 700;
   color: ${({ theme }) => theme.colors.textPrimary};
   letter-spacing: -0.5px;
@@ -32,21 +38,21 @@ export const MetricValue = styled.span`
 `;
 
 export const MetricTitle = styled.span`
-  font-size: 13px;
+  font-size: clamp(13px, 0.2vw + 11px, 16px);
   font-weight: 600;
   color: ${({ theme }) => theme.colors.textSecondary};
-  margin-top: 4px;
+  margin-top: 6px;
 `;
 
 export const MetricSubtitle = styled.span`
-  font-size: 11px;
+  font-size: clamp(11px, 0.15vw + 10px, 13px);
   color: ${({ theme }) => theme.colors.textMuted};
-  margin-top: 4px;
+  margin-top: 6px;
 `;
 
 export const IconCircle = styled.div<{ $variant?: string }>`
-  width: 48px;
-  height: 48px;
+  width: 58px;
+  height: 58px;
   border-radius: ${({ theme }) => theme.radii.full};
   background-color: ${({ theme, $variant }) => {
     switch ($variant) {

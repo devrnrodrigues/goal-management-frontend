@@ -30,7 +30,7 @@ export const ChartHeader = styled.div`
 `;
 
 export const ChartTitle = styled.h3`
-  font-size: 16px;
+  font-size: clamp(15px, 0.2vw + 14px, 18px);
   font-weight: 700;
   color: ${({ theme }) => theme.colors.textPrimary};
 `;
@@ -45,7 +45,7 @@ export const LegendItem = styled.div<{ $color: string }>`
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 12px;
+  font-size: clamp(11px, 0.15vw + 10px, 13px);
   font-weight: 500;
   color: ${({ theme }) => theme.colors.textSecondary};
 

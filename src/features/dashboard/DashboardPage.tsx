@@ -20,7 +20,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigateToGoals 
         <div>
           <DashboardGreetingTitle>Visão geral</DashboardGreetingTitle>
           <DashboardGreetingSubtitle>
-            Olá, Renan Rodrigues! Acompanhe métricas em tempo real e o ritmo de entrega das metas.
+            Acompanhe métricas em tempo real e o ritmo de finalização das metas.
           </DashboardGreetingSubtitle>
         </div>
         {onNavigateToGoals && (

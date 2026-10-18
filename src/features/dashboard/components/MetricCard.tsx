@@ -21,7 +21,7 @@ export const MetricCard: React.FC<MetricCardProps> = ({ metric }) => {
       </MetricInfo>
 
       <IconCircle $variant={metric.variant}>
-        <IconComponent size={22} />
+        <IconComponent size={26} />
       </IconCircle>
     </CardContainer>
   );
