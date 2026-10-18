@@ -5,9 +5,12 @@ import {
     GoalCard, 
     GoalDetailView, 
     AddGoalModal, 
-    UpdateGoalModal,
+    GoalConfigModal,
+    type GoalConfigData,
+    type MemberAvatar,
     GoalStatsBar,
 } from './components';
+import { membersByTitle, defaultMembers } from './constants/members';
 import { useCardsPerPage } from './hooks';
 import { ConfirmDeleteModal } from '../shared';
 import {
@@ -37,6 +40,7 @@ export interface Task {
     deadline?: string;
     status?: string;
     priority?: string;
+    members?: MemberAvatar[];
     subtasks?: SubTask[];
 }
 
@@ -213,12 +217,10 @@ export const MyGoals: React.FC = () => {
     const [tasks, setTasks] = useState<Task[]>(initialTasks);
     const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
-    
-    const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
-    const [goalToEdit, setGoalToEdit] = useState<Task | null>(null);
-
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [goalToDeleteId, setGoalToDeleteId] = useState<string | null>(null);
+    const [isConfigModalOpen, setIsConfigModalOpen] = useState(false);
+    const [goalForConfig, setGoalForConfig] = useState<Task | null>(null);
 
     const totalGoals = tasks.length;
     const inProgressGoals = tasks.filter((t) => 
@@ -265,35 +267,6 @@ export const MyGoals: React.FC = () => {
         setCurrentPage(1);
     };
 
-    const handleOpenEditModal = (task: Task) => {
-        setGoalToEdit(task);
-        setIsUpdateModalOpen(true);
-    };
-
-    const handleUpdateGoal = (updatedTask: Task) => {
-        if (goalToEdit) {
-            setTasks((prev) => 
-                prev.map((t) => {
-                    if (t.id !== goalToEdit.id) return t;
-
-                    const subtasks = updatedTask.subtasks || t.subtasks || [];
-                    const total = subtasks.length;
-                    const completed = subtasks.filter((st) => st.completed).length;
-                    const progress = total > 0 ? Math.round((completed / total) * 100) : t.progress;
-
-                    return {
-                        ...updatedTask,
-                        id: t.id,
-                        subtasks,
-                        progress,
-                    };
-                })
-            );
-        }
-        setIsUpdateModalOpen(false);
-        setGoalToEdit(null);
-    };
-
     const handleOpenDeleteModal = (taskId: string) => {
         setGoalToDeleteId(taskId);
         setIsDeleteModalOpen(true);
@@ -308,6 +281,56 @@ export const MyGoals: React.FC = () => {
         }
         setIsDeleteModalOpen(false);
         setGoalToDeleteId(null);
+    };
+
+    const handleOpenConfigModal = (task: Task) => {
+        const existingMembers = task.members && task.members.length > 0 
+            ? task.members 
+            : (membersByTitle[task.title] || defaultMembers);
+
+        setGoalForConfig({
+            ...task,
+            members: existingMembers,
+        });
+        setIsConfigModalOpen(true);
+    };
+
+    const handleSaveGoalConfig = (updatedData: GoalConfigData) => {
+        if (!goalForConfig) return;
+
+        setTasks((prev) =>
+            prev.map((t) => {
+                if (t.id === goalForConfig.id || t.title === goalForConfig.title) {
+                    return {
+                        ...t,
+                        category: updatedData.category,
+                        title: updatedData.title,
+                        description: updatedData.description,
+                        deadline: updatedData.deadline,
+                        status: updatedData.status,
+                        priority: updatedData.priority,
+                        members: updatedData.members,
+                    };
+                }
+                return t;
+            })
+        );
+
+        setIsConfigModalOpen(false);
+        setGoalForConfig(null);
+    };
+
+    const handleDeleteGoalFromConfig = () => {
+        if (!goalForConfig) return;
+        const targetId = goalForConfig.id;
+        const targetTitle = goalForConfig.title;
+
+        setTasks((prev) => prev.filter((t) => t.id !== targetId && t.title !== targetTitle));
+        if (selectedTaskId === targetId) {
+            setSelectedTaskId(null);
+        }
+        setIsConfigModalOpen(false);
+        setGoalForConfig(null);
     };
 
     const handleUpdateSingleTask = (updatedSubtask: SubTask) => {
@@ -393,83 +416,82 @@ export const MyGoals: React.FC = () => {
 
     return (
         <GoalsPageArea>
-            <AnimatePresence mode="wait">
-                {selectedTask ? (
-                    <GoalDetailView 
-                        key="task-view"
-                        task={selectedTask} 
-                        onClose={() => setSelectedTaskId(null)} 
-                        onAddTasks={handleAddSubtasks}
-                        onUpdateTasks={handleUpdateGoalTasks}
-                        onUpdateSingleTask={handleUpdateSingleTask}
-                        onToggleSubtask={handleToggleSubtask}
-                        onDeleteTask={() => handleOpenDeleteModal(selectedTask.id || '')}
-                        onDeleteSubtask={handleDeleteSubtask}
+            {selectedTask ? (
+                <GoalDetailView 
+                    key="task-view"
+                    task={selectedTask} 
+                    onClose={() => setSelectedTaskId(null)} 
+                    onAddTasks={handleAddSubtasks}
+                    onUpdateTasks={handleUpdateGoalTasks}
+                    onUpdateSingleTask={handleUpdateSingleTask}
+                    onToggleSubtask={handleToggleSubtask}
+                    onDeleteTask={() => handleOpenDeleteModal(selectedTask.id || '')}
+                    onDeleteSubtask={handleDeleteSubtask}
+                    onEditGoal={() => handleOpenConfigModal(selectedTask)}
+                />
+            ) : (
+                <>
+                    <GoalsHeader>
+                        <div>
+                            <GoalsTitle>Minhas metas</GoalsTitle>
+                            <GoalsSubtitle>
+                                Acompanhe o progresso, adicione e gerencie metas.
+                            </GoalsSubtitle>
+                        </div>
+                        <AddButton type="button" onClick={() => setIsModalOpen(true)}>
+                            <Plus size={16} /> Adicionar meta
+                        </AddButton>
+                    </GoalsHeader>
+
+                    <GoalStatsBar 
+                        totalGoals={totalGoals}
+                        inProgressGoals={inProgressGoals}
+                        urgentGoals={urgentGoals}
+                        averageProgress={averageProgress}
                     />
-                ) : (
-                    <>
-                        <GoalsHeader>
-                            <div>
-                                <GoalsTitle>Minhas metas</GoalsTitle>
-                                <GoalsSubtitle>
-                                    Acompanhe o progresso, gerencie squads e prazos das metas corporativas.
-                                </GoalsSubtitle>
-                            </div>
-                            <AddButton type="button" onClick={() => setIsModalOpen(true)}>
-                                <Plus size={16} /> Adicionar meta
-                            </AddButton>
-                        </GoalsHeader>
 
-                        <GoalStatsBar 
-                            totalGoals={totalGoals}
-                            inProgressGoals={inProgressGoals}
-                            urgentGoals={urgentGoals}
-                            averageProgress={averageProgress}
-                        />
-
-                        <CardGrid id="cardGrid">
-                            {currentTasks.map((task) => (
-                                <GoalCardWrapper 
-                                    key={task.id || task.title} 
-                                    onClick={() => setSelectedTaskId(task.id || null)} 
-                                >
-                                    <GoalCard
-                                        category={task.category}
-                                        title={task.title}
-                                        progress={task.progress}
-                                        description={task.description}
-                                        deadline={task.deadline}
-                                        status={task.status}
-                                        priority={task.priority}
-                                        onEdit={() => handleOpenEditModal(task)}
-                                        onDelete={() => handleOpenDeleteModal(task.id || '')}
-                                    />
-                                </GoalCardWrapper>
-                            ))}
-                        </CardGrid>
-
-                        <ViewSelector>
-                            <button 
-                                id="prevBtn" 
-                                type="button"
-                                onClick={handlePrev} 
-                                disabled={currentPage === 1}
+                    <CardGrid id="cardGrid">
+                        {currentTasks.map((task) => (
+                            <GoalCardWrapper 
+                                key={task.id || task.title} 
+                                onClick={() => setSelectedTaskId(task.id || null)} 
                             >
-                                <ChevronLeft size={16} /> Voltar
-                            </button>
-                            <span id="pageIndicator">{currentPage} / {totalPages}</span>
-                            <button 
-                                id="nextBtn" 
-                                type="button"
-                                onClick={handleNext} 
-                                disabled={currentPage === totalPages}
-                            >
-                                Próximo <ChevronRight size={16} />
-                            </button>
-                        </ViewSelector>
-                    </>
-                )}
-            </AnimatePresence>
+                                <GoalCard
+                                    category={task.category}
+                                    title={task.title}
+                                    progress={task.progress}
+                                    description={task.description}
+                                    deadline={task.deadline}
+                                    status={task.status}
+                                    priority={task.priority}
+                                    members={task.members}
+                                    onOpenSettings={() => handleOpenConfigModal(task)}
+                                />
+                            </GoalCardWrapper>
+                        ))}
+                    </CardGrid>
+
+                    <ViewSelector>
+                        <button 
+                            id="prevBtn" 
+                            type="button"
+                            onClick={handlePrev} 
+                            disabled={currentPage === 1}
+                        >
+                            <ChevronLeft size={16} /> Voltar
+                        </button>
+                        <span id="pageIndicator">{currentPage} / {totalPages}</span>
+                        <button 
+                            id="nextBtn" 
+                            type="button"
+                            onClick={handleNext} 
+                            disabled={currentPage === totalPages}
+                        >
+                            Próximo <ChevronRight size={16} />
+                        </button>
+                    </ViewSelector>
+                </>
+            )}
 
             <AnimatePresence>
                 {isModalOpen && (
@@ -480,17 +502,6 @@ export const MyGoals: React.FC = () => {
                     />
                 )}
 
-                {isUpdateModalOpen && goalToEdit && (
-                    <UpdateGoalModal
-                        isOpen={isUpdateModalOpen}
-                        onClose={() => {
-                            setIsUpdateModalOpen(false);
-                            setGoalToEdit(null);
-                        }}
-                        onUpdateGoal={handleUpdateGoal}
-                        initialGoal={goalToEdit}
-                    />
-                )}
 
                 {isDeleteModalOpen && (
                     <ConfirmDeleteModal
@@ -500,6 +511,27 @@ export const MyGoals: React.FC = () => {
                             setGoalToDeleteId(null);
                         }}
                         onConfirm={handleConfirmDelete}
+                    />
+                )}
+
+                {isConfigModalOpen && goalForConfig && (
+                    <GoalConfigModal
+                        isOpen={isConfigModalOpen}
+                        onClose={() => {
+                            setIsConfigModalOpen(false);
+                            setGoalForConfig(null);
+                        }}
+                        goal={{
+                            category: goalForConfig.category,
+                            title: goalForConfig.title,
+                            description: goalForConfig.description,
+                            deadline: goalForConfig.deadline,
+                            status: goalForConfig.status,
+                            priority: goalForConfig.priority,
+                            members: goalForConfig.members,
+                        }}
+                        onSaveGoal={handleSaveGoalConfig}
+                        onDeleteGoal={handleDeleteGoalFromConfig}
                     />
                 )}
             </AnimatePresence>

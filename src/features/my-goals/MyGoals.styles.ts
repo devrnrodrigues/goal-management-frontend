@@ -17,21 +17,15 @@ export const MainContentWrapper = styled.main`
 `;
 
 export const GoalsPageArea = styled.div`
-  padding: 24px 0 24px 0;
+  padding: 24px 0 32px 0;
   width: 100%;
-  flex: 1;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  justify-content: flex-start;
   gap: 24px;
-
-  @media (min-width: 1720px) and (min-height: 900px) {
-    gap: clamp(24px, 2.8vh, 36px);
-  }
 
   @media (max-width: 900px) {
     padding: 16px 0 24px 0;
-    justify-content: flex-start;
   }
 `;
 
@@ -48,25 +42,21 @@ export const GoalsHeader = styled.div`
 `;
 
 export const GoalsTitle = styled.h1`
-  font-size: 26px;
+  font-size: clamp(20px, 1.2vw + 16px, 28px);
   font-weight: 700;
   color: ${({ theme }) => theme.colors.textPrimary};
   margin-bottom: 4px;
   letter-spacing: -0.5px;
-
-  @media (max-width: 868px) {
-    font-size: 20px;
-  }
 `;
 
 export const GoalsSubtitle = styled.p`
-  font-size: 14px;
+  font-size: clamp(13px, 0.2vw + 12px, 15px);
   font-weight: 500;
   color: ${({ theme }) => theme.colors.textSecondary};
 `;
 
 export const SectionTitle = styled.h2`
-  font-size: 18px;
+  font-size: clamp(16px, 0.3vw + 14px, 20px);
   font-weight: 700;
   color: ${({ theme }) => theme.colors.textPrimary};
   margin-top: 8px;
@@ -74,13 +64,13 @@ export const SectionTitle = styled.h2`
 
 export const ViewSelector = styled.div`
   display: flex;
-  font-size: 14px;
+  font-size: clamp(12px, 0.15vw + 11px, 14px);
   color: ${({ theme }) => theme.colors.textSecondary};
   gap: 15px;
   align-items: center;
   justify-content: center;
-  margin-top: auto;
-  padding-top: 16px;
+  margin-top: 24px;
+  padding-bottom: 8px;
 
   button {
     background: none;
@@ -117,7 +107,7 @@ export const AddButton = styled.button`
   padding: 10px 22px;
   border-radius: ${({ theme }) => theme.radii.full};
   cursor: pointer;
-  font-size: 14px;
+  font-size: clamp(13px, 0.2vw + 12px, 15px);
   font-weight: 600;
   border: none;
   transition: all 0.2s ease;

@@ -1,44 +1,34 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { AnimatePresence } from 'framer-motion';
-import { Edit, Trash2, ArrowLeft, Plus, Check, Info, X } from 'lucide-react';
+import { Search, X, Layers, CheckSquare } from 'lucide-react';
 import { AddTaskModal, UpdateTaskModal } from '../../task-board';
 import { ConfirmDeleteModal } from '../../shared';
-import { 
-  MotionViewContainer, 
-  HeaderContainer, 
-  HeaderActions,
-  HeaderActionBtn,
-  BackBtn,
-  Title, 
-  ListContainer, 
-  ListItem, 
-  ItemMainRow,
-  ItemLeftContent,
-  CheckboxWrapper,
-  HiddenCheckbox,
-  StyledCheckbox,
-  EditTitleInput,
-  ItemTitle,
-  ItemActions,
-  ActionIconBtn,
-  AnimatedSection,
-  TextAreaInput,
-  DescriptionBox,
-  ExpandedFooter,
-  FooterContainer, 
-  CompletedText,
-  ProgressWrapper,
-  ProgressBar, 
-  ProgressFill, 
-  ProgressPercent,
-  AddButtonContainer,
-  AddButton 
+import type { Task, SubTask } from '../types';
+import { useGoalDetail } from '../hooks';
+import { GoalDetailHero } from './GoalDetailHero';
+import { GoalTaskQuickAdd } from './GoalTaskQuickAdd';
+import { GoalTaskItem } from './GoalTaskItem';
+import { GoalTaskInspector } from './GoalTaskInspector';
+import {
+  ViewContainer,
+  WorkspaceGrid,
+  TaskListSection,
+  ControlsBar,
+  FilterTabsGroup,
+  FilterTabButton,
+  ControlsRightGroup,
+  SearchBox,
+  SearchInput,
+  ClearSearchButton,
+  BulkActionButton,
+  TasksListWrapper,
+  EmptyStateBox,
+  EmptyStateIcon,
+  EmptyStateTitle,
+  EmptyStateText,
 } from '../styles/GoalDetailView.styles';
 
-interface SubTask { id: string; title: string; description?: string; completed: boolean; }
-interface Task { category: string; title: string; progress: number; subtasks?: SubTask[]; }
-
-interface GoalDetailViewProps {
+export interface GoalDetailViewProps {
   task: Task;
   onClose: () => void;
   onAddTasks?: (newTasks: SubTask[]) => void;
@@ -47,221 +37,198 @@ interface GoalDetailViewProps {
   onToggleSubtask?: (subtaskId: string) => void;
   onDeleteTask?: () => void;
   onDeleteSubtask?: (subtaskId: string) => void;
+  onEditGoal?: () => void;
 }
 
-export const GoalDetailView: React.FC<GoalDetailViewProps> = ({ 
-  task, 
-  onClose, 
-  onAddTasks, 
+export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
+  task,
+  onClose,
+  onAddTasks,
   onUpdateTasks,
-  onUpdateSingleTask, 
+  onUpdateSingleTask,
   onToggleSubtask,
   onDeleteTask,
-  onDeleteSubtask
+  onDeleteSubtask,
+  onEditGoal,
 }) => {
-  const [isAddTaskModalOpen, setIsAddTaskModalOpen] = useState(false);
-  const [isUpdateTaskModalOpen, setIsUpdateTaskModalOpen] = useState(false);
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [subtaskToDeleteId, setSubtaskToDeleteId] = useState<string | null>(null);
-  
-  const [editingSubtaskId, setEditingSubtaskId] = useState<string | null>(null);
-  const [expandedSubtaskIds, setExpandedSubtaskIds] = useState<Record<string, boolean>>({});
-  
-  const [editTitle, setEditTitle] = useState('');
-  const [editDescription, setEditDescription] = useState('');
+  const {
+    filterStatus,
+    setFilterStatus,
+    searchQuery,
+    setSearchQuery,
+    selectedSubtaskId,
+    activeSubtask,
+    handleSelectSubtask,
+    isQuickAddOpen,
+    setIsQuickAddOpen,
+    quickTitle,
+    setQuickTitle,
+    quickDescription,
+    setQuickDescription,
+    handleQuickAddSubmit,
+    isAddTaskModalOpen,
+    setIsAddTaskModalOpen,
+    isUpdateTaskModalOpen,
+    setIsUpdateTaskModalOpen,
+    isDeleteModalOpen,
+    subtaskToDeleteId,
+    handleOpenDeleteModal,
+    handleCloseDeleteModal,
+    handleConfirmDelete,
+    inspectorTitle,
+    setInspectorTitle,
+    inspectorDescription,
+    setInspectorDescription,
+    handleSaveInspector,
+    handleToggleSubtaskClick,
+    filteredSubtasks,
+    totalCount,
+    completedCount,
+    pendingCount,
+    progressPercent,
+  } = useGoalDetail({
+    task,
+    onAddTasks,
+    onUpdateSingleTask,
+    onToggleSubtask,
+    onDeleteTask,
+    onDeleteSubtask,
+  });
 
   const handleAddTasksSubmit = (newTasks: SubTask[]) => {
     onAddTasks?.(newTasks);
+    setIsAddTaskModalOpen(false);
   };
 
   const handleUpdateTasksSubmit = (updatedTasks: SubTask[]) => {
     onUpdateTasks?.(updatedTasks);
+    setIsUpdateTaskModalOpen(false);
   };
-
-  const handleStartEdit = (sub: SubTask) => {
-    setEditingSubtaskId(sub.id);
-    setEditTitle(sub.title);
-    setEditDescription(sub.description || '');
-  };
-
-  const handleToggleExpand = (subId: string) => {
-    if (editingSubtaskId === subId) return;
-    setExpandedSubtaskIds(prev => ({
-      ...prev,
-      [subId]: !prev[subId]
-    }));
-  };
-
-  const handleSaveEdit = (sub: SubTask) => {
-    if (onUpdateSingleTask) {
-      onUpdateSingleTask({
-        ...sub,
-        title: editTitle,
-        description: editDescription,
-      });
-    }
-    setEditingSubtaskId(null);
-  };
-
-  const handleConfirmDelete = () => {
-    if (subtaskToDeleteId) {
-      onDeleteSubtask?.(subtaskToDeleteId);
-      setSubtaskToDeleteId(null);
-    } else {
-      onDeleteTask?.();
-    }
-    setIsDeleteModalOpen(false);
-  };
-
-  const subtasksList = task.subtasks || [];
-  const completedCount = subtasksList.filter(st => st.completed).length;
-  const totalCount = subtasksList.length;
 
   return (
     <>
-      <MotionViewContainer
-        initial={{ opacity: 0, scale: 0.95, y: 20 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        exit={{ opacity: 0, scale: 0.95, y: 20 }}
-        transition={{ duration: 0.25, ease: 'easeInOut' }}
-      >
-        <HeaderContainer>
-          <HeaderActions>
-            <HeaderActionBtn onClick={() => setIsUpdateTaskModalOpen(true)}>
-              <Edit size={20} />
-            </HeaderActionBtn>
-            <HeaderActionBtn 
-              $isDelete 
-              onClick={() => {
-                setSubtaskToDeleteId(null);
-                setIsDeleteModalOpen(true);
-              }}
-            >
-              <Trash2 size={20} />
-            </HeaderActionBtn>
-          </HeaderActions>
-          <BackBtn onClick={onClose}>
-            <ArrowLeft size={24} />
-          </BackBtn>
-        </HeaderContainer>
+      <ViewContainer>
+        <GoalDetailHero
+          task={task}
+          onClose={onClose}
+          completedCount={completedCount}
+          totalCount={totalCount}
+          progressPercent={progressPercent}
+        />
 
-        <Title>{task.title}</Title>
+        <WorkspaceGrid>
+          <TaskListSection>
+            <ControlsBar>
+              <FilterTabsGroup>
+                <FilterTabButton
+                  type="button"
+                  $isActive={filterStatus === 'all'}
+                  onClick={() => setFilterStatus('all')}
+                >
+                  Todas ({totalCount})
+                </FilterTabButton>
+                <FilterTabButton
+                  type="button"
+                  $isActive={filterStatus === 'pending'}
+                  onClick={() => setFilterStatus('pending')}
+                >
+                  Pendentes ({pendingCount})
+                </FilterTabButton>
+                <FilterTabButton
+                  type="button"
+                  $isActive={filterStatus === 'completed'}
+                  onClick={() => setFilterStatus('completed')}
+                >
+                  Concluídas ({completedCount})
+                </FilterTabButton>
+              </FilterTabsGroup>
 
-        <ListContainer>
-          {subtasksList.map((sub) => {
-            const isEditing = editingSubtaskId === sub.id;
-            const isExpanded = expandedSubtaskIds[sub.id];
-
-            return (
-              <ListItem 
-                key={sub.id} 
-                $isExpandedOrEditing={isEditing || isExpanded}
-              >
-                <ItemMainRow>
-                  <ItemLeftContent>
-                    <CheckboxWrapper>
-                      <HiddenCheckbox 
-                        checked={sub.completed} 
-                        onChange={() => onToggleSubtask?.(sub.id)} 
-                      />
-                      <StyledCheckbox $checked={sub.completed} />
-                    </CheckboxWrapper>
-                    {isEditing ? (
-                      <EditTitleInput
-                        type="text"
-                        value={editTitle}
-                        placeholder="Inserir novo título..."
-                        onChange={(e) => setEditTitle(e.target.value)}
-                      />
-                    ) : (
-                      <ItemTitle>{sub.title}</ItemTitle>
-                    )}
-                  </ItemLeftContent>
-
-                  <ItemActions>
-                    {isEditing ? (
-                      <>
-                        <ActionIconBtn onClick={() => handleSaveEdit(sub)}>
-                          <Check size={18} />
-                        </ActionIconBtn>
-                        <ActionIconBtn onClick={() => setEditingSubtaskId(null)}>
-                          <X size={18} />
-                        </ActionIconBtn>
-                      </>
-                    ) : (
-                      <ActionIconBtn onClick={() => handleToggleExpand(sub.id)}>
-                        <Info size={18} />
-                      </ActionIconBtn>
-                    )}
-                  </ItemActions>
-                </ItemMainRow>
-
-                <AnimatePresence>
-                  {isEditing && (
-                    <AnimatedSection
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: 'auto' }}
-                      exit={{ opacity: 0, height: 0 }}
-                      transition={{ duration: 0.2, ease: 'easeInOut' }}
+              <ControlsRightGroup>
+                <SearchBox>
+                  <Search size={14} />
+                  <SearchInput
+                    type="text"
+                    value={searchQuery}
+                    placeholder="Buscar tarefa..."
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                  />
+                  {searchQuery && (
+                    <ClearSearchButton
+                      type="button"
+                      onClick={() => setSearchQuery('')}
                     >
-                      <TextAreaInput
-                        as="textarea"
-                        rows={3}
-                        style={{ resize: 'none', overflow: 'hidden' }}
-                        placeholder="Inserir descrição..."
-                        value={editDescription}
-                        onChange={(e) => setEditDescription(e.target.value)}
-                      />
-                    </AnimatedSection>
+                      <X size={12} />
+                    </ClearSearchButton>
                   )}
+                </SearchBox>
 
-                  {!isEditing && isExpanded && (
-                    <AnimatedSection
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: 'auto' }}
-                      exit={{ opacity: 0, height: 0 }}
-                      transition={{ duration: 0.2, ease: 'easeInOut' }}
-                    >
-                      <DescriptionBox className={!sub.description ? 'no-description' : ''}>
-                        {sub.description || 'Sem descrição fornecida.'}
-                      </DescriptionBox>
-                      <ExpandedFooter>
-                        <ActionIconBtn onClick={() => handleStartEdit(sub)}>
-                          <Edit size={16} />
-                        </ActionIconBtn>
-                        <ActionIconBtn 
-                          $isDelete 
-                          onClick={() => {
-                            setSubtaskToDeleteId(sub.id);
-                            setIsDeleteModalOpen(true);
-                          }}
-                        >
-                          <Trash2 size={16} />
-                        </ActionIconBtn>
-                      </ExpandedFooter>
-                    </AnimatedSection>
-                  )}
-                </AnimatePresence>
-              </ListItem>
-            );
-          })}
-        </ListContainer>
+                <BulkActionButton
+                  type="button"
+                  onClick={() => setIsUpdateTaskModalOpen(true)}
+                >
+                  <Layers size={14} /> Em lote
+                </BulkActionButton>
+              </ControlsRightGroup>
+            </ControlsBar>
 
-        <FooterContainer>
-          <CompletedText>
-            {completedCount}/{totalCount} tarefas concluídas
-          </CompletedText>
-          <ProgressWrapper>
-            <ProgressBar><ProgressFill $width={task.progress} /></ProgressBar>
-            <ProgressPercent>{task.progress}%</ProgressPercent>
-          </ProgressWrapper>
-          <AddButtonContainer>
-            <AddButton onClick={() => setIsAddTaskModalOpen(true)}>
-              <Plus size={16} /> Adicionar tarefas
-            </AddButton>
-          </AddButtonContainer>
-        </FooterContainer>
-      </MotionViewContainer>
+            <GoalTaskQuickAdd
+              isOpen={isQuickAddOpen}
+              onOpen={() => setIsQuickAddOpen(true)}
+              onClose={() => setIsQuickAddOpen(false)}
+              title={quickTitle}
+              onChangeTitle={setQuickTitle}
+              description={quickDescription}
+              onChangeDescription={setQuickDescription}
+              onSubmit={handleQuickAddSubmit}
+            />
+
+            {filteredSubtasks.length > 0 ? (
+              <TasksListWrapper>
+                {filteredSubtasks.map((subtask) => (
+                  <GoalTaskItem
+                    key={subtask.id}
+                    subtask={subtask}
+                    isSelected={selectedSubtaskId === subtask.id}
+                    onSelect={() => handleSelectSubtask(subtask.id)}
+                    onToggle={() => handleToggleSubtaskClick(subtask.id)}
+                    onDelete={() => handleOpenDeleteModal(subtask.id)}
+                  />
+                ))}
+              </TasksListWrapper>
+            ) : (
+              <EmptyStateBox>
+                <EmptyStateIcon>
+                  <CheckSquare size={24} />
+                </EmptyStateIcon>
+                <EmptyStateTitle>Nenhuma tarefa encontrada</EmptyStateTitle>
+                <EmptyStateText>
+                  {searchQuery
+                    ? 'Nenhuma tarefa corresponde à busca informada.'
+                    : 'Adicione sua primeira tarefa para esta meta utilizando o campo acima.'}
+                </EmptyStateText>
+              </EmptyStateBox>
+            )}
+          </TaskListSection>
+
+          <GoalTaskInspector
+            activeSubtask={activeSubtask}
+            title={inspectorTitle}
+            onChangeTitle={setInspectorTitle}
+            description={inspectorDescription}
+            onChangeDescription={setInspectorDescription}
+            onSave={handleSaveInspector}
+            onClose={() => handleSelectSubtask(selectedSubtaskId || '')}
+            onToggleStatus={() =>
+              activeSubtask && handleToggleSubtaskClick(activeSubtask.id)
+            }
+            onDelete={() =>
+              activeSubtask && handleOpenDeleteModal(activeSubtask.id)
+            }
+            progressPercent={progressPercent}
+            pendingCount={pendingCount}
+          />
+        </WorkspaceGrid>
+      </ViewContainer>
 
       <AnimatePresence>
         {isAddTaskModalOpen && (
@@ -279,7 +246,7 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
             open={isUpdateTaskModalOpen}
             onClose={() => setIsUpdateTaskModalOpen(false)}
             onUpdateTask={handleUpdateTasksSubmit}
-            initialTasks={subtasksList}
+            initialTasks={task.subtasks || []}
           />
         )}
       </AnimatePresence>
@@ -288,13 +255,14 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
         {isDeleteModalOpen && (
           <ConfirmDeleteModal
             isOpen={isDeleteModalOpen}
-            onClose={() => {
-              setIsDeleteModalOpen(false);
-              setSubtaskToDeleteId(null);
-            }}
+            onClose={handleCloseDeleteModal}
             onConfirm={handleConfirmDelete}
-            title={subtaskToDeleteId ? "Excluir Tarefa" : "Excluir Meta"}
-            message={subtaskToDeleteId ? "Tem certeza que deseja excluir esta tarefa? Esta ação não poderá ser desfeita." : "Tem certeza que deseja excluir esta meta? Esta ação não poderá ser desfeita."}
+            title={subtaskToDeleteId ? 'Excluir Tarefa' : 'Excluir Meta'}
+            message={
+              subtaskToDeleteId
+                ? 'Tem certeza que deseja excluir esta tarefa? Esta ação não poderá ser desfeita.'
+                : 'Tem certeza que deseja excluir esta meta? Esta ação não poderá ser desfeita.'
+            }
           />
         )}
       </AnimatePresence>

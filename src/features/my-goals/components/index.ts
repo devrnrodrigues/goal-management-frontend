@@ -1,7 +1,13 @@
 export { AddGoalModal } from './AddGoalModal';
 export { UpdateGoalModal } from './UpdateGoalModal';
+export { GoalConfigModal } from './GoalConfigModal';
+export type { GoalConfigData, MemberAvatar } from './GoalConfigModal';
 export { GoalCard } from './GoalCard';
 export { GoalDetailView } from './GoalDetailView';
+export { GoalDetailHero } from './GoalDetailHero';
+export { GoalTaskItem } from './GoalTaskItem';
+export { GoalTaskQuickAdd } from './GoalTaskQuickAdd';
+export { GoalTaskInspector } from './GoalTaskInspector';
 export { GoalStatsBar } from './GoalStatsBar';
 export { GoalFilterToolbar } from './GoalFilterToolbar';
 export type { GoalStatusFilter } from './GoalFilterToolbar';
