@@ -1,4 +1,4 @@
-import styled from 'styled-components';
+import styled, { keyframes, css } from 'styled-components';
 import { motion } from 'framer-motion';
 
 export const ModalOverlay = styled(motion.div)`
@@ -304,7 +304,22 @@ export const MemberList = styled.div`
     gap: 6px;
 `;
 
-export const MemberCard = styled.div`
+const highlightBlink = keyframes`
+    0% {
+        border-color: #f0f4f2;
+    }
+    30% {
+        border-color: #00a86b;
+    }
+    60% {
+        border-color: #00a86b;
+    }
+    100% {
+        border-color: #f0f4f2;
+    }
+`;
+
+export const MemberCard = styled.div<{ $isHighlighted?: boolean }>`
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -313,6 +328,12 @@ export const MemberCard = styled.div`
     background-color: ${({ theme }) => theme.colors.surface};
     border: 1px solid ${({ theme }) => theme.colors.borderLight};
     transition: all 0.15s ease;
+
+    ${({ $isHighlighted }) =>
+        $isHighlighted &&
+        css`
+            animation: ${highlightBlink} 1.2s ease-in-out 1 forwards;
+        `}
 
     &:hover {
         border-color: ${({ theme }) => theme.colors.border};

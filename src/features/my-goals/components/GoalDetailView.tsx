@@ -1,13 +1,14 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import { Search, X, Layers, CheckSquare } from 'lucide-react';
 import { AddTaskModal, UpdateTaskModal } from '../../task-board';
 import { ConfirmDeleteModal } from '../../shared';
-import type { Task, SubTask } from '../types';
+import type { Task, SubTask, SubTaskPriority } from '../types';
 import { useGoalDetail } from '../hooks';
 import { GoalDetailHero } from './GoalDetailHero';
 import { GoalTaskQuickAdd } from './GoalTaskQuickAdd';
 import { GoalTaskItem } from './GoalTaskItem';
+import { GoalTaskModal } from './GoalTaskModal';
 import {
   ViewContainer,
   WorkspaceGrid,
@@ -48,7 +49,7 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
   onToggleSubtask,
   onDeleteTask,
   onDeleteSubtask,
-  onEditGoal,
+  onEditGoal: _onEditGoal,
 }) => {
   const {
     filterStatus,
@@ -85,6 +86,33 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
     onDeleteTask,
     onDeleteSubtask,
   });
+
+  const [subtaskToEdit, setSubtaskToEdit] = useState<SubTask | null>(null);
+  const [isEditSubtaskModalOpen, setIsEditSubtaskModalOpen] = useState(false);
+
+  const handleOpenEditSubtask = (subtask: SubTask) => {
+    setSubtaskToEdit(subtask);
+    setIsEditSubtaskModalOpen(true);
+  };
+
+  const handleSaveSubtask = (
+    title: string,
+    description?: string,
+    priority?: SubTaskPriority,
+    deadline?: string
+  ) => {
+    if (subtaskToEdit) {
+      onUpdateSingleTask?.({
+        ...subtaskToEdit,
+        title,
+        description,
+        priority,
+        deadline,
+      });
+    }
+    setIsEditSubtaskModalOpen(false);
+    setSubtaskToEdit(null);
+  };
 
   const handleAddTasksSubmit = (newTasks: SubTask[]) => {
     onAddTasks?.(newTasks);
@@ -173,15 +201,42 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
 
             {filteredSubtasks.length > 0 ? (
               <TasksListWrapper>
-                {filteredSubtasks.map((subtask) => (
-                  <GoalTaskItem
-                    key={subtask.id}
-                    subtask={subtask}
-                    onToggle={() => handleToggleSubtaskClick(subtask.id)}
-                    onDelete={() => onDeleteSubtask?.(subtask.id)}
-                    onUpdate={onUpdateSingleTask}
-                  />
-                ))}
+                {filteredSubtasks.map((subtask, index) => {
+                  const effectivePriority: SubTaskPriority =
+                    subtask.priority || (index % 3 === 0 ? 'Alta' : index % 3 === 1 ? 'Média' : 'Baixa');
+                  const effectiveDeadline =
+                    subtask.deadline || `${(index + 2) * 5} dias`;
+                  const effectiveMembers =
+                    subtask.members || task.members?.slice(index % 2, (index % 2) + 2);
+
+                  const effectiveColumnTitle =
+                    subtask.columnTitle ||
+                    subtask.status ||
+                    (subtask.completed
+                      ? 'Concluído'
+                      : index % 2 === 0
+                      ? 'A Fazer'
+                      : 'Em Andamento');
+
+                  const displaySubtask: SubTask = {
+                    ...subtask,
+                    priority: effectivePriority,
+                    deadline: effectiveDeadline,
+                    members: effectiveMembers,
+                    columnTitle: effectiveColumnTitle,
+                  };
+
+                  return (
+                    <GoalTaskItem
+                      key={subtask.id}
+                      subtask={displaySubtask}
+                      onToggle={() => handleToggleSubtaskClick(subtask.id)}
+                      onDelete={() => handleOpenDeleteModal(subtask.id)}
+                      onEdit={handleOpenEditSubtask}
+                      onUpdate={onUpdateSingleTask}
+                    />
+                  );
+                })}
               </TasksListWrapper>
             ) : (
               <EmptyStateBox>
@@ -217,6 +272,20 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
             onClose={() => setIsUpdateTaskModalOpen(false)}
             onUpdateTask={handleUpdateTasksSubmit}
             initialTasks={task.subtasks || []}
+          />
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {isEditSubtaskModalOpen && (
+          <GoalTaskModal
+            isOpen={isEditSubtaskModalOpen}
+            task={subtaskToEdit}
+            onClose={() => {
+              setIsEditSubtaskModalOpen(false);
+              setSubtaskToEdit(null);
+            }}
+            onSave={handleSaveSubtask}
           />
         )}
       </AnimatePresence>

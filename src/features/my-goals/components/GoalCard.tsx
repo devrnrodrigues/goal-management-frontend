@@ -4,16 +4,7 @@ import {
     Settings,
     ArrowLeft,
     Info,
-    Calendar,
-    Compass,
-    Activity,
-    Wrench,
-    ShieldCheck,
-    CheckCircle2,
-    Code2,
-    AlertCircle,
-    Flag,
-    Clock
+    Calendar
 } from 'lucide-react';
 import {
     CardPerspectiveWrapper,
@@ -28,11 +19,6 @@ import {
     ProgressTrack,
     ProgressBar,
     ProgressTextInside,
-    StatusBadgeWrapper,
-    StatusBadgePill,
-    StatusBadgePillText,
-    StatusBadgeFooterIcon,
-    type StatusVariant,
     CardBottomSection,
     CardDivider,
     CardFooter,
@@ -59,27 +45,10 @@ interface GoalCardProps {
     status?: string;
     priority?: string;
     members?: MemberAvatar[];
-    onOpenSettings?: () => void;
+    onOpenSettings?: (tab?: 'details' | 'members', memberId?: string) => void;
 }
 
-const statusMap: Record<string, string> = {
-    'Novo Checkout Transacional': 'Revisão final',
-    'Design System Core v2': 'Em desenvolvimento',
-    'Migração para Kubernetes': 'Homologação',
-    'Onboarding do Cliente': 'Em progresso',
-    'Data Warehouse & BI': 'Planejamento',
-    'Automação E2E Mobile': 'Prazo final',
-    'Auditoria SOC 2 e LGPD': 'Revisão final',
-    'Copiloto de Atendimento': 'Em desenvolvimento',
-    'Motor de Faturamento Recorrente': 'Homologação',
-    'Otimização de Core Web Vitals': 'Em progresso',
-    'Versionamento': 'Revisão final',
-    'Frontend': 'Em desenvolvimento',
-    'Backend': 'Em progresso',
-    'Banco de Dados': 'Planejamento',
-    'Nuvem': 'Homologação',
-    'Testes': 'Prazo final',
-};
+
 
 const priorityMap: Record<string, string> = {
     'Novo Checkout Transacional': 'Alta prioridade',
@@ -107,91 +76,7 @@ function resolvePriority(title: string, customPriority?: string): string {
     return priorityMap[title] || 'Média prioridade';
 }
 
-function renderPriorityIcon(priority: string) {
-    switch (priority) {
-        case 'Alta prioridade':
-            return <AlertCircle size={14} />;
-        case 'Média prioridade':
-            return <Clock size={14} />;
-        default:
-            return <Flag size={14} />;
-    }
-}
 
-function resolveKanbanStatus(title: string, progress: number, customStatus?: string): string {
-    if (customStatus) {
-        return customStatus;
-    }
-    if (statusMap[title]) {
-        return statusMap[title];
-    }
-    if (progress === 0) {
-        return 'Planejamento';
-    }
-    if (progress >= 100) {
-        return 'Concluído';
-    }
-    if (progress >= 70) {
-        return 'Revisão final';
-    }
-    if (progress >= 45) {
-        return 'Homologação';
-    }
-    return 'Em progresso';
-}
-
-function renderStatusIcon(status: string) {
-    switch (status) {
-        case 'Prazo final':
-        case 'Prazo Final':
-            return <AlertCircle size={14} />;
-        case 'Revisão final':
-        case 'Revisão Final':
-        case 'Em revisão':
-            return <Wrench size={14} />;
-        case 'Planejamento':
-        case 'Não iniciado':
-            return <Compass size={14} />;
-        case 'Homologação':
-        case 'Validação':
-            return <ShieldCheck size={14} />;
-        case 'Testes de QA':
-        case 'Concluído':
-            return <CheckCircle2 size={14} />;
-        case 'Em desenvolvimento':
-            return <Code2 size={14} />;
-        default:
-            return <Activity size={14} />;
-    }
-}
-
-function getStatusVariant(status: string): StatusVariant {
-    switch (status) {
-        case 'Prazo final':
-        case 'Prazo Final':
-            return 'urgent';
-        case 'Planejamento':
-        case 'Não iniciado':
-            return 'planning';
-        case 'Em desenvolvimento':
-            return 'development';
-        case 'Em progresso':
-            return 'in_progress';
-        case 'Homologação':
-            return 'homologation';
-        case 'Testes de QA':
-        case 'Validação':
-            return 'qa';
-        case 'Revisão final':
-        case 'Revisão Final':
-        case 'Em revisão':
-            return 'review';
-        case 'Concluído':
-            return 'done';
-        default:
-            return 'default';
-    }
-}
 
 export const GoalCard: React.FC<GoalCardProps> = ({
     category,
@@ -199,7 +84,6 @@ export const GoalCard: React.FC<GoalCardProps> = ({
     progress,
     description,
     deadline,
-    status,
     priority,
     members,
     onOpenSettings,
@@ -210,11 +94,10 @@ export const GoalCard: React.FC<GoalCardProps> = ({
     const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
     const [isHovered, setIsHovered] = useState(false);
     const [isInfoHovered, setIsInfoHovered] = useState(false);
-    const [isStatusExpanded, setIsStatusExpanded] = useState(false);
+    const [isAvatarHovered, setIsAvatarHovered] = useState(false);
 
     function flip(to: boolean) {
         if (isFlipping) return;
-        if (!to) setIsStatusExpanded(false);
         setIsFlipping(true);
         setRotationY((prev) => (to ? prev + 360 : prev - 360));
         setTimeout(() => {
@@ -231,12 +114,10 @@ export const GoalCard: React.FC<GoalCardProps> = ({
     };
 
     const hasDescription = Boolean(description && description.trim() !== '');
-    const currentStatus = resolveKanbanStatus(title, progress, status);
     const currentPriority = resolvePriority(title, priority);
     const cardMembers = members && members.length > 0 ? members : (membersByTitle[title] || defaultMembers);
     const visibleMembers = cardMembers.slice(0, 3);
     const extraMembersCount = cardMembers.length - 3;
-    const isLongStatus = currentStatus.length > 14;
 
     return (
         <CardPerspectiveWrapper
@@ -256,7 +137,7 @@ export const GoalCard: React.FC<GoalCardProps> = ({
                 onMouseLeave={() => setIsHovered(false)}
             >
                 <AnimatePresence>
-                    {isHovered && !expanded && !isInfoHovered && (
+                    {isHovered && !expanded && !isInfoHovered && !isAvatarHovered && (
                         <TooltipContainer
                             $x={mousePosition.x}
                             $y={mousePosition.y}
@@ -277,7 +158,7 @@ export const GoalCard: React.FC<GoalCardProps> = ({
                                 type="button"
                                 onClick={(e) => {
                                     e.stopPropagation();
-                                    onOpenSettings?.();
+                                    onOpenSettings?.('details');
                                 }}
                                 title="Configurações da meta"
                                 aria-label="Configurações da meta"
@@ -312,40 +193,8 @@ export const GoalCard: React.FC<GoalCardProps> = ({
                             <CardDivider />
                             <CardFooter>
                                 <PriorityBadge $priority={currentPriority}>
-                                    {renderPriorityIcon(currentPriority)}
-                                    <span>{currentPriority}</span>
+                                    {currentPriority}
                                 </PriorityBadge>
-
-                                <StatusBadgeWrapper>
-                                    <StatusBadgePill
-                                        layout
-                                        transition={{ layout: { duration: 0.28, ease: [0.4, 0, 0.2, 1] } }}
-                                        $variant={getStatusVariant(currentStatus)}
-                                        $isLong={isLongStatus}
-                                        onMouseEnter={() => {
-                                            if (isLongStatus) setIsStatusExpanded(true);
-                                        }}
-                                        onMouseLeave={() => {
-                                            if (isLongStatus) setIsStatusExpanded(false);
-                                        }}
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            if (isLongStatus) setIsStatusExpanded((prev) => !prev);
-                                        }}
-                                        title={currentStatus}
-                                    >
-                                        <StatusBadgeFooterIcon>
-                                            {renderStatusIcon(currentStatus)}
-                                        </StatusBadgeFooterIcon>
-                                        <StatusBadgePillText
-                                            layout="position"
-                                            $isLong={isLongStatus}
-                                            $isExpanded={isStatusExpanded}
-                                        >
-                                            {currentStatus}
-                                        </StatusBadgePillText>
-                                    </StatusBadgePill>
-                                </StatusBadgeWrapper>
                             </CardFooter>
                         </CardBottomSection>
                     </>
@@ -388,16 +237,46 @@ export const GoalCard: React.FC<GoalCardProps> = ({
                                     <span>{deadline ? `Prazo: ${deadline}` : 'Sem prazo'}</span>
                                 </CalendarBadge>
 
-                                <AvatarGroup>
+                                <AvatarGroup
+                                    role="button"
+                                    tabIndex={0}
+                                    title="Gerenciar usuários"
+                                    aria-label="Gerenciar usuários"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        onOpenSettings?.('members');
+                                    }}
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter' || e.key === ' ') {
+                                            e.stopPropagation();
+                                            e.preventDefault();
+                                            onOpenSettings?.('members');
+                                        }
+                                    }}
+                                    onMouseEnter={() => setIsAvatarHovered(true)}
+                                    onMouseLeave={() => setIsAvatarHovered(false)}
+                                >
                                     {visibleMembers.map((member) => (
                                         <AvatarImage
                                             key={member.id}
                                             src={member.avatarUrl}
                                             alt={member.name}
+                                            title={member.name}
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                onOpenSettings?.('members', member.id);
+                                            }}
                                         />
                                     ))}
                                     {extraMembersCount > 0 && (
-                                        <AvatarMoreBadge>+{extraMembersCount}</AvatarMoreBadge>
+                                        <AvatarMoreBadge
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                onOpenSettings?.('members');
+                                            }}
+                                        >
+                                            +{extraMembersCount}
+                                        </AvatarMoreBadge>
                                     )}
                                 </AvatarGroup>
                             </CardFooter>

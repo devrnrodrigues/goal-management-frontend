@@ -1,5 +1,4 @@
 import styled from 'styled-components';
-import { motion } from 'framer-motion';
 
 export const TaskItemCard = styled.div<{ $isSelected: boolean; $isCompleted: boolean }>`
   background: ${({ theme }) => theme.colors.surface};
@@ -96,6 +95,104 @@ export const TaskTitleText = styled.span<{ $completed: boolean }>`
   transition: color 0.2s ease;
 `;
 
+export const TaskDescriptionMetaRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding-top: 6px;
+`;
+
+export const PriorityBadge = styled.span<{ $priority: string }>`
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 6px;
+  background-color: ${({ $priority }) => {
+    if ($priority.includes('Alta')) return '#fee2e2';
+    if ($priority.includes('Média') || $priority.includes('Media')) return '#fef3c7';
+    return '#dcfce7';
+  }};
+  color: ${({ $priority }) => {
+    if ($priority.includes('Alta')) return '#ef4444';
+    if ($priority.includes('Média') || $priority.includes('Media')) return '#d97706';
+    return '#16a34a';
+  }};
+`;
+
+export const KanbanStatusBadge = styled.span<{ $status?: string }>`
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 6px;
+  background-color: ${({ $status }) => {
+    switch ($status) {
+      case 'Concluído':
+      case 'Concluída':
+        return '#dcfce7';
+      case 'Em Andamento':
+      case 'Em andamento':
+      case 'Em progresso':
+        return '#fef3c7';
+      case 'A Fazer':
+      case 'A fazer':
+        return '#dbeafe';
+      default:
+        return '#f1f5f9';
+    }
+  }};
+  color: ${({ $status }) => {
+    switch ($status) {
+      case 'Concluído':
+      case 'Concluída':
+        return '#16a34a';
+      case 'Em Andamento':
+      case 'Em andamento':
+      case 'Em progresso':
+        return '#d97706';
+      case 'A Fazer':
+      case 'A fazer':
+        return '#2563eb';
+      default:
+        return '#475569';
+    }
+  }};
+`;
+
+export const DeadlineBadge = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11.5px;
+  color: #94a3b8;
+  font-weight: 500;
+
+  svg {
+    width: 13px;
+    height: 13px;
+    color: #94a3b8;
+  }
+`;
+
+export const AvatarsGroup = styled.div`
+  display: flex;
+  align-items: center;
+`;
+
+export const MemberImg = styled.img`
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2px solid #ffffff;
+  margin-left: -6px;
+  object-fit: cover;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+
+  &:first-child {
+    margin-left: 0;
+  }
+`;
+
 export const TaskItemActions = styled.div`
   display: flex;
   align-items: center;
@@ -142,10 +239,11 @@ export const TaskDescriptionContainer = styled.div`
 
 export const TaskDescriptionMainRow = styled.div`
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
   gap: 16px;
   width: 100%;
+  flex-wrap: wrap;
 `;
 
 export const TaskDescriptionText = styled.p`
@@ -156,176 +254,23 @@ export const TaskDescriptionText = styled.p`
   white-space: pre-wrap;
   word-break: break-word;
   flex: 1;
+  min-width: 180px;
+`;
+
+export const TaskDescriptionRightGroup = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+  margin-left: auto;
+  flex-wrap: wrap;
 `;
 
 export const TaskDescriptionActions = styled.div`
   display: flex;
   align-items: center;
-  gap: 6px;
-  flex-shrink: 0;
-`;
-
-export const InlineEditContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  margin-left: 32px;
-  padding-top: 10px;
-  border-top: 1px dashed rgba(0, 0, 0, 0.06);
-`;
-
-export const InlineEditTitleInput = styled.input`
-  font-size: 14px;
-  font-family: inherit;
-  font-weight: 500;
-  color: ${({ theme }) => theme.colors.textPrimary};
-  background: ${({ theme }) => theme.colors.background};
-  border: 1px solid ${({ theme }) => theme.colors.primary};
-  border-radius: 6px;
-  padding: 4px 8px;
-  outline: none;
-  flex: 1;
-  min-width: 0;
-  box-sizing: border-box;
-
-  &:focus {
-    box-shadow: 0 0 0 2px ${({ theme }) => theme.colors.primaryLight};
-  }
-`;
-
-export const InlineEditTextArea = styled.textarea`
-  font-size: 13px;
-  font-family: inherit;
-  color: ${({ theme }) => theme.colors.textPrimary};
-  background: ${({ theme }) => theme.colors.background};
-  border: 1px solid ${({ theme }) => theme.colors.border};
-  border-radius: 8px;
-  padding: 8px 12px;
-  outline: none;
-  resize: vertical;
-  min-height: 60px;
-  transition: border-color 0.2s ease;
-
-  &:focus {
-    border-color: ${({ theme }) => theme.colors.primary};
-  }
-`;
-
-export const InlineEditActions = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 8px;
-`;
-
-export const InlineSaveButton = styled.button`
-  display: inline-flex;
-  align-items: center;
   gap: 4px;
-  background: ${({ theme }) => theme.colors.primary};
-  color: #ffffff;
-  border: none;
-  border-radius: 6px;
-  padding: 6px 12px;
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.2s ease;
-
-  &:hover {
-    background: ${({ theme }) => theme.colors.primaryHover};
-  }
-
-  &:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-`;
-
-export const InlineCancelButton = styled.button`
-  background: transparent;
-  color: ${({ theme }) => theme.colors.textSecondary};
-  border: 1px solid ${({ theme }) => theme.colors.border};
-  border-radius: 6px;
-  padding: 6px 12px;
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-
-  &:hover {
-    background: ${({ theme }) => theme.colors.background};
-    color: ${({ theme }) => theme.colors.textPrimary};
-  }
-`;
-
-export const DeletePromptWrapper = styled(motion.div)`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  gap: 12px;
-  background: transparent;
-  border: none;
-  padding: 6px 0 0 0;
-  box-sizing: border-box;
-
-  @media (max-width: 520px) {
-    flex-direction: column;
-    align-items: flex-end;
-    gap: 8px;
-  }
-`;
-
-export const DeletePromptText = styled.span`
-  font-size: 12px;
-  font-weight: 500;
-  color: ${({ theme }) => theme.colors.statusDanger};
-  line-height: 1.3;
-`;
-
-export const DeletePromptActions = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-shrink: 0;
-`;
-
-export const CancelDeleteBtn = styled.button`
-  padding: 5px 10px;
-  border-radius: 6px;
-  border: 1px solid ${({ theme }) => theme.colors.border};
-  background: ${({ theme }) => theme.colors.surface};
-  color: ${({ theme }) => theme.colors.textSecondary};
-  font-size: 12px;
-  font-weight: 500;
-  white-space: nowrap;
-  cursor: pointer;
-  transition: all 0.15s ease;
-
-  &:hover {
-    background: rgba(0, 0, 0, 0.04);
-    color: ${({ theme }) => theme.colors.textPrimary};
-  }
-`;
-
-export const ConfirmDeleteBtn = styled.button`
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 5px 12px;
-  border-radius: 6px;
-  border: none;
-  background-color: ${({ theme }) => theme.colors.statusDanger};
-  color: #ffffff;
-  font-size: 12px;
-  font-weight: 500;
-  white-space: nowrap;
-  cursor: pointer;
-  transition: all 0.15s ease;
-
-  &:hover {
-    background-color: #dc2626;
-  }
+  padding-left: 6px;
+  border-left: 1px solid ${({ theme }) => theme.colors.borderLight};
 `;
 

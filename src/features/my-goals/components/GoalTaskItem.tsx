@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import { AnimatePresence } from 'framer-motion';
-import { Trash2, Pencil, Check, ChevronDown } from 'lucide-react';
+import { Trash2, Pencil, ChevronDown, Clock } from 'lucide-react';
 import type { SubTask } from '../types';
 import {
   TaskItemCard,
@@ -16,18 +15,14 @@ import {
   TaskDescriptionContainer,
   TaskDescriptionMainRow,
   TaskDescriptionText,
+  TaskDescriptionRightGroup,
+  TaskDescriptionMetaRow,
   TaskDescriptionActions,
-  InlineEditContainer,
-  InlineEditTitleInput,
-  InlineEditTextArea,
-  InlineEditActions,
-  InlineSaveButton,
-  InlineCancelButton,
-  DeletePromptWrapper,
-  DeletePromptText,
-  DeletePromptActions,
-  CancelDeleteBtn,
-  ConfirmDeleteBtn,
+  PriorityBadge,
+  KanbanStatusBadge,
+  DeadlineBadge,
+  AvatarsGroup,
+  MemberImg,
 } from '../styles/GoalTaskItem.styles';
 
 interface GoalTaskItemProps {
@@ -36,6 +31,7 @@ interface GoalTaskItemProps {
   onSelect?: () => void;
   onToggle: () => void;
   onDelete: () => void;
+  onEdit?: (subtask: SubTask) => void;
   onUpdate?: (updatedSubtask: SubTask) => void;
 }
 
@@ -45,13 +41,9 @@ export const GoalTaskItem: React.FC<GoalTaskItemProps> = ({
   onSelect,
   onToggle,
   onDelete,
-  onUpdate,
+  onEdit,
 }) => {
   const [showInlineDesc, setShowInlineDesc] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
-  const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
-  const [editTitle, setEditTitle] = useState(subtask.title);
-  const [editDescription, setEditDescription] = useState(subtask.description || '');
 
   const handleCheckboxClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -67,39 +59,18 @@ export const GoalTaskItem: React.FC<GoalTaskItemProps> = ({
     if (onSelect) {
       onSelect();
     }
-    if (!isEditing && !isConfirmingDelete) {
-      setShowInlineDesc((prev) => !prev);
-    }
+    setShowInlineDesc((prev) => !prev);
   };
 
-  const handleStartEdit = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    setIsConfirmingDelete(false);
-    setEditTitle(subtask.title);
-    setEditDescription(subtask.description || '');
-    setIsEditing(true);
-    setShowInlineDesc(true);
-  };
+  const priorityLabel = subtask.priority
+    ? subtask.priority.includes('prioridade')
+      ? subtask.priority
+      : `${subtask.priority} prioridade`
+    : null;
 
-  const handleCancelEdit = (e: React.SyntheticEvent) => {
-    e.stopPropagation();
-    setIsEditing(false);
-    setEditTitle(subtask.title);
-    setEditDescription(subtask.description || '');
-  };
-
-  const handleSaveEdit = (e: React.SyntheticEvent) => {
-    e.stopPropagation();
-    const trimmedTitle = editTitle.trim();
-    if (!trimmedTitle) return;
-
-    onUpdate?.({
-      ...subtask,
-      title: trimmedTitle,
-      description: editDescription.trim() || undefined,
-    });
-    setIsEditing(false);
-  };
+  const kanbanStatus = subtask.completed
+    ? 'Concluído'
+    : (subtask.columnTitle || subtask.status || 'A Fazer');
 
   return (
     <TaskItemCard
@@ -116,27 +87,18 @@ export const GoalTaskItem: React.FC<GoalTaskItemProps> = ({
             />
             <CustomCheckbox $checked={subtask.completed} />
           </CheckboxWrapper>
-          {isEditing ? (
-            <InlineEditTitleInput
-              type="text"
-              value={editTitle}
-              placeholder="Título da tarefa"
-              autoFocus
-              onClick={(e) => e.stopPropagation()}
-              onChange={(e) => setEditTitle(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') handleSaveEdit(e);
-                if (e.key === 'Escape') handleCancelEdit(e);
-              }}
-            />
-          ) : (
-            <TaskTitleText $completed={subtask.completed} title={subtask.title}>
-              {subtask.title}
-            </TaskTitleText>
-          )}
+          <TaskTitleText $completed={subtask.completed} title={subtask.title}>
+            {subtask.title}
+          </TaskTitleText>
         </TaskItemLeft>
 
         <TaskItemActions>
+          {subtask.priority && priorityLabel && (
+            <PriorityBadge $priority={subtask.priority}>
+              {priorityLabel}
+            </PriorityBadge>
+          )}
+
           <IconButton
             type="button"
             title={showInlineDesc ? 'Recolher detalhes' : 'Ver detalhes'}
@@ -149,87 +111,62 @@ export const GoalTaskItem: React.FC<GoalTaskItemProps> = ({
         </TaskItemActions>
       </TaskItemMainRow>
 
-      {showInlineDesc && !isEditing && (
+      {showInlineDesc && (
         <TaskDescriptionContainer onClick={(e) => e.stopPropagation()}>
           <TaskDescriptionMainRow>
             <TaskDescriptionText>
               {subtask.description || 'Nenhuma descrição informada.'}
             </TaskDescriptionText>
-            <TaskDescriptionActions>
-              <IconButton
-                type="button"
-                title="Editar tarefa"
-                onClick={handleStartEdit}
-              >
-                <Pencil size={15} />
-              </IconButton>
-              <IconButton
-                type="button"
-                $isDanger
-                title="Excluir tarefa"
-                onClick={() => setIsConfirmingDelete((prev) => !prev)}
-              >
-                <Trash2 size={15} />
-              </IconButton>
-            </TaskDescriptionActions>
+
+            <TaskDescriptionRightGroup>
+              <TaskDescriptionMetaRow>
+                <KanbanStatusBadge $status={kanbanStatus}>
+                  {kanbanStatus}
+                </KanbanStatusBadge>
+
+                {subtask.deadline && (
+                  <DeadlineBadge>
+                    <Clock size={12} />
+                    <span>{subtask.deadline}</span>
+                  </DeadlineBadge>
+                )}
+
+                {subtask.members && subtask.members.length > 0 && (
+                  <AvatarsGroup>
+                    {subtask.members.map((m) => (
+                      <MemberImg key={m.id} src={m.avatarUrl} alt={m.name} title={m.name} />
+                    ))}
+                  </AvatarsGroup>
+                )}
+              </TaskDescriptionMetaRow>
+
+              <TaskDescriptionActions>
+                <IconButton
+                  type="button"
+                  title="Editar tarefa"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onEdit?.(subtask);
+                  }}
+                >
+                  <Pencil size={15} />
+                </IconButton>
+
+                <IconButton
+                  type="button"
+                  $isDanger
+                  title="Excluir tarefa"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onDelete();
+                  }}
+                >
+                  <Trash2 size={15} />
+                </IconButton>
+              </TaskDescriptionActions>
+            </TaskDescriptionRightGroup>
           </TaskDescriptionMainRow>
-
-          <AnimatePresence>
-            {isConfirmingDelete && (
-              <DeletePromptWrapper
-                key="delete-prompt"
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                exit={{ opacity: 0, height: 0 }}
-                transition={{ duration: 0.16, ease: 'easeOut' }}
-              >
-                <DeletePromptText>
-                  Tem certeza? Essa ação não poderá ser desfeita.
-                </DeletePromptText>
-                <DeletePromptActions>
-                  <CancelDeleteBtn
-                    type="button"
-                    onClick={() => setIsConfirmingDelete(false)}
-                  >
-                    Cancelar
-                  </CancelDeleteBtn>
-                  <ConfirmDeleteBtn
-                    type="button"
-                    onClick={() => {
-                      onDelete();
-                      setIsConfirmingDelete(false);
-                    }}
-                  >
-                    Confirmar
-                  </ConfirmDeleteBtn>
-                </DeletePromptActions>
-              </DeletePromptWrapper>
-            )}
-          </AnimatePresence>
         </TaskDescriptionContainer>
-      )}
-
-      {showInlineDesc && isEditing && (
-        <InlineEditContainer onClick={(e) => e.stopPropagation()}>
-          <InlineEditTextArea
-            rows={2}
-            value={editDescription}
-            placeholder="Descrição da tarefa"
-            onChange={(e) => setEditDescription(e.target.value)}
-          />
-          <InlineEditActions>
-            <InlineCancelButton type="button" onClick={handleCancelEdit}>
-              Cancelar
-            </InlineCancelButton>
-            <InlineSaveButton
-              type="button"
-              disabled={!editTitle.trim()}
-              onClick={handleSaveEdit}
-            >
-              <Check size={14} /> Salvar
-            </InlineSaveButton>
-          </InlineEditActions>
-        </InlineEditContainer>
       )}
     </TaskItemCard>
   );

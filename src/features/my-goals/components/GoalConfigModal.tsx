@@ -92,6 +92,8 @@ export interface GoalConfigData {
 
 interface GoalConfigModalProps {
     isOpen: boolean;
+    initialTab?: 'details' | 'members';
+    highlightedMemberId?: string | null;
     onClose: () => void;
     goal: GoalConfigData;
     onSaveGoal: (updatedGoal: GoalConfigData) => void;
@@ -115,12 +117,14 @@ const tabVariants = {
 
 export const GoalConfigModal: React.FC<GoalConfigModalProps> = ({
     isOpen,
+    initialTab = 'details',
+    highlightedMemberId,
     onClose,
     goal,
     onSaveGoal,
     onDeleteGoal
 }) => {
-    const [activeTab, setActiveTab] = useState<'details' | 'members'>('details');
+    const [activeTab, setActiveTab] = useState<'details' | 'members'>(initialTab);
     const [tabDirection, setTabDirection] = useState<number>(0);
     const [category, setCategory] = useState(goal.category || '');
     const [title, setTitle] = useState(goal.title || '');
@@ -189,6 +193,8 @@ export const GoalConfigModal: React.FC<GoalConfigModalProps> = ({
     }, [isOpen]);
 
     useEffect(() => {
+        setActiveTab(initialTab);
+        setTabDirection(0);
         setCategory(goal.category || '');
         setTitle(goal.title || '');
         setDescription(goal.description || '');
@@ -233,7 +239,7 @@ export const GoalConfigModal: React.FC<GoalConfigModalProps> = ({
         } else {
             setSelectedDate(null);
         }
-    }, [goal]);
+    }, [goal, initialTab]);
 
     if (!isOpen) return null;
 
@@ -505,13 +511,15 @@ export const GoalConfigModal: React.FC<GoalConfigModalProps> = ({
                                             <AnimatePresence initial={false}>
                                                 {members.map((member) => {
                                                     const isOwnerSelf = member.id === currentUser.id && member.role === 'owner';
+                                                    const isHighlighted = member.id === highlightedMemberId || member.name === highlightedMemberId;
                                                     return (
                                                         <MemberItemWrapper
                                                             key={member.id}
+                                                            ref={isHighlighted ? (el) => el?.scrollIntoView({ behavior: 'smooth', block: 'nearest' }) : undefined}
                                                             exit={{ opacity: 0, height: 0, overflow: 'hidden' }}
                                                             transition={{ duration: 0.18, ease: 'easeOut' }}
                                                         >
-                                                            <MemberCard>
+                                                            <MemberCard $isHighlighted={isHighlighted}>
                                                                 <MemberInfo>
                                                                     <MemberAvatarImg src={member.avatarUrl} alt={member.name} />
                                                                     <MemberName>
