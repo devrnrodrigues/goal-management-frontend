@@ -2,224 +2,207 @@ import styled from 'styled-components';
 import { motion } from 'framer-motion';
 
 export const ModalOverlay = styled(motion.div)`
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background: rgba(15, 23, 42, 0.6);
-    backdrop-filter: blur(4px);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-    padding: 20px;
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(4px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  padding: 20px;
 `;
 
 export const ModalContainer = styled(motion.div)`
-    background: 
-        linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.9));
-    background-size: cover;
-    background-position: center;
-    padding: 28px;
-    border-radius: 16px;
-    width: 100%;
-    max-width: 440px;
-    max-height: 90vh;
+  background: ${({ theme }) => theme.colors.surface};
+  border-radius: ${({ theme }) => theme.radii.lg};
+  border: 1px solid ${({ theme }) => theme.colors.border};
+  box-shadow: ${({ theme }) => theme.shadows.dropdown};
+  width: 100%;
+  max-width: 520px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+
+  form {
     display: flex;
     flex-direction: column;
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-    border: none;
+    flex: 1;
+    overflow: hidden;
+  }
 
-    form {
-        display: flex;
-        flex-direction: column;
-        flex: 1;
-        overflow: hidden;
-    }
-
-    .modal-body {
-        overflow-y: auto;
-        max-height: 60vh;
-        scrollbar-width: none;
-    }
+  .modal-body {
+    overflow-y: auto;
+    max-height: 60vh;
+    padding: 20px;
+  }
 `;
 
 export const ModalHeader = styled.div`
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 20px;
-    border-bottom: 1px solid rgba(226, 232, 240, 0.6);
-    padding-bottom: 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 16px 20px;
+  border-bottom: 1px solid ${({ theme }) => theme.colors.borderLight};
 
-    div {
-        p {
-            font-size: 13px;
-            color: #64748b;
-            margin-top: 4px;
-        }
+  div {
+    p {
+      font-size: 13px;
+      color: ${({ theme }) => theme.colors.textSecondary};
+      margin-top: 4px;
     }
+  }
 `;
 
 export const ModalTitle = styled.h2`
-    font-size: 18px;
-    color: #0f172a;
-    font-weight: 600;
-    letter-spacing: -0.01em;
+  font-size: 16px;
+  color: ${({ theme }) => theme.colors.textPrimary};
+  font-weight: 700;
+  margin: 0;
 `;
 
 export const CloseButton = styled.button`
-    background: transparent;
-    border: none;
-    border-radius: 50%;
-    width: 32px;
-    height: 32px;
-    cursor: pointer;
-    color: #64748b;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.2s;
+  background: transparent;
+  border: none;
+  border-radius: ${({ theme }) => theme.radii.sm};
+  width: 28px;
+  height: 28px;
+  cursor: pointer;
+  color: ${({ theme }) => theme.colors.textSecondary};
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
 
-    &:hover {
-        background: rgba(0, 0, 0, 0.05);
-        color: #0f172a;
-    }
+  &:hover {
+    background: rgba(0, 0, 0, 0.05);
+    color: ${({ theme }) => theme.colors.textPrimary};
+  }
 `;
 
 export const FormGroup = styled.div`
-    margin-bottom: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  .tasks-container {
     display: flex;
     flex-direction: column;
-    gap: 6px;
-
-    .tasks-container {
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
-    }
+    gap: 12px;
+  }
 `;
 
 export const Label = styled.label`
-    font-size: 13px;
-    color: #334155;
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-    gap: 6px;
+  font-size: 12px;
+  color: ${({ theme }) => theme.colors.textSecondary};
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 
-    svg {
-        color: ${({ theme }) => theme.colors.primary};
-    }
+  svg {
+    color: ${({ theme }) => theme.colors.primary};
+  }
 `;
 
 export const Input = styled.input`
-    padding: 9px 12px;
-    border: 1px solid white;
-    border-radius: 8px;
-    font-size: 12px;
-    color: #0f172a;
-    outline: none;
-    transition: all 0.2s ease;
-    background: rgba(255, 255, 255, 0.85);
+  padding: 9px 12px;
+  border: 1px solid ${({ theme }) => theme.colors.border};
+  border-radius: ${({ theme }) => theme.radii.md};
+  font-size: 13px;
+  color: ${({ theme }) => theme.colors.textPrimary};
+  outline: none;
+  background-color: ${({ theme }) => theme.colors.surface};
+  transition: border-color 0.2s ease;
 
-    &::placeholder {
-    color: #94a3b8;
-    opacity: 0;
-    transition: opacity 0.2s ease;
-    }
-    &:focus::placeholder {
-    opacity: 1;
-    }
+  &::placeholder {
+    color: ${({ theme }) => theme.colors.textMuted};
+  }
 
-    &:focus {
-        border: 1px solid ${({ theme }) => theme.colors.primary};
-    }
+  &:focus {
+    border-color: ${({ theme }) => theme.colors.primary};
+  }
 `;
 
 export const TextArea = styled.textarea`
-    padding: 8px 12px;
-    border: 1px solid white;
-    border-radius: 8px;
-    font-size: 12px;
-    color: #0f172a;
-    outline: none;
-    transition: all 0.2s ease;
-    background: rgba(255, 255, 255, 0.85);
-    resize: vertical;
-    font-family: inherit;
+  padding: 8px 12px;
+  border: 1px solid ${({ theme }) => theme.colors.border};
+  border-radius: ${({ theme }) => theme.radii.md};
+  font-size: 13px;
+  color: ${({ theme }) => theme.colors.textPrimary};
+  outline: none;
+  background-color: ${({ theme }) => theme.colors.surface};
+  resize: vertical;
+  font-family: inherit;
+  transition: border-color 0.2s ease;
 
-    &::placeholder {
-    color: #94a3b8;
-    opacity: 0;
-    transition: opacity 0.2s ease;
-    }
-    &:focus::placeholder {
-    opacity: 1;
-    }
+  &::placeholder {
+    color: ${({ theme }) => theme.colors.textMuted};
+  }
 
-    &:focus {
-        border: 1px solid ${({ theme }) => theme.colors.primary};
-    }
+  &:focus {
+    border-color: ${({ theme }) => theme.colors.primary};
+  }
 `;
 
 export const TaskInputsWrapper = styled.div`
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
 `;
 
 export const TaskRow = styled.div`
-    display: flex;
-    gap: 8px;
-    align-items: flex-start;
-    background: rgba(248, 250, 252, 0.6);
-    padding: 10px;
-    border-radius: 10px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  background: ${({ theme }) => theme.colors.surfaceHover || '#f8fafc'};
+  padding: 12px;
+  border-radius: ${({ theme }) => theme.radii.md};
+  border: 1px solid ${({ theme }) => theme.colors.borderLight};
 `;
 
 export const ModalFooter = styled.div`
-    display: flex;
-    justify-content: flex-end;
-    gap: 10px;
-    margin-top: 20px;
-    padding-top: 14px;
-    border-top: 1px solid rgba(226, 232, 240, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 14px 20px;
+  border-top: 1px solid ${({ theme }) => theme.colors.borderLight};
+  background-color: rgba(244, 247, 246, 0.6);
 `;
 
 export const CancelButton = styled.button`
-    background: rgba(255, 255, 255, 0.9);
-    border: none;
-    color: #475569;
-    padding: 9px 16px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 14px;
-    font-weight: 500;
-    transition: all 0.2s;
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  color: ${({ theme }) => theme.colors.textSecondary};
+  background: transparent;
+  border: 1px solid ${({ theme }) => theme.colors.border};
+  border-radius: ${({ theme }) => theme.radii.md};
+  cursor: pointer;
+  transition: background-color 0.15s ease;
 
-    &:hover {
-        background: #f8fafc;
-        color: #0f172a;
-    }
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.04);
+  }
 `;
 
 export const SubmitButton = styled.button`
-    background: ${({ theme }) => theme.colors.primary};
-    border: none;
-    color: white;
-    padding: 9px 20px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 14px;
-    font-weight: 500;
-    transition: all 0.2s;
-    box-shadow: 0 4px 6px -1px rgba(0, 168, 107, 0.25);
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #ffffff;
+  background-color: ${({ theme }) => theme.colors.primary};
+  border: none;
+  border-radius: ${({ theme }) => theme.radii.md};
+  cursor: pointer;
+  transition: background-color 0.15s ease;
 
-    &:hover {
-        background: ${({ theme }) => theme.colors.primaryHover};
-    }
+  &:hover {
+    background-color: ${({ theme }) => theme.colors.primaryHover};
+  }
 `;

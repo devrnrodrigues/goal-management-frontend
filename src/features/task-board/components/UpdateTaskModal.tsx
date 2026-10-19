@@ -124,20 +124,20 @@ export const UpdateTaskModal: React.FC<UpdateTaskModalProps> = ({ open, onClose,
                             </Label>
                             <div className="tasks-container">
                                 {tasks.map((taskItem, index) => (
-                                    <TaskRow key={index}>
+                                    <TaskRow key={taskItem.id || `task-row-${index}`}>
                                         <TaskInputsWrapper>
                                             <Input 
                                                 ref={index === 0 ? firstInputRef : null}
                                                 id={`update-task-input-${index}`}
                                                 type="text" 
-                                                placeholder="Ex: Ler um livro" 
+                                                placeholder="Título da tarefa" 
                                                 value={taskItem.title} 
                                                 onChange={(e) => handleTaskChange(index, 'title', e.target.value)} 
                                                 required
                                             />
                                             <TextArea 
                                                 id={`update-task-desc-${index}`}
-                                                placeholder="Descreva os detalhes e objetivos principais desta tarefa."
+                                                placeholder="Descrição da tarefa"
                                                 value={taskItem.description}
                                                 onChange={(e) => handleTaskChange(index, 'description', e.target.value)}
                                                 rows={2}
