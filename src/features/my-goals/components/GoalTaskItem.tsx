@@ -18,7 +18,6 @@ import {
   TaskDescriptionRightGroup,
   TaskDescriptionMetaRow,
   TaskDescriptionActions,
-  PriorityBadge,
   KanbanStatusBadge,
   DeadlineBadge,
   AvatarsGroup,
@@ -62,12 +61,6 @@ export const GoalTaskItem: React.FC<GoalTaskItemProps> = ({
     setShowInlineDesc((prev) => !prev);
   };
 
-  const priorityLabel = subtask.priority
-    ? subtask.priority.includes('prioridade')
-      ? subtask.priority
-      : `${subtask.priority} prioridade`
-    : null;
-
   const kanbanStatus = subtask.completed
     ? 'Concluído'
     : (subtask.columnTitle || subtask.status || 'A Fazer');
@@ -93,12 +86,6 @@ export const GoalTaskItem: React.FC<GoalTaskItemProps> = ({
         </TaskItemLeft>
 
         <TaskItemActions>
-          {subtask.priority && priorityLabel && (
-            <PriorityBadge $priority={subtask.priority}>
-              {priorityLabel}
-            </PriorityBadge>
-          )}
-
           <IconButton
             type="button"
             title={showInlineDesc ? 'Recolher detalhes' : 'Ver detalhes'}

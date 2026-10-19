@@ -103,23 +103,6 @@ export const TaskDescriptionMetaRow = styled.div`
   padding-top: 6px;
 `;
 
-export const PriorityBadge = styled.span<{ $priority: string }>`
-  font-size: 11px;
-  font-weight: 600;
-  padding: 2px 8px;
-  border-radius: 6px;
-  background-color: ${({ $priority }) => {
-    if ($priority.includes('Alta')) return '#fee2e2';
-    if ($priority.includes('Média') || $priority.includes('Media')) return '#fef3c7';
-    return '#dcfce7';
-  }};
-  color: ${({ $priority }) => {
-    if ($priority.includes('Alta')) return '#ef4444';
-    if ($priority.includes('Média') || $priority.includes('Media')) return '#d97706';
-    return '#16a34a';
-  }};
-`;
-
 export const KanbanStatusBadge = styled.span<{ $status?: string }>`
   font-size: 11px;
   font-weight: 600;
