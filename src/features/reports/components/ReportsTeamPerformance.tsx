@@ -11,7 +11,6 @@ import {
   MemberAvatarImg,
   MemberTextCol,
   MemberName,
-  MemberRole,
   MemberStatsRow,
   StatPill,
 } from '../styles/ReportsTeamPerformance.styles';
@@ -47,7 +46,6 @@ export const ReportsTeamPerformance: React.FC<ReportsTeamPerformanceProps> = ({
 
               <MemberTextCol>
                 <MemberName>{member.name}</MemberName>
-                <MemberRole>{member.role}</MemberRole>
               </MemberTextCol>
             </MemberInfo>
 

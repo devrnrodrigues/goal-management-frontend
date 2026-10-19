@@ -103,11 +103,6 @@ export const MemberName = styled.span`
   text-overflow: ellipsis;
 `;
 
-export const MemberRole = styled.span`
-  font-size: 11px;
-  color: ${({ theme }) => theme.colors.textMuted};
-`;
-
 export const MemberStatsRow = styled.div`
   display: flex;
   align-items: center;
