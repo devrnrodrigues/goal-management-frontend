@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { Search, Bell, Menu, ChevronDown } from 'lucide-react';
+import { Search, Bell, Menu, ChevronDown, Code2, Settings, LogOut } from 'lucide-react';
 import type { HeaderProps } from './types';
+import { useProfileDropdown } from './hooks/useProfileDropdown';
 import {
   HeaderContainer,
   HeaderContentWrapper,
@@ -17,7 +18,13 @@ import {
   UserAvatar,
   UserInfoContainer,
   UserNameText,
-  UserRoleText,
+  ProfileDropdownContainer,
+  ProfileChevron,
+  ProfileDropdownMenu,
+  ProfileDropdownItem,
+  ProfileItemLeft,
+  ProfileDropdownDivider,
+  DevModeBadge,
 } from './styles/Header.styles';
 
 export const Header: React.FC<HeaderProps> = ({
@@ -26,10 +33,18 @@ export const Header: React.FC<HeaderProps> = ({
   onSearchChange,
   notificationCount = 2,
   userName = 'Renan Rodrigues',
-  userRole = 'Gestor de metas',
   avatarUrl = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80',
+  onLogout,
 }) => {
   const [internalQuery, setInternalQuery] = useState('');
+  const {
+    isOpen,
+    isDevMode,
+    dropdownRef,
+    toggleDropdown,
+    closeDropdown,
+    toggleDevMode,
+  } = useProfileDropdown();
 
   const isControlled = searchQuery !== undefined && onSearchChange !== undefined;
   const currentQuery = isControlled ? searchQuery : internalQuery;
@@ -39,6 +54,11 @@ export const Header: React.FC<HeaderProps> = ({
       setInternalQuery(event.target.value);
     }
     onSearchChange?.(event);
+  };
+
+  const handleLogoutClick = () => {
+    closeDropdown();
+    onLogout?.();
   };
 
   return (
@@ -82,13 +102,51 @@ export const Header: React.FC<HeaderProps> = ({
             )}
           </NotificationButton>
 
-          <UserProfileWrapper>
-            <UserAvatar src={avatarUrl} alt={userName} />
-            <UserInfoContainer>
-              <UserNameText>{userName}</UserNameText>
-              <UserRoleText>{userRole}</UserRoleText>
-            </UserInfoContainer>
-          </UserProfileWrapper>
+          <ProfileDropdownContainer ref={dropdownRef}>
+            <UserProfileWrapper onClick={toggleDropdown} role="button" tabIndex={0}>
+              <UserAvatar src={avatarUrl} alt={userName} />
+              <UserInfoContainer>
+                <UserNameText>{userName}</UserNameText>
+              </UserInfoContainer>
+              <ProfileChevron $isOpen={isOpen}>
+                <ChevronDown size={14} />
+              </ProfileChevron>
+            </UserProfileWrapper>
+
+            {isOpen && (
+              <ProfileDropdownMenu>
+                <ProfileDropdownItem type="button" onClick={toggleDevMode}>
+                  <ProfileItemLeft>
+                    <Code2 size={16} />
+                    <span>Modo desenvolvedor</span>
+                  </ProfileItemLeft>
+                  <DevModeBadge $isActive={isDevMode}>
+                    {isDevMode ? 'Ativo' : 'Inativo'}
+                  </DevModeBadge>
+                </ProfileDropdownItem>
+
+                <ProfileDropdownItem type="button" onClick={closeDropdown}>
+                  <ProfileItemLeft>
+                    <Settings size={16} />
+                    <span>Configurações</span>
+                  </ProfileItemLeft>
+                </ProfileDropdownItem>
+
+                <ProfileDropdownDivider />
+
+                <ProfileDropdownItem
+                  type="button"
+                  $isDanger
+                  onClick={handleLogoutClick}
+                >
+                  <ProfileItemLeft>
+                    <LogOut size={16} />
+                    <span>Sair</span>
+                  </ProfileItemLeft>
+                </ProfileDropdownItem>
+              </ProfileDropdownMenu>
+            )}
+          </ProfileDropdownContainer>
         </HeaderRight>
       </HeaderContentWrapper>
     </HeaderContainer>

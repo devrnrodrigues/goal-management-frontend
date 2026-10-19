@@ -219,7 +219,72 @@ export const UserNameText = styled.span`
   color: ${({ theme }) => theme.colors.textPrimary};
 `;
 
-export const UserRoleText = styled.span`
-  font-size: clamp(11px, 0.1vw + 10px, 12px);
+export const ProfileDropdownContainer = styled.div`
+  position: relative;
+  display: flex;
+  align-items: center;
+`;
+
+export const ProfileChevron = styled.span<{ $isOpen: boolean }>`
+  display: flex;
+  align-items: center;
   color: ${({ theme }) => theme.colors.textMuted};
+  transition: transform 0.2s ease;
+  transform: ${({ $isOpen }) => ($isOpen ? 'rotate(180deg)' : 'rotate(0)')};
+`;
+
+export const ProfileDropdownMenu = styled.div`
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  min-width: 210px;
+  background-color: ${({ theme }) => theme.colors.surface};
+  border: 1px solid ${({ theme }) => theme.colors.border};
+  border-radius: ${({ theme }) => theme.radii.lg};
+  box-shadow: ${({ theme }) => theme.shadows.dropdown};
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  z-index: 100;
+`;
+
+export const ProfileDropdownItem = styled.button<{ $isDanger?: boolean }>`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 9px 12px;
+  border-radius: ${({ theme }) => theme.radii.md};
+  font-size: 13px;
+  font-weight: 500;
+  color: ${({ theme, $isDanger }) => ($isDanger ? theme.colors.statusDanger : theme.colors.textPrimary)};
+  cursor: pointer;
+  transition: all 0.15s ease;
+
+  &:hover {
+    background-color: ${({ theme, $isDanger }) =>
+      $isDanger ? 'rgba(239, 68, 68, 0.08)' : theme.colors.surfaceHover};
+  }
+`;
+
+export const ProfileItemLeft = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 10px;
+`;
+
+export const ProfileDropdownDivider = styled.div`
+  height: 1px;
+  background-color: ${({ theme }) => theme.colors.borderLight};
+  margin: 4px 6px;
+`;
+
+export const DevModeBadge = styled.span<{ $isActive: boolean }>`
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background-color: ${({ $isActive }) => ($isActive ? '#dcfce7' : '#f1f5f9')};
+  color: ${({ $isActive }) => ($isActive ? '#16a34a' : '#64748b')};
 `;

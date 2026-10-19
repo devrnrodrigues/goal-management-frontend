@@ -7,8 +7,8 @@ export interface HeaderProps {
   onSearchChange?: (event: ChangeEvent<HTMLInputElement>) => void;
   notificationCount?: number;
   userName?: string;
-  userRole?: string;
   avatarUrl?: string;
+  onLogout?: () => void;
 }
 
 export interface NavItemConfig {
@@ -37,4 +37,5 @@ export interface MainLayoutProps {
   onSelectNavItem?: (id: string) => void;
   searchQuery?: string;
   onSearchChange?: (e: ChangeEvent<HTMLInputElement>) => void;
+  onLogout?: () => void;
 }
