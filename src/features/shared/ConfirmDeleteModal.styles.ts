@@ -91,9 +91,9 @@ export const CloseButton = styled.button`
 `;
 
 export const ModalFooter = styled.div`
-    padding: 16px 24px 24px 24px;
+    padding: 12px 20px;
     background: #f8fafc;
-    border-top: 1px solid lightgray;
+    border-top: 1px solid #f1f5f9;
     display: flex;
     align-items: center;
     justify-content: flex-end;
@@ -101,10 +101,10 @@ export const ModalFooter = styled.div`
 `;
 
 export const BaseButton = styled.button`
-    padding: 10px 18px;
+    padding: 8px 16px;
     font-size: 0.875rem;
     font-weight: 500;
-    border-radius: 10px;
+    border-radius: 8px;
     cursor: pointer;
     transition: all 0.2s ease;
 `;
