@@ -9,6 +9,7 @@ import { RecentActivity } from './features/recent-activity';
 import { CalendarPage } from './features/calendar';
 import { ReportsPage } from './features/reports';
 import { CompletedGoalsPage } from './features/completed-goals';
+import { AuthPage } from './features/auth';
 import './App.css';
 
 const pageNamesMap: Record<string, string> = {
@@ -21,7 +22,17 @@ const pageNamesMap: Record<string, string> = {
 
 export function App() {
   useScrollbarVisibility();
-  const [activeTab, setActiveTab] = useState<string>('goals');
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [activeTab, setActiveTab] = useState<string>('dashboard');
+
+  const handleLoginSuccess = () => {
+    setIsAuthenticated(true);
+    setActiveTab('dashboard');
+  };
+
+  const handleLogout = () => {
+    setIsAuthenticated(false);
+  };
 
   const renderActivePage = () => {
     switch (activeTab) {
@@ -52,12 +63,17 @@ export function App() {
   return (
     <ThemeProvider theme={theme}>
       <GlobalStyles />
-      <MainLayout
-        activeNavItemId={activeTab}
-        onSelectNavItem={(id) => setActiveTab(id)}
-      >
-        {renderActivePage()}
-      </MainLayout>
+      {!isAuthenticated ? (
+        <AuthPage onLoginSuccess={handleLoginSuccess} />
+      ) : (
+        <MainLayout
+          activeNavItemId={activeTab}
+          onSelectNavItem={(id) => setActiveTab(id)}
+          onLogout={handleLogout}
+        >
+          {renderActivePage()}
+        </MainLayout>
+      )}
     </ThemeProvider>
   );
 }
