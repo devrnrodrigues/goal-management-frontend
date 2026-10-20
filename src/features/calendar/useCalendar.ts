@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import {
   startOfMonth,
   endOfMonth,
@@ -16,7 +16,13 @@ import type {
   CalendarTask,
   CalendarDayInfo,
   CalendarTaskAuthor,
+  CalendarTaskStatus,
+  CalendarTaskPriority,
 } from './types';
+import { isMockSession, getAuthToken } from '../shared/api/httpClient';
+import { goalsApi } from '../my-goals/api/goalsApi';
+import { taskBoardApi } from '../task-board/api/taskBoardApi';
+import { mapPriorityToDisplay } from '../task-board/api/taskBoardMappers';
 
 const AUTHOR_RENAN: CalendarTaskAuthor = {
   id: 'u-1',
@@ -99,15 +105,15 @@ const buildMockTasks = (referenceDate: Date): CalendarTask[] => {
       formattedDate: '17/10 às 15:00',
       goalTitle: 'Certificação Cloud Architecture',
       priority: 'Baixa',
-      status: 'completed',
+      status: 'pending',
       author: AUTHOR_LUCAS,
-      columnName: 'Concluído',
+      columnName: 'A Fazer',
     },
     {
       id: 'cal-task-6',
-      title: 'Refinar design system dos cards de metas',
+      title: 'Definir métricas de sucesso da meta',
       createdAt: makeDateKey(15),
-      formattedDate: '15/10 às 11:10',
+      formattedDate: '15/10 às 11:30',
       goalTitle: 'Fluência em Inglês Técnico',
       priority: 'Alta',
       status: 'completed',
@@ -116,9 +122,20 @@ const buildMockTasks = (referenceDate: Date): CalendarTask[] => {
     },
     {
       id: 'cal-task-7',
-      title: 'Revisão técnica de arquitetura Serverless AWS',
+      title: 'Pesquisa com usuários sobre experiência',
       createdAt: makeDateKey(15),
-      formattedDate: '15/10 às 17:30',
+      formattedDate: '15/10 às 16:00',
+      goalTitle: 'Fluência em Inglês Técnico',
+      priority: 'Média',
+      status: 'completed',
+      author: AUTHOR_CAMILA,
+      columnName: 'Concluído',
+    },
+    {
+      id: 'cal-task-8',
+      title: 'Migração de banco legado MySQL 5.7',
+      createdAt: makeDateKey(12),
+      formattedDate: '12/10 às 14:00',
       goalTitle: 'Certificação Cloud Architecture',
       priority: 'Alta',
       status: 'completed',
@@ -126,25 +143,14 @@ const buildMockTasks = (referenceDate: Date): CalendarTask[] => {
       columnName: 'Concluído',
     },
     {
-      id: 'cal-task-8',
-      title: 'Configurar monitoramento com Prometheus e Grafana',
+      id: 'cal-task-9',
+      title: 'Criar documentação técnica da API',
       createdAt: makeDateKey(22),
-      formattedDate: '22/10 às 09:00',
+      formattedDate: '22/10 às 10:00',
       goalTitle: 'Certificação Cloud Architecture',
-      priority: 'Alta',
+      priority: 'Baixa',
       status: 'pending',
       author: AUTHOR_LUCAS,
-      columnName: 'A Fazer',
-    },
-    {
-      id: 'cal-task-9',
-      title: 'Simulação de contingência multi-região AWS',
-      createdAt: makeDateKey(25),
-      formattedDate: '25/10 às 14:00',
-      goalTitle: 'Certificação Cloud Architecture',
-      priority: 'Alta',
-      status: 'pending',
-      author: AUTHOR_RENAN,
       columnName: 'A Fazer',
     },
     {
@@ -183,25 +189,104 @@ const buildMockTasks = (referenceDate: Date): CalendarTask[] => {
   ];
 };
 
+const getInitials = (name?: string): string => {
+  if (!name) return 'U';
+  const parts = name.trim().split(' ');
+  if (parts.length >= 2) {
+    return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase();
+  }
+  return parts[0].slice(0, 2).toUpperCase();
+};
+
 export const useCalendar = () => {
+  const isMock = isMockSession() || !getAuthToken();
   const [currentMonthDate, setCurrentMonthDate] = useState<Date>(() => new Date());
   const [selectedDate, setSelectedDate] = useState<Date>(() => new Date());
+  const [realTasks, setRealTasks] = useState<CalendarTask[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(!isMock);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const mockTasks = useMemo(() => {
-    return buildMockTasks(currentMonthDate);
-  }, [currentMonthDate]);
+  const loadRealCalendarTasks = useCallback(async () => {
+    if (isMock) return;
+
+    setIsLoading(true);
+    setErrorMessage(null);
+
+    try {
+      const goalsResponse = await goalsApi.listGoals(0, 50);
+      const goals = goalsResponse.content;
+
+      const tasksPromises = goals.map(async (goal) => {
+        try {
+          const taskList = await taskBoardApi.listTasks(goal.id);
+          return taskList.map((t): CalendarTask => {
+            const dateKey = t.deadline || (t.createdAt ? t.createdAt.slice(0, 10) : format(new Date(), 'yyyy-MM-dd'));
+            const dateParts = dateKey.split('-');
+            const formattedDate = dateParts.length === 3 ? `${dateParts[2]}/${dateParts[1]}` : dateKey;
+
+            const priority: CalendarTaskPriority = mapPriorityToDisplay(t.priority);
+            const status: CalendarTaskStatus = t.completed
+              ? 'completed'
+              : t.columnTitle?.toLowerCase().includes('progresso')
+              ? 'in_progress'
+              : 'pending';
+
+            const firstMember = t.members?.[0];
+            const author: CalendarTaskAuthor = {
+              id: firstMember?.userId || 'u-user',
+              name: firstMember?.name || 'Membro',
+              avatarUrl: firstMember?.avatarUrl,
+              initials: getInitials(firstMember?.name),
+            };
+
+            return {
+              id: t.id,
+              title: t.title,
+              createdAt: dateKey,
+              formattedDate,
+              goalTitle: goal.title,
+              priority,
+              status,
+              author,
+              columnName: t.columnTitle || 'A Fazer',
+            };
+          });
+        } catch {
+          return [];
+        }
+      });
+
+      const results = await Promise.all(tasksPromises);
+      setRealTasks(results.flat());
+    } catch {
+      setErrorMessage('Não foi possível carregar as entregas no calendário.');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [isMock]);
+
+  useEffect(() => {
+    loadRealCalendarTasks();
+  }, [loadRealCalendarTasks]);
+
+  const activeTasks = useMemo(() => {
+    if (isMock) {
+      return buildMockTasks(currentMonthDate);
+    }
+    return realTasks;
+  }, [isMock, currentMonthDate, realTasks]);
 
   const tasksByDateKey = useMemo(() => {
     const map = new Map<string, CalendarTask[]>();
 
-    mockTasks.forEach((task) => {
+    activeTasks.forEach((task) => {
       const existing = map.get(task.createdAt) || [];
       existing.push(task);
       map.set(task.createdAt, existing);
     });
 
     return map;
-  }, [mockTasks]);
+  }, [activeTasks]);
 
   const calendarDays = useMemo(() => {
     const monthStart = startOfMonth(currentMonthDate);
@@ -253,6 +338,8 @@ export const useCalendar = () => {
     currentMonthDate,
     selectedDate,
     calendarDays,
+    isLoading,
+    errorMessage,
     handlePrevMonth,
     handleNextMonth,
     handleToday,
