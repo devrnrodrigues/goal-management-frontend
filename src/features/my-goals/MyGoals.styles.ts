@@ -153,3 +153,37 @@ export const GoalCardWrapper = styled.div`
   cursor: pointer;
   width: 100%;
 `;
+
+export const ErrorMessageBanner = styled.div`
+  background-color: rgba(239, 68, 68, 0.1);
+  border: 1px solid ${({ theme }) => theme.colors.statusDanger};
+  color: ${({ theme }) => theme.colors.statusDanger};
+  padding: 12px 16px;
+  border-radius: ${({ theme }) => theme.radii.md};
+  font-size: 14px;
+`;
+
+export const EmptyStateContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+  color: ${({ theme }) => theme.colors.textSecondary};
+  background-color: ${({ theme }) => theme.colors.surface};
+  border: 1px dashed ${({ theme }) => theme.colors.border};
+  border-radius: ${({ theme }) => theme.radii.lg};
+  gap: 12px;
+
+  h3 {
+    font-size: 18px;
+    font-weight: 600;
+    color: ${({ theme }) => theme.colors.textPrimary};
+  }
+
+  p {
+    font-size: 14px;
+    max-width: 400px;
+  }
+`;
