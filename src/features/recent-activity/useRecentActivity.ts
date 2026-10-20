@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import type {
   ActivityItem,
   ActivityFiltersState,
@@ -6,6 +6,10 @@ import type {
   DateGroupLabel,
   GoalFilterOption,
 } from './types';
+import { isMockSession, getAuthToken } from '../shared/api/httpClient';
+import { activityApi } from './api/activityApi';
+import { mapActivityToItem } from './api/activityMappers';
+import { goalsApi } from '../my-goals/api/goalsApi';
 
 const AUTHOR_RENAN = {
   id: 'u-1',
@@ -101,42 +105,65 @@ const INITIAL_ACTIVITIES: ActivityItem[] = [
   },
   {
     id: 'act-4',
-    actionType: 'task_updated',
+    actionType: 'goal_created',
     author: AUTHOR_CAMILA,
-    title: 'Refinar design system dos cards de metas',
+    title: 'Definiu a nova meta de negócios para o Q4',
     goalTitle: 'Fluência em Inglês Técnico',
-    timestamp: 'Hoje às 11:05',
-    dateGroup: 'Hoje',
+    timestamp: 'Ontem às 17:45',
+    dateGroup: 'Ontem',
+    metadata: {
+      priority: 'Alta',
+    },
     changes: [
       {
         id: 'c-5',
-        label: 'Prioridade',
-        from: 'Baixa',
-        to: 'Alta',
+        label: 'Categoria',
+        to: 'Idiomas & Carreira',
       },
       {
         id: 'c-6',
-        label: 'Prazo',
-        from: '20/12/2026',
-        to: '10/12/2026',
+        label: 'Prazo final',
+        to: '31/12/2026',
       },
     ],
   },
   {
     id: 'act-5',
-    actionType: 'task_moved',
-    author: AUTHOR_RENAN,
-    title: 'Mapeamento de endpoints REST para GraphQL',
+    actionType: 'task_updated',
+    author: AUTHOR_LUCAS,
+    title: 'Refatoração da camada de persistência com isolamento de repositórios',
     goalTitle: 'Certificação Cloud Architecture',
-    timestamp: 'Ontem às 17:35',
+    timestamp: 'Ontem às 11:15',
     dateGroup: 'Ontem',
+    changes: [
+      {
+        id: 'c-7',
+        label: 'Prioridade',
+        from: 'Média',
+        to: 'Alta',
+      },
+      {
+        id: 'c-8',
+        label: 'Responsável',
+        to: 'Lucas Mendes',
+      },
+    ],
+  },
+  {
+    id: 'act-6',
+    actionType: 'task_moved',
+    author: AUTHOR_CAMILA,
+    title: 'Pesquisa com usuários sobre nova experiência de busca',
+    goalTitle: 'Fluência em Inglês Técnico',
+    timestamp: 'Há 3 dias',
+    dateGroup: 'Esta semana',
     metadata: {
       fromColumn: 'Backlog',
       toColumn: 'A Fazer',
     },
     changes: [
       {
-        id: 'c-7',
+        id: 'c-9',
         label: 'Coluna',
         from: 'Backlog',
         to: 'A Fazer',
@@ -144,92 +171,12 @@ const INITIAL_ACTIVITIES: ActivityItem[] = [
     ],
   },
   {
-    id: 'act-6',
-    actionType: 'goal_updated',
-    author: AUTHOR_RENAN,
-    title: 'Reserva de Emergência 12 Meses',
-    goalTitle: 'Reserva de Emergência 12 Meses',
-    timestamp: 'Ontem às 15:10',
-    dateGroup: 'Ontem',
-    changes: [
-      {
-        id: 'c-8',
-        label: 'Progresso',
-        from: '65%',
-        to: '82%',
-      },
-      {
-        id: 'c-9',
-        label: 'Aporte',
-        from: 'R$ 8.500',
-        to: 'R$ 11.200',
-      },
-    ],
-  },
-  {
     id: 'act-7',
-    actionType: 'task_created',
-    author: AUTHOR_LUCAS,
-    title: 'Construir componente de timeline minimalista',
-    goalTitle: 'Certificação Cloud Architecture',
-    timestamp: 'Ontem às 10:40',
-    dateGroup: 'Ontem',
-    metadata: {
-      toColumn: 'Em Progresso',
-      priority: 'Média',
-    },
-    changes: [
-      {
-        id: 'c-10',
-        label: 'Coluna',
-        to: 'Em Progresso',
-      },
-    ],
-  },
-  {
-    id: 'act-8',
     actionType: 'task_completed',
     author: AUTHOR_RENAN,
-    title: 'Revisão técnica de arquitetura Serverless com AWS Lambda',
-    goalTitle: 'Certificação Cloud Architecture',
-    timestamp: '16 de Outubro às 16:50',
-    dateGroup: 'Esta semana',
-    metadata: {
-      fromColumn: 'Em Progresso',
-      toColumn: 'Concluído',
-    },
-    changes: [
-      {
-        id: 'c-11',
-        label: 'Status',
-        from: 'Em Progresso',
-        to: 'Concluído',
-      },
-    ],
-  },
-  {
-    id: 'act-9',
-    actionType: 'goal_created',
-    author: AUTHOR_RENAN,
-    title: 'Fluência em Inglês Técnico',
-    goalTitle: 'Fluência em Inglês Técnico',
-    timestamp: '15 de Outubro às 09:15',
-    dateGroup: 'Esta semana',
-    changes: [
-      {
-        id: 'c-12',
-        label: 'Meta',
-        to: 'Criada com 45% concluído',
-      },
-    ],
-  },
-  {
-    id: 'act-10',
-    actionType: 'task_moved',
-    author: AUTHOR_CAMILA,
-    title: 'Prototipação de telas de onboarding no Figma',
-    goalTitle: 'Fluência em Inglês Técnico',
-    timestamp: '14 de Outubro às 18:20',
+    title: 'Modelagem do banco de dados relacional e migrações Flyway',
+    goalTitle: 'Reserva de Emergência 12 Meses',
+    timestamp: 'Há 4 dias',
     dateGroup: 'Esta semana',
     metadata: {
       fromColumn: 'Em Revisão',
@@ -237,15 +184,58 @@ const INITIAL_ACTIVITIES: ActivityItem[] = [
     },
     changes: [
       {
-        id: 'c-13',
-        label: 'Coluna',
+        id: 'c-10',
+        label: 'Status',
         from: 'Em Revisão',
         to: 'Concluído',
       },
     ],
   },
   {
-    id: 'act-11',
+    id: 'act-8',
+    actionType: 'goal_updated',
+    author: AUTHOR_RENAN,
+    title: 'Alterou o prazo e indicadores de sucesso da meta',
+    goalTitle: 'Certificação Cloud Architecture',
+    timestamp: 'Há 5 dias',
+    dateGroup: 'Esta semana',
+    changes: [
+      {
+        id: 'c-11',
+        label: 'Prazo',
+        from: '15/11/2026',
+        to: '30/11/2026',
+      },
+      {
+        id: 'c-12',
+        label: 'Progresso',
+        from: '65%',
+        to: '75%',
+      },
+    ],
+  },
+  {
+    id: 'act-9',
+    actionType: 'task_created',
+    author: AUTHOR_LUCAS,
+    title: 'Criação dos mocks visuais e testes de acessibilidade com leitor de tela',
+    goalTitle: 'Fluência em Inglês Técnico',
+    timestamp: '14 de Outubro às 09:10',
+    dateGroup: 'Anterior',
+    metadata: {
+      toColumn: 'Backlog',
+      priority: 'Média',
+    },
+    changes: [
+      {
+        id: 'c-13',
+        label: 'Coluna',
+        to: 'Backlog',
+      },
+    ],
+  },
+  {
+    id: 'act-10',
     actionType: 'task_deleted',
     author: AUTHOR_RENAN,
     title: 'Migração de banco legado MySQL 5.7',
@@ -277,8 +267,45 @@ const INITIAL_FILTERS: ActivityFiltersState = {
 const DATE_GROUPS: DateGroupLabel[] = ['Hoje', 'Ontem', 'Esta semana', 'Anterior'];
 
 export const useRecentActivity = () => {
-  const [activities] = useState<ActivityItem[]>(INITIAL_ACTIVITIES);
+  const isMock = isMockSession() || !getAuthToken();
+  const [activities, setActivities] = useState<ActivityItem[]>(isMock ? INITIAL_ACTIVITIES : []);
+  const [goalOptions, setGoalOptions] = useState<GoalFilterOption[]>(isMock ? GOAL_OPTIONS : []);
+  const [isLoading, setIsLoading] = useState<boolean>(!isMock);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [filters, setFilters] = useState<ActivityFiltersState>(INITIAL_FILTERS);
+
+  const loadData = useCallback(async () => {
+    if (isMock) {
+      setActivities(INITIAL_ACTIVITIES);
+      setGoalOptions(GOAL_OPTIONS);
+      return;
+    }
+
+    setIsLoading(true);
+    setErrorMessage(null);
+
+    try {
+      const [actRes, goalsRes] = await Promise.all([
+        activityApi.listUserActivities(0, 50),
+        goalsApi.listGoals(0, 50),
+      ]);
+
+      setActivities(actRes.content.map(mapActivityToItem));
+      const options: GoalFilterOption[] = goalsRes.content.map((g) => ({
+        id: g.title,
+        title: g.title,
+      }));
+      setGoalOptions(options);
+    } catch {
+      setErrorMessage('Não foi possível carregar as atividades recentes.');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [isMock]);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
 
   const handleSearchChange = (search: string) => {
     setFilters((prev) => ({ ...prev, search }));
@@ -391,7 +418,9 @@ export const useRecentActivity = () => {
   return {
     filters,
     categoryCounts,
-    goalOptions: GOAL_OPTIONS,
+    goalOptions,
+    isLoading,
+    errorMessage,
     hasActiveFilters,
     filteredActivitiesCount: filteredActivities.length,
     groupedActivities,

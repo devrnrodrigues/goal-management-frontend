@@ -12,6 +12,7 @@ import {
   ActivityTitle,
   ActivitySubtitle,
   ActivityFeedWrapper,
+  ErrorMessageBanner,
 } from './RecentActivity.styles';
 
 export const RecentActivity: React.FC = () => {
@@ -19,6 +20,7 @@ export const RecentActivity: React.FC = () => {
     filters,
     categoryCounts,
     goalOptions,
+    errorMessage,
     hasActiveFilters,
     filteredActivitiesCount,
     groupedActivities,
@@ -38,6 +40,8 @@ export const RecentActivity: React.FC = () => {
           </ActivitySubtitle>
         </HeaderTitlesCol>
       </ActivityHeaderWrapper>
+
+      {errorMessage && <ErrorMessageBanner>{errorMessage}</ErrorMessageBanner>}
 
       <ActivityFilters
         filters={filters}

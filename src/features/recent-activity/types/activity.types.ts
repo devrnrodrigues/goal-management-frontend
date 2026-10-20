@@ -14,6 +14,15 @@ export type ActivityActionType =
   | 'goal_created'
   | 'goal_updated';
 
+export type ActivityActionTypeApi =
+  | 'TASK_MOVED'
+  | 'TASK_CREATED'
+  | 'TASK_COMPLETED'
+  | 'TASK_UPDATED'
+  | 'TASK_DELETED'
+  | 'GOAL_CREATED'
+  | 'GOAL_UPDATED';
+
 export type DateGroupLabel = 'Hoje' | 'Ontem' | 'Esta semana' | 'Anterior';
 
 export interface ActivityAuthor {
@@ -47,7 +56,6 @@ export interface ActivityItem {
   };
 }
 
-
 export interface ActivityFiltersState {
   search: string;
   category: ActivityCategory;
@@ -57,4 +65,19 @@ export interface ActivityFiltersState {
 export interface GoalFilterOption {
   id: string;
   title: string;
+}
+
+export interface ActivityApiResponse {
+  id: string;
+  actionType: ActivityActionTypeApi;
+  title: string;
+  authorId: string;
+  authorName: string;
+  authorAvatarUrl?: string;
+  goalId?: string;
+  goalTitle?: string;
+  taskId?: string;
+  fromColumn?: string;
+  toColumn?: string;
+  createdAt: string;
 }

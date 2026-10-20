@@ -76,3 +76,12 @@ export const ActivityFeedWrapper = styled.div`
     gap: 20px;
   }
 `;
+
+export const ErrorMessageBanner = styled.div`
+  background-color: rgba(239, 68, 68, 0.1);
+  border: 1px solid ${({ theme }) => theme.colors.statusDanger};
+  color: ${({ theme }) => theme.colors.statusDanger};
+  padding: 12px 16px;
+  border-radius: ${({ theme }) => theme.radii.md};
+  font-size: 14px;
+`;
