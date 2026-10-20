@@ -1,6 +1,14 @@
 import { useState } from 'react';
 import { ThemeProvider } from 'styled-components';
-import { theme, GlobalStyles, PlaceholderPage, useScrollbarVisibility } from './features/shared';
+import {
+  theme,
+  GlobalStyles,
+  PlaceholderPage,
+  useScrollbarVisibility,
+  getAuthToken,
+  isMockSession,
+  clearAuthSession,
+} from './features/shared';
 import { MainLayout } from './features/layout';
 import { MyGoals } from './features/my-goals';
 import { DashboardPage } from './features/dashboard';
@@ -22,7 +30,9 @@ const pageNamesMap: Record<string, string> = {
 
 export function App() {
   useScrollbarVisibility();
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
+    return Boolean(getAuthToken() || isMockSession());
+  });
   const [activeTab, setActiveTab] = useState<string>('dashboard');
 
   const handleLoginSuccess = () => {
@@ -31,6 +41,7 @@ export function App() {
   };
 
   const handleLogout = () => {
+    clearAuthSession();
     setIsAuthenticated(false);
   };
 
