@@ -1,24 +1,29 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import type {
   CompletedGoalItem,
   CompletedGoalsFiltersState,
-  CompletedGoalsOverviewStats,
   CompletedGoalsSortOption,
+  CompletedGoalsOverviewStats,
+  CompletedSubTask,
 } from './types';
+import { isMockSession, getAuthToken } from '../shared/api/httpClient';
+import { goalsApi } from '../my-goals/api/goalsApi';
+import { taskBoardApi } from '../task-board/api/taskBoardApi';
+import { formatDateToDisplay, mapMemberToAvatar } from '../my-goals/api/goalMappers';
 
 const INITIAL_COMPLETED_GOALS: CompletedGoalItem[] = [
   {
     id: 'cg-1',
-    title: 'Migração para Gateway V2',
+    title: 'Migração do Core para Java 21 & Spring Boot 3.3',
     category: 'Engenharia de Produto',
-    description: 'Transição completa do processamento de pagamentos para a nova API transacional com suporte a Pix e antifraude nativo.',
-    completedDate: '12/10/2026',
-    initialDate: '01/09/2026',
-    durationDays: 41,
+    description: 'Atualização profunda do ecossistema backend com Virtual Threads, redução de consumo de memória em 38% e padronização da arquitetura Package by Feature.',
+    completedDate: '28/09/2026',
+    initialDate: '01/08/2026',
+    durationDays: 58,
     totalSubtasks: 6,
     completedSubtasks: 6,
-    deliverablesSummary: '6 de 6 entregas validadas em produção sem ocorrência de incidentes críticos.',
-    impactHighlight: '+99.98% de disponibilidade e redução de 40% nas taxas de estorno.',
+    deliverablesSummary: 'Virtual threads habilitadas em todos os microsserviços e taxa de throughput multiplicada por 2.4x.',
+    impactHighlight: 'Tempo médio de resposta reduzido de 140ms para 32ms em horários de pico.',
     members: [
       {
         id: 'usr-renan',
@@ -39,43 +44,43 @@ const INITIAL_COMPLETED_GOALS: CompletedGoalItem[] = [
     subtasks: [
       {
         id: 'cst-1-1',
-        title: 'Mapeamento de endpoints e schemas de requisição',
-        completedAt: '08/09/2026',
+        title: 'Mapeamento e atualização das dependências do Maven pom.xml',
+        completedAt: '05/08/2026',
         responsibleName: 'Marina Silva',
         responsibleAvatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=80&q=80',
       },
       {
         id: 'cst-1-2',
-        title: 'Implementação de fallback automático para adquirente reserva',
-        completedAt: '19/09/2026',
+        title: 'Refatoração dos Records DTO e validações Jakarta Validation',
+        completedAt: '16/08/2026',
         responsibleName: 'Renan Rodrigues',
         responsibleAvatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=80&q=80',
       },
       {
         id: 'cst-1-3',
-        title: 'Bateria de testes de carga simulando 40k req/min',
-        completedAt: '28/09/2026',
+        title: 'Ajuste de filtros Spring Security e emissão stateless de JWT',
+        completedAt: '28/08/2026',
         responsibleName: 'Lucas Costa',
         responsibleAvatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=80&q=80',
       },
       {
         id: 'cst-1-4',
-        title: 'Homologação bancária e conciliação de recebíveis',
-        completedAt: '04/10/2026',
+        title: 'Configuração de migrações Flyway e testes idempotentes',
+        completedAt: '08/09/2026',
         responsibleName: 'Marina Silva',
         responsibleAvatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=80&q=80',
       },
       {
         id: 'cst-1-5',
-        title: 'Certificação de conformidade de logs e auditoria',
-        completedAt: '09/10/2026',
+        title: 'Homologação e benchmark de carga em cluster de staging',
+        completedAt: '20/09/2026',
         responsibleName: 'Renan Rodrigues',
         responsibleAvatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=80&q=80',
       },
       {
         id: 'cst-1-6',
-        title: 'Virada completa de DNS e desligamento do legado',
-        completedAt: '12/10/2026',
+        title: 'Deploy final e monitoramento de telemetria com Grafana',
+        completedAt: '28/09/2026',
         responsibleName: 'Lucas Costa',
         responsibleAvatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=80&q=80',
       },
@@ -83,16 +88,16 @@ const INITIAL_COMPLETED_GOALS: CompletedGoalItem[] = [
   },
   {
     id: 'cg-2',
-    title: 'Automação de CI/CD para Produção',
-    category: 'Infraestrutura & Cloud',
-    description: 'Implementação de pipelines declarativos no GitHub Actions com verificações estáticas, testes de integração e deploy canário.',
-    completedDate: '28/09/2026',
-    initialDate: '15/08/2026',
-    durationDays: 44,
+    title: 'Design System & Identidade Visual v1.0',
+    category: 'Design System',
+    description: 'Padronização de tipografia Plus Jakarta Sans, tokens de espaçamento, temas dark/light e catálogo unificado de componentes React com Styled Components.',
+    completedDate: '15/09/2026',
+    initialDate: '15/07/2026',
+    durationDays: 62,
     totalSubtasks: 5,
     completedSubtasks: 5,
-    deliverablesSummary: 'Todas as esteiras operando com tempo médio de build inferior a 4 minutos.',
-    impactHighlight: 'Tempo de deploy reduzido de 45 minutos para apenas 3.8 minutos.',
+    deliverablesSummary: 'Biblioteca reutilizável integrada ao pipeline de desenvolvimento e documentação interativa.',
+    impactHighlight: 'Redução de 45% no tempo de entrega de novas telas pelos times frontend.',
     members: [
       {
         id: 'usr-renan',
@@ -113,36 +118,36 @@ const INITIAL_COMPLETED_GOALS: CompletedGoalItem[] = [
     subtasks: [
       {
         id: 'cst-2-1',
-        title: 'Padronização de Dockerfiles multi-stage para microserviços',
-        completedAt: '22/08/2026',
+        title: 'Mapeamento de paleta de cores HSL e contraste semântico WCAG AAA',
+        completedAt: '25/07/2026',
         responsibleName: 'Gabriel Pires',
         responsibleAvatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=80&q=80',
       },
       {
         id: 'cst-2-2',
-        title: 'Configuração de runner auto-hospedado com cache distribuído',
-        completedAt: '03/09/2026',
+        title: 'Construção dos componentes base (Button, Input, Badge, Card, Modal)',
+        completedAt: '12/08/2026',
         responsibleName: 'Rodrigo Alves',
         responsibleAvatar: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=80&q=80',
       },
       {
         id: 'cst-2-3',
-        title: 'Integração de scan de vulnerabilidades de dependências no PR',
-        completedAt: '12/09/2026',
+        title: 'Implementação de micro-animações suaves com Framer Motion',
+        completedAt: '25/08/2026',
         responsibleName: 'Renan Rodrigues',
         responsibleAvatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=80&q=80',
       },
       {
         id: 'cst-2-4',
-        title: 'Mecanismo de rollback automático em caso de falha de probe',
-        completedAt: '20/09/2026',
+        title: 'Testes de responsividade cross-device (mobile first)',
+        completedAt: '05/09/2026',
         responsibleName: 'Gabriel Pires',
         responsibleAvatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=80&q=80',
       },
       {
         id: 'cst-2-5',
-        title: 'Publicação de dashboards de telemetria no canal de engenharia',
-        completedAt: '28/09/2026',
+        title: 'Publicação da versão estável e migração das rotas principais',
+        completedAt: '15/09/2026',
         responsibleName: 'Rodrigo Alves',
         responsibleAvatar: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=80&q=80',
       },
@@ -150,16 +155,16 @@ const INITIAL_COMPLETED_GOALS: CompletedGoalItem[] = [
   },
   {
     id: 'cg-3',
-    title: 'Portal do Desenvolvedor & API Docs',
-    category: 'Design System',
-    description: 'Central unificada de documentação interativa, playbooks de arquitetura e guias de integração para times internos e parceiros.',
-    completedDate: '15/09/2026',
-    initialDate: '01/08/2026',
-    durationDays: 45,
+    title: 'Migração de Infraestrutura para Kubernetes na AWS',
+    category: 'Infraestrutura & Cloud',
+    description: 'Transição completa dos serviços legados para clusters EKS com autoscaling horizontal e esteiras automatizadas de CI/CD.',
+    completedDate: '02/09/2026',
+    initialDate: '10/06/2026',
+    durationDays: 84,
     totalSubtasks: 4,
     completedSubtasks: 4,
-    deliverablesSummary: 'Documentação 100% atualizada com exemplos em TypeScript, cURL e Python.',
-    impactHighlight: 'Tempo de onboarding de novos desenvolvedores caiu de 12 para 2 dias.',
+    deliverablesSummary: 'Clusters multi-AZ tolerantes a falhas e implantação contínua zero downtime.',
+    impactHighlight: 'Disponibilidade de 99.98% e economia de 32% nos custos de nuvem.',
     members: [
       {
         id: 'usr-5',
@@ -180,171 +185,112 @@ const INITIAL_COMPLETED_GOALS: CompletedGoalItem[] = [
     subtasks: [
       {
         id: 'cst-3-1',
-        title: 'Estruturação do OpenAPI 3.1 para todos os endpoints públicos',
-        completedAt: '10/08/2026',
+        title: 'Provisionamento de infraestrutura como código (Terraform)',
+        completedAt: '30/06/2026',
         responsibleName: 'Beatriz Rocha',
         responsibleAvatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=80&q=80',
       },
       {
         id: 'cst-3-2',
-        title: 'Desenvolvimento do portal web interativo com busca semântica',
-        completedAt: '25/08/2026',
+        title: 'Criação dos manifests Kubernetes e Helm Charts parametrizados',
+        completedAt: '18/07/2026',
         responsibleName: 'Julia Martins',
         responsibleAvatar: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=80&q=80',
       },
       {
         id: 'cst-3-3',
-        title: 'Criação do console interativo para testes de requisições sandbox',
-        completedAt: '05/09/2026',
+        title: 'Implementação de esteira com GitHub Actions e deploy canário',
+        completedAt: '10/08/2026',
         responsibleName: 'Renan Rodrigues',
         responsibleAvatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=80&q=80',
       },
       {
         id: 'cst-3-4',
-        title: 'Publicação oficial e treinamento das lideranças técnicas',
-        completedAt: '15/09/2026',
+        title: 'Virada oficial de DNS e desligamento dos servidores legados',
+        completedAt: '02/09/2026',
         responsibleName: 'Beatriz Rocha',
         responsibleAvatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=80&q=80',
-      },
-    ],
-  },
-  {
-    id: 'cg-4',
-    title: 'Auditoria de Conformidade LGPD & SOC2',
-    category: 'Segurança & Compliance',
-    description: 'Revisão técnica de retenção de dados, anonimização em logs, criptografia em trânsito e políticas de acesso baseado em cargos.',
-    completedDate: '30/08/2026',
-    initialDate: '10/07/2026',
-    durationDays: 51,
-    totalSubtasks: 5,
-    completedSubtasks: 5,
-    deliverablesSummary: 'Certificação de compliance emitida sem ressalvas por auditor externo.',
-    impactHighlight: 'Adequação 100% legal aprovada para captação de clientes corporativos.',
-    members: [
-      {
-        id: 'usr-3',
-        name: 'Camila Lima',
-        avatarUrl: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=80&q=80',
-      },
-      {
-        id: 'usr-1',
-        name: 'Marina Silva',
-        avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=80&q=80',
-      },
-      {
-        id: 'usr-8',
-        name: 'Felipe Dias',
-        avatarUrl: 'https://images.unsplash.com/photo-1501196354995-cbb51c65aaea?auto=format&fit=crop&w=80&q=80',
-      },
-    ],
-    subtasks: [
-      {
-        id: 'cst-4-1',
-        title: 'Mapeamento do inventário e fluxo de dados sensíveis (PII)',
-        completedAt: '24/07/2026',
-        responsibleName: 'Camila Lima',
-        responsibleAvatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=80&q=80',
-      },
-      {
-        id: 'cst-4-2',
-        title: 'Aplicação de mascaramento automático em pipelines analíticos',
-        completedAt: '06/08/2026',
-        responsibleName: 'Marina Silva',
-        responsibleAvatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=80&q=80',
-      },
-      {
-        id: 'cst-4-3',
-        title: 'Configuração de MFA obrigatório e rotação automática de chaves',
-        completedAt: '16/08/2026',
-        responsibleName: 'Felipe Dias',
-        responsibleAvatar: 'https://images.unsplash.com/photo-1501196354995-cbb51c65aaea?auto=format&fit=crop&w=80&q=80',
-      },
-      {
-        id: 'cst-4-4',
-        title: 'Execução de teste de intrusão (pentest) com empresa terceira',
-        completedAt: '23/08/2026',
-        responsibleName: 'Camila Lima',
-        responsibleAvatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=80&q=80',
-      },
-      {
-        id: 'cst-4-5',
-        title: 'Emissão e registro formal do relatório de adequação',
-        completedAt: '30/08/2026',
-        responsibleName: 'Marina Silva',
-        responsibleAvatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=80&q=80',
-      },
-    ],
-  },
-  {
-    id: 'cg-5',
-    title: 'Unificação do Data Warehouse & BI',
-    category: 'Growth & Operações',
-    description: 'Consolidação de fontes de dados dispersas em um único lakehouse com modelagem dbt e atualização horária de KPIs.',
-    completedDate: '18/08/2026',
-    initialDate: '01/07/2026',
-    durationDays: 48,
-    totalSubtasks: 4,
-    completedSubtasks: 4,
-    deliverablesSummary: 'Modelos de dados homologados com reconciliação contábil automatizada.',
-    impactHighlight: 'Decisões executivas com dados em tempo real e eliminação de relatórios manuais.',
-    members: [
-      {
-        id: 'usr-2',
-        name: 'Lucas Costa',
-        avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=80&q=80',
-      },
-      {
-        id: 'usr-9',
-        name: 'Ana Souza',
-        avatarUrl: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=80&q=80',
-      },
-      {
-        id: 'usr-renan',
-        name: 'Renan Rodrigues',
-        avatarUrl: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=80&q=80',
-      },
-    ],
-    subtasks: [
-      {
-        id: 'cst-5-1',
-        title: 'Ingestão contínua de eventos com Kafka e CDC de bancos',
-        completedAt: '14/07/2026',
-        responsibleName: 'Lucas Costa',
-        responsibleAvatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=80&q=80',
-      },
-      {
-        id: 'cst-5-2',
-        title: 'Modelagem dimensional de métricas de receita (ARR e LTV)',
-        completedAt: '27/07/2026',
-        responsibleName: 'Ana Souza',
-        responsibleAvatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=80&q=80',
-      },
-      {
-        id: 'cst-5-3',
-        title: 'Criação dos dashboards operacionais de squads no Metabase',
-        completedAt: '08/08/2026',
-        responsibleName: 'Renan Rodrigues',
-        responsibleAvatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=80&q=80',
-      },
-      {
-        id: 'cst-5-4',
-        title: 'Validação cruzada de consistência com o balanço fiscal',
-        completedAt: '18/08/2026',
-        responsibleName: 'Ana Souza',
-        responsibleAvatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=80&q=80',
       },
     ],
   },
 ];
 
 export const useCompletedGoals = () => {
-  const [goals] = useState<CompletedGoalItem[]>(INITIAL_COMPLETED_GOALS);
+  const isMock = isMockSession() || !getAuthToken();
+  const [goals, setGoals] = useState<CompletedGoalItem[]>(isMock ? INITIAL_COMPLETED_GOALS : []);
   const [selectedGoal, setSelectedGoal] = useState<CompletedGoalItem | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(!isMock);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [filters, setFilters] = useState<CompletedGoalsFiltersState>({
     searchQuery: '',
     selectedCategory: 'all',
     sortBy: 'recent',
   });
+
+  const loadCompletedGoals = useCallback(async () => {
+    if (isMock) {
+      setGoals(INITIAL_COMPLETED_GOALS);
+      return;
+    }
+
+    setIsLoading(true);
+    setErrorMessage(null);
+
+    try {
+      const pageRes = await goalsApi.listGoals(0, 50);
+      const completedGoals = pageRes.content.filter(
+        (g) => g.status === 'COMPLETED' || g.progress === 100
+      );
+
+      const detailedPromises = completedGoals.map(async (g) => {
+        try {
+          const [tasks, members] = await Promise.all([
+            taskBoardApi.listTasks(g.id).catch(() => []),
+            goalsApi.listMembers(g.id).catch(() => []),
+          ]);
+
+          const completedSubtasks: CompletedSubTask[] = tasks.map((t) => ({
+            id: t.id,
+            title: t.title,
+            completedAt: t.deadline ? formatDateToDisplay(t.deadline) : 'Concluído',
+            responsibleName: t.members?.[0]?.name,
+            responsibleAvatar: t.members?.[0]?.avatarUrl,
+          }));
+
+          const item: CompletedGoalItem = {
+            id: g.id,
+            title: g.title,
+            category: g.category,
+            description: g.description || '',
+            completedDate: g.deadline ? formatDateToDisplay(g.deadline) : 'Recentemente',
+            initialDate: g.createdAt ? formatDateToDisplay(g.createdAt.slice(0, 10)) : '',
+            durationDays: 30,
+            totalSubtasks: tasks.length,
+            completedSubtasks: tasks.filter((t) => t.completed).length,
+            members: members.map(mapMemberToAvatar),
+            deliverablesSummary: g.description || 'Entregas finalizadas com sucesso.',
+            impactHighlight: 'Meta cumprida integralmente conforme o planejamento.',
+            subtasks: completedSubtasks,
+          };
+          return item;
+        } catch {
+          return null;
+        }
+      });
+
+      const resolved = await Promise.all(detailedPromises);
+      const valid = resolved.filter((item): item is CompletedGoalItem => item !== null);
+      setGoals(valid);
+    } catch {
+      setErrorMessage('Não foi possível carregar as metas concluídas.');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [isMock]);
+
+  useEffect(() => {
+    loadCompletedGoals();
+  }, [loadCompletedGoals]);
 
   const availableCategories = useMemo(() => {
     const set = new Set<string>();
@@ -364,7 +310,7 @@ export const useCompletedGoals = () => {
       totalCompletedGoals: totalGoals,
       totalDeliveredTasks: totalTasks,
       avgDurationDays: avgDuration,
-      onTimeSuccessRate: 96,
+      onTimeSuccessRate: 100,
     };
   }, [goals]);
 
@@ -424,6 +370,8 @@ export const useCompletedGoals = () => {
     filters,
     availableCategories,
     overviewStats,
+    isLoading,
+    errorMessage,
     handleSearchChange,
     handleCategoryChange,
     handleSortChange,

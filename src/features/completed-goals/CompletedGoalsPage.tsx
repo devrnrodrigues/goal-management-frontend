@@ -15,6 +15,7 @@ import {
   EmptyState,
   EmptyTitle,
   EmptySubtitle,
+  ErrorMessageBanner,
 } from './CompletedGoalsPage.styles';
 
 export const CompletedGoalsPage: React.FC = () => {
@@ -23,6 +24,7 @@ export const CompletedGoalsPage: React.FC = () => {
     selectedGoal,
     filters,
     availableCategories,
+    errorMessage,
     handleSearchChange,
     handleCategoryChange,
     handleSortChange,
@@ -38,6 +40,8 @@ export const CompletedGoalsPage: React.FC = () => {
           Histórico de metas finalizadas, conquistas alcançadas e entregas realizadas com sucesso
         </PageSubtitle>
       </HeaderWrapper>
+
+      {errorMessage && <ErrorMessageBanner>{errorMessage}</ErrorMessageBanner>}
 
       <CompletedGoalsFilters
         searchQuery={filters.searchQuery}
