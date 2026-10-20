@@ -1,8 +1,17 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import type { Task } from '../my-goals/types';
 import { initialTasks } from '../my-goals/constants/initialGoals';
 import { membersByTitle, defaultMembers } from '../my-goals/constants/members';
 import type { BoardColumn, BoardTask, ActiveGoalInfo, TaskPriority } from './types';
+import { isMockSession, getAuthToken } from '../shared/api/httpClient';
+import { goalsApi } from '../my-goals/api/goalsApi';
+import { mapSummaryToTask } from '../my-goals/api/goalMappers';
+import { taskBoardApi } from './api/taskBoardApi';
+import {
+  mapColumnToDisplay,
+  mapTaskToDisplay,
+  mapPriorityToApi,
+} from './api/taskBoardMappers';
 
 const defaultColumns: BoardColumn[] = [
   { id: 'col-backlog', title: 'Backlog', color: '#64748b' },
@@ -12,8 +21,13 @@ const defaultColumns: BoardColumn[] = [
 ];
 
 export const useTaskBoard = () => {
-  const [availableGoals] = useState<Task[]>(initialTasks);
-  const [activeGoal, setActiveGoal] = useState<ActiveGoalInfo>(() => {
+  const isMock = isMockSession() || !getAuthToken();
+  const [availableGoals, setAvailableGoals] = useState<Task[]>(isMock ? initialTasks : []);
+  const [isLoading, setIsLoading] = useState<boolean>(!isMock);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  const [activeGoal, setActiveGoal] = useState<ActiveGoalInfo | null>(() => {
+    if (!isMock) return null;
     const first = initialTasks[0];
     return {
       id: first.id || 'goal-default',
@@ -24,9 +38,10 @@ export const useTaskBoard = () => {
     };
   });
 
-  const [columns, setColumns] = useState<BoardColumn[]>(defaultColumns);
+  const [columns, setColumns] = useState<BoardColumn[]>(isMock ? defaultColumns : []);
 
   const [tasks, setTasks] = useState<BoardTask[]>(() => {
+    if (!isMock) return [];
     const first = initialTasks[0];
     const firstColId = defaultColumns[0].id;
     const goalMembers = membersByTitle[first.title] || defaultMembers;
@@ -57,7 +72,66 @@ export const useTaskBoard = () => {
   const [draggedTaskId, setDraggedTaskId] = useState<string | null>(null);
   const [draggedColumnId, setDraggedColumnId] = useState<string | null>(null);
 
-  const handleSelectGoal = (goalInput: string | Task) => {
+  const loadGoalBoard = useCallback(async (goalId: string) => {
+    if (isMock) return;
+
+    try {
+      const [colRes, taskRes] = await Promise.all([
+        taskBoardApi.listColumns(goalId),
+        taskBoardApi.listTasks(goalId),
+      ]);
+      const displayColumns = colRes.map(mapColumnToDisplay);
+      setColumns(displayColumns.length > 0 ? displayColumns : defaultColumns);
+      setTasks(taskRes.map(mapTaskToDisplay));
+    } catch {
+      setErrorMessage('Não foi possível carregar as colunas e tarefas do quadro.');
+    }
+  }, [isMock]);
+
+  const loadGoals = useCallback(async () => {
+    if (isMock) {
+      setAvailableGoals(initialTasks);
+      return;
+    }
+
+    setIsLoading(true);
+    setErrorMessage(null);
+
+    try {
+      const pageRes = await goalsApi.listGoals(0, 50);
+      const mapped = pageRes.content.map(mapSummaryToTask);
+      setAvailableGoals(mapped);
+
+      if (mapped.length > 0) {
+        const first = mapped[0];
+        const newActive: ActiveGoalInfo = {
+          id: first.id || '',
+          title: first.title,
+          category: first.category,
+          deadline: first.deadline,
+          progress: first.progress,
+        };
+        setActiveGoal(newActive);
+        if (first.id) {
+          await loadGoalBoard(first.id);
+        }
+      } else {
+        setActiveGoal(null);
+        setColumns([]);
+        setTasks([]);
+      }
+    } catch {
+      setErrorMessage('Não foi possível carregar as metas.');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [isMock, loadGoalBoard]);
+
+  useEffect(() => {
+    loadGoals();
+  }, [loadGoals]);
+
+  const handleSelectGoal = async (goalInput: string | Task) => {
     if (typeof goalInput === 'string') {
       const trimmed = goalInput.trim();
       if (!trimmed) return;
@@ -67,8 +141,8 @@ export const useTaskBoard = () => {
       );
 
       if (matched) {
-        applyGoal(matched);
-      } else {
+        await applyGoal(matched);
+      } else if (isMock) {
         const customGoal: ActiveGoalInfo = {
           id: `goal-custom-${Date.now()}`,
           title: trimmed,
@@ -79,78 +153,112 @@ export const useTaskBoard = () => {
         setTasks([]);
       }
     } else {
-      applyGoal(goalInput);
+      await applyGoal(goalInput);
     }
   };
 
-  const applyGoal = (goal: Task) => {
-    setActiveGoal({
+  const applyGoal = async (goal: Task) => {
+    const selected: ActiveGoalInfo = {
       id: goal.id || `goal-${Date.now()}`,
       title: goal.title,
       category: goal.category,
       deadline: goal.deadline,
       progress: goal.progress,
-    });
-
-    const firstColId = columns[0]?.id || 'col-backlog';
-    const goalMembers = membersByTitle[goal.title] || defaultMembers;
-
-    const newTasks: BoardTask[] = (goal.subtasks || []).map((st, index) => {
-      const priorities: TaskPriority[] = ['Alta', 'Média', 'Baixa'];
-      const p = priorities[index % priorities.length];
-      const memberSubset = goalMembers.slice(index % 2, (index % 2) + 2);
-
-      return {
-        id: `task-${goal.id || 'g'}-${st.id}`,
-        title: st.title.replace(/;$/, ''),
-        description: st.description,
-        completed: st.completed,
-        priority: p,
-        columnId: firstColId,
-        goalId: goal.id,
-        deadline: goal.deadline ? `${(index + 2) * 4} dias` : undefined,
-        attachmentsCount: (index * 2) % 7,
-        commentsCount: (index * 5) % 12,
-        members: memberSubset,
-      };
-    });
-
-    setTasks(newTasks);
-  };
-
-  const handleAddColumn = (title: string, color: string) => {
-    const trimmed = title.trim();
-    if (!trimmed) return;
-    const newCol: BoardColumn = {
-      id: `col-${Date.now()}`,
-      title: trimmed,
-      color: color || '#64748b',
     };
-    setColumns((prev) => [...prev, newCol]);
+    setActiveGoal(selected);
+
+    if (isMock) {
+      const firstColId = columns[0]?.id || 'col-backlog';
+      const goalMembers = membersByTitle[goal.title] || defaultMembers;
+
+      const newTasks: BoardTask[] = (goal.subtasks || []).map((st, index) => {
+        const priorities: TaskPriority[] = ['Alta', 'Média', 'Baixa'];
+        const p = priorities[index % priorities.length];
+        const memberSubset = goalMembers.slice(index % 2, (index % 2) + 2);
+
+        return {
+          id: `task-${st.id}-${Date.now()}`,
+          title: st.title.replace(/;$/, ''),
+          description: st.description,
+          completed: st.completed,
+          priority: p,
+          columnId: firstColId,
+          goalId: goal.id,
+          deadline: goal.deadline ? `${(index + 2) * 5} dias` : undefined,
+          attachmentsCount: (index * 2) % 6,
+          commentsCount: (index * 3) % 10,
+          members: memberSubset,
+        };
+      });
+      setTasks(newTasks);
+      return;
+    }
+
+    if (goal.id) {
+      await loadGoalBoard(goal.id);
+    }
   };
 
-  const handleEditColumn = (columnId: string, title: string, color: string) => {
+  const handleAddColumn = async (title: string, color: string) => {
     const trimmed = title.trim();
     if (!trimmed) return;
-    setColumns((prev) =>
-      prev.map((col) =>
-        col.id === columnId ? { ...col, title: trimmed, color } : col
-      )
-    );
+
+    if (isMock || !activeGoal?.id) {
+      const newCol: BoardColumn = {
+        id: `col-${Date.now()}`,
+        title: trimmed,
+        color,
+      };
+      setColumns((prev) => [...prev, newCol]);
+      return;
+    }
+
+    try {
+      const res = await taskBoardApi.createColumn(activeGoal.id, { title: trimmed, color });
+      setColumns((prev) => [...prev, mapColumnToDisplay(res)]);
+    } catch {
+      setErrorMessage('Erro ao adicionar coluna.');
+    }
   };
 
-  const handleDeleteColumn = (columnId: string) => {
-    if (columns.length <= 1) return;
-    const fallbackColId = columns.find((c) => c.id !== columnId)?.id || '';
-    setTasks((prev) =>
-      prev.map((t) =>
-        t.columnId === columnId ? { ...t, columnId: fallbackColId } : t
-      )
-    );
-    setColumns((prev) => prev.filter((col) => col.id !== columnId));
+  const handleEditColumn = async (columnId: string, title: string, color: string) => {
+    const trimmed = title.trim();
+    if (!trimmed) return;
+
+    if (isMock) {
+      setColumns((prev) =>
+        prev.map((col) => (col.id === columnId ? { ...col, title: trimmed, color } : col))
+      );
+      return;
+    }
+
+    try {
+      const res = await taskBoardApi.updateColumn(columnId, { title: trimmed, color });
+      setColumns((prev) =>
+        prev.map((col) => (col.id === columnId ? mapColumnToDisplay(res) : col))
+      );
+    } catch {
+      setErrorMessage('Erro ao atualizar coluna.');
+    }
   };
 
-  const handleAddTask = (
+  const handleDeleteColumn = async (columnId: string) => {
+    if (isMock) {
+      setColumns((prev) => prev.filter((col) => col.id !== columnId));
+      setTasks((prev) => prev.filter((t) => t.columnId !== columnId));
+      return;
+    }
+
+    try {
+      await taskBoardApi.deleteColumn(columnId);
+      setColumns((prev) => prev.filter((col) => col.id !== columnId));
+      setTasks((prev) => prev.filter((t) => t.columnId !== columnId));
+    } catch {
+      setErrorMessage('Erro ao excluir coluna.');
+    }
+  };
+
+  const handleAddTask = async (
     columnId: string,
     title: string,
     description?: string,
@@ -158,24 +266,40 @@ export const useTaskBoard = () => {
   ) => {
     const trimmed = title.trim();
     if (!trimmed) return;
-    const goalMembers = membersByTitle[activeGoal.title] || defaultMembers;
-    const newTask: BoardTask = {
-      id: `task-${Date.now()}`,
-      title: trimmed,
-      description: description?.trim() || undefined,
-      completed: false,
-      priority,
-      columnId,
-      goalId: activeGoal.id,
-      deadline: '7 dias',
-      attachmentsCount: 0,
-      commentsCount: 0,
-      members: goalMembers.slice(0, 1),
-    };
-    setTasks((prev) => [...prev, newTask]);
+
+    if (isMock || !activeGoal?.id) {
+      const goalMembers = activeGoal ? (membersByTitle[activeGoal.title] || defaultMembers) : defaultMembers;
+      const newTask: BoardTask = {
+        id: `task-${Date.now()}`,
+        title: trimmed,
+        description: description?.trim() || undefined,
+        completed: false,
+        priority,
+        columnId,
+        goalId: activeGoal?.id,
+        deadline: '7 dias',
+        attachmentsCount: 0,
+        commentsCount: 0,
+        members: goalMembers.slice(0, 1),
+      };
+      setTasks((prev) => [...prev, newTask]);
+      return;
+    }
+
+    try {
+      const created = await taskBoardApi.createTask(activeGoal.id, {
+        columnId,
+        title: trimmed,
+        description: description?.trim() || undefined,
+        priority: mapPriorityToApi(priority),
+      });
+      setTasks((prev) => [...prev, mapTaskToDisplay(created)]);
+    } catch {
+      setErrorMessage('Erro ao criar tarefa.');
+    }
   };
 
-  const handleUpdateTask = (
+  const handleUpdateTask = async (
     taskId: string,
     title: string,
     description?: string,
@@ -184,26 +308,54 @@ export const useTaskBoard = () => {
   ) => {
     const trimmed = title.trim();
     if (!trimmed) return;
-    setTasks((prev) =>
-      prev.map((t) =>
-        t.id === taskId
-          ? {
-              ...t,
-              title: trimmed,
-              description: description?.trim() || undefined,
-              priority,
-              columnId: columnId || t.columnId,
-            }
-          : t
-      )
-    );
+
+    if (isMock) {
+      setTasks((prev) =>
+        prev.map((t) =>
+          t.id === taskId
+            ? {
+                ...t,
+                title: trimmed,
+                description: description?.trim() || undefined,
+                priority,
+                columnId: columnId || t.columnId,
+              }
+            : t
+        )
+      );
+      return;
+    }
+
+    try {
+      const updated = await taskBoardApi.updateTask(taskId, {
+        title: trimmed,
+        description: description?.trim() || undefined,
+        priority: mapPriorityToApi(priority),
+        columnId,
+      });
+      setTasks((prev) =>
+        prev.map((t) => (t.id === taskId ? mapTaskToDisplay(updated) : t))
+      );
+    } catch {
+      setErrorMessage('Erro ao atualizar tarefa.');
+    }
   };
 
-  const handleDeleteTask = (taskId: string) => {
-    setTasks((prev) => prev.filter((t) => t.id !== taskId));
+  const handleDeleteTask = async (taskId: string) => {
+    if (isMock) {
+      setTasks((prev) => prev.filter((t) => t.id !== taskId));
+      return;
+    }
+
+    try {
+      await taskBoardApi.deleteTask(taskId);
+      setTasks((prev) => prev.filter((t) => t.id !== taskId));
+    } catch {
+      setErrorMessage('Erro ao excluir tarefa.');
+    }
   };
 
-  const handleMoveTask = (taskId: string, targetColumnId: string) => {
+  const handleMoveTask = async (taskId: string, targetColumnId: string) => {
     const isDoneCol =
       targetColumnId === 'col-done' ||
       columns.find((c) => c.id === targetColumnId)?.title.toLowerCase().includes('conclu');
@@ -219,9 +371,17 @@ export const useTaskBoard = () => {
       const without = prev.filter((t) => t.id !== taskId);
       return [...without, updated];
     });
+
+    if (!isMock) {
+      try {
+        await taskBoardApi.moveTask(taskId, { targetColumnId });
+      } catch {
+        setErrorMessage('Erro ao mover tarefa no servidor.');
+      }
+    }
   };
 
-  const handleToggleTaskComplete = (taskId: string) => {
+  const handleToggleTaskComplete = async (taskId: string) => {
     setTasks((prev) =>
       prev.map((t) => {
         if (t.id !== taskId) return t;
@@ -243,6 +403,14 @@ export const useTaskBoard = () => {
         };
       })
     );
+
+    if (!isMock) {
+      try {
+        await taskBoardApi.toggleComplete(taskId);
+      } catch {
+        setErrorMessage('Erro ao alternar conclusão da tarefa.');
+      }
+    }
   };
 
   const handleTaskDragStart = (taskId: string) => {
@@ -281,6 +449,10 @@ export const useTaskBoard = () => {
       next.splice(newTargetIndex, 0, sourceTask);
       return next;
     });
+
+    if (!isMock && draggedTaskId) {
+      taskBoardApi.moveTask(draggedTaskId, { targetColumnId }).catch(() => {});
+    }
 
     setDraggedTaskId(null);
   };
@@ -359,6 +531,8 @@ export const useTaskBoard = () => {
     activeGoal,
     columns,
     tasks,
+    isLoading,
+    errorMessage,
     filteredTasks,
     tasksByColumn,
     searchFilter,

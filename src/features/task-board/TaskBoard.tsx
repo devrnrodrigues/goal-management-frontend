@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { AnimatePresence } from 'framer-motion';
+import { Target } from 'lucide-react';
 import { useTaskBoard } from './useTaskBoard';
 import type { BoardColumn, BoardTask, TaskPriority } from './types';
 import {
@@ -15,6 +16,8 @@ import {
   BoardTitle,
   BoardSubtitle,
   BoardColumnsRow,
+  ErrorMessageBanner,
+  EmptyBoardNotice,
 } from './TaskBoard.styles';
 
 export const TaskBoard: React.FC = () => {
@@ -22,6 +25,8 @@ export const TaskBoard: React.FC = () => {
     availableGoals,
     activeGoal,
     columns,
+    isLoading,
+    errorMessage,
     tasksByColumn,
     priorityFilter,
     setPriorityFilter,
@@ -122,6 +127,8 @@ export const TaskBoard: React.FC = () => {
         </BoardSubtitle>
       </BoardPageHeader>
 
+      {errorMessage && <ErrorMessageBanner>{errorMessage}</ErrorMessageBanner>}
+
       <TaskBoardHeader
         availableGoals={availableGoals}
         activeGoal={activeGoal}
@@ -131,32 +138,40 @@ export const TaskBoard: React.FC = () => {
         onOpenAddColumnModal={handleOpenAddColumn}
       />
 
-      <BoardColumnsRow>
-        {columns.map((column) => (
-          <TaskBoardColumn
-            key={column.id}
-            column={column}
-            tasks={tasksByColumn[column.id] || []}
-            allColumns={columns}
-            draggedTaskId={draggedTaskId}
-            draggedColumnId={draggedColumnId}
-            onAddTaskToColumn={handleOpenAddTask}
-            onEditColumn={handleOpenEditColumn}
-            onDeleteColumn={handleDeleteColumn}
-            onToggleComplete={handleToggleTaskComplete}
-            onEditTask={handleOpenEditTask}
-            onDeleteTask={handleRequestDeleteTask}
-            onMoveTask={handleMoveTask}
-            onDragStartTask={handleTaskDragStart}
-            onDragEndTask={handleTaskDragEnd}
-            onDropTaskOnTask={handleTaskDropOnTask}
-            onDropTaskOnColumn={handleTaskDropOnColumn}
-            onDragStartColumn={handleColumnDragStart}
-            onDragEndColumn={handleColumnDragEnd}
-            onDropColumn={handleColumnDrop}
-          />
-        ))}
-      </BoardColumnsRow>
+      {!isLoading && !activeGoal ? (
+        <EmptyBoardNotice>
+          <Target size={42} />
+          <h3>Nenhuma meta encontrada</h3>
+          <p>Crie uma meta primeiro na aba "Metas" para gerenciar tarefas no quadro.</p>
+        </EmptyBoardNotice>
+      ) : (
+        <BoardColumnsRow>
+          {columns.map((column) => (
+            <TaskBoardColumn
+              key={column.id}
+              column={column}
+              tasks={tasksByColumn[column.id] || []}
+              allColumns={columns}
+              draggedTaskId={draggedTaskId}
+              draggedColumnId={draggedColumnId}
+              onAddTaskToColumn={handleOpenAddTask}
+              onEditColumn={handleOpenEditColumn}
+              onDeleteColumn={handleDeleteColumn}
+              onToggleComplete={handleToggleTaskComplete}
+              onEditTask={handleOpenEditTask}
+              onDeleteTask={handleRequestDeleteTask}
+              onMoveTask={handleMoveTask}
+              onDragStartTask={handleTaskDragStart}
+              onDragEndTask={handleTaskDragEnd}
+              onDropTaskOnTask={handleTaskDropOnTask}
+              onDropTaskOnColumn={handleTaskDropOnColumn}
+              onDragStartColumn={handleColumnDragStart}
+              onDragEndColumn={handleColumnDragEnd}
+              onDropColumn={handleColumnDrop}
+            />
+          ))}
+        </BoardColumnsRow>
+      )}
 
       <AnimatePresence>
         {isColumnModalOpen && (

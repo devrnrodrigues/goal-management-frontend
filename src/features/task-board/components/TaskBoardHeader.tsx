@@ -18,7 +18,7 @@ import {
 
 interface TaskBoardHeaderProps {
   availableGoals: Task[];
-  activeGoal: ActiveGoalInfo;
+  activeGoal: ActiveGoalInfo | null;
   priorityFilter: string;
   onPriorityFilterChange: (val: string) => void;
   onSelectGoal: (goal: string | Task) => void;

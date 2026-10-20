@@ -19,7 +19,7 @@ import {
 
 interface GoalSelectorProps {
   availableGoals: Task[];
-  activeGoal: ActiveGoalInfo;
+  activeGoal: ActiveGoalInfo | null;
   onSelectGoal: (goal: string | Task) => void;
 }
 
@@ -86,7 +86,7 @@ export const GoalSelector: React.FC<GoalSelectorProps> = ({
         title="Meta ativa"
       >
         <Target size={14} color="#00a86b" />
-        <GoalTitleTruncated>{activeGoal.title}</GoalTitleTruncated>
+        <GoalTitleTruncated>{activeGoal ? activeGoal.title : 'Selecionar meta'}</GoalTitleTruncated>
         <ChevronDown size={14} />
       </GoalTriggerButton>
 
@@ -118,7 +118,7 @@ export const GoalSelector: React.FC<GoalSelectorProps> = ({
             )}
 
             {filtered.map((g) => {
-              const isSelected = g.id === activeGoal.id || g.title === activeGoal.title;
+              const isSelected = Boolean(activeGoal && (g.id === activeGoal.id || g.title === activeGoal.title));
               return (
                 <GoalOptionItem
                   key={g.id || g.title}
