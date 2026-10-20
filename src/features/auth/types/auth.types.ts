@@ -1,5 +1,3 @@
-import type { FormEvent } from 'react';
-
 export type AuthMode = 'login' | 'register';
 
 export interface AuthPageProps {
@@ -13,13 +11,38 @@ export interface GoogleAuthButtonProps {
 }
 
 export interface LoginFormProps {
-  onSubmit: (event: FormEvent<HTMLFormElement>) => void;
+  onLoginSuccess: () => void;
   onGoogleLogin: () => void;
   onSwitchToRegister: () => void;
 }
 
 export interface RegisterFormProps {
-  onSubmit: (event: FormEvent<HTMLFormElement>) => void;
+  onRegisterSuccess: () => void;
   onGoogleRegister: () => void;
   onSwitchToLogin: () => void;
+}
+
+export interface LoginCredentials {
+  email: string;
+  password: string;
+}
+
+export interface RegisterCredentials {
+  name: string;
+  email: string;
+  password: string;
+}
+
+export interface AuthUser {
+  id: string;
+  name: string;
+  email: string;
+  avatarUrl?: string;
+  provider: 'LOCAL' | 'GOOGLE';
+}
+
+export interface AuthApiResponse {
+  token: string;
+  tokenType: string;
+  user: AuthUser;
 }

@@ -24,7 +24,7 @@ export const AuthPage: React.FC<AuthPageProps> = ({
     authMode,
     handleSwitchToLogin,
     handleSwitchToRegister,
-    handleSubmitAuth,
+    handleGoogleAuth,
   } = useAuth({ initialMode, onLoginSuccess });
 
   return (
@@ -50,8 +50,8 @@ export const AuthPage: React.FC<AuthPageProps> = ({
                 transition={{ duration: 0.2 }}
               >
                 <LoginForm
-                  onSubmit={handleSubmitAuth}
-                  onGoogleLogin={handleSubmitAuth}
+                  onLoginSuccess={onLoginSuccess}
+                  onGoogleLogin={handleGoogleAuth}
                   onSwitchToRegister={handleSwitchToRegister}
                 />
               </MotionFormContainer>
@@ -64,8 +64,8 @@ export const AuthPage: React.FC<AuthPageProps> = ({
                 transition={{ duration: 0.2 }}
               >
                 <RegisterForm
-                  onSubmit={handleSubmitAuth}
-                  onGoogleRegister={handleSubmitAuth}
+                  onRegisterSuccess={onLoginSuccess}
+                  onGoogleRegister={handleGoogleAuth}
                   onSwitchToLogin={handleSwitchToLogin}
                 />
               </MotionFormContainer>

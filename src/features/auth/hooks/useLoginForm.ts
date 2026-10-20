@@ -1,22 +1,33 @@
 import { useState } from 'react';
 import type { FormEvent, ChangeEvent } from 'react';
+import { authApi } from '../api/authApi';
+import { setAuthSession } from '../../shared/api/httpClient';
+import type { ApiError } from '../../shared/api/httpClient';
 
 interface UseLoginFormProps {
-  onSubmit: (event: FormEvent<HTMLFormElement>) => void;
+  onLoginSuccess: () => void;
 }
 
-export const useLoginForm = ({ onSubmit }: UseLoginFormProps) => {
+export const useLoginForm = ({ onLoginSuccess }: UseLoginFormProps) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const handleEmailChange = (event: ChangeEvent<HTMLInputElement>) => {
     setEmail(event.target.value);
+    if (errorMessage) {
+      setErrorMessage(null);
+    }
   };
 
   const handlePasswordChange = (event: ChangeEvent<HTMLInputElement>) => {
     setPassword(event.target.value);
+    if (errorMessage) {
+      setErrorMessage(null);
+    }
   };
 
   const handleTogglePasswordVisibility = () => {
@@ -27,9 +38,21 @@ export const useLoginForm = ({ onSubmit }: UseLoginFormProps) => {
     setRememberMe(event.target.checked);
   };
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    onSubmit(event);
+    setErrorMessage(null);
+    setIsLoading(true);
+
+    try {
+      const response = await authApi.login({ email, password });
+      setAuthSession(response.token, response.user);
+      onLoginSuccess();
+    } catch (error) {
+      const apiError = error as ApiError;
+      setErrorMessage(apiError.message || 'Falha ao autenticar. Verifique suas credenciais.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return {
@@ -37,6 +60,8 @@ export const useLoginForm = ({ onSubmit }: UseLoginFormProps) => {
     password,
     showPassword,
     rememberMe,
+    isLoading,
+    errorMessage,
     handleEmailChange,
     handlePasswordChange,
     handleTogglePasswordVisibility,

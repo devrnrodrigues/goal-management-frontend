@@ -8,6 +8,7 @@ import {
   FormHeader,
   FormTitle,
   FormSubtitle,
+  ErrorMessageBox,
   InputGroup,
   InputLabel,
   InputFieldWrapper,
@@ -26,7 +27,7 @@ import {
 } from '../styles/RegisterForm.styles';
 
 export const RegisterForm: React.FC<RegisterFormProps> = ({
-  onSubmit,
+  onRegisterSuccess,
   onGoogleRegister,
   onSwitchToLogin,
 }) => {
@@ -37,6 +38,8 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
     confirmPassword,
     showPassword,
     agreeTerms,
+    isLoading,
+    errorMessage,
     handleNameChange,
     handleEmailChange,
     handlePasswordChange,
@@ -44,7 +47,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
     handleTogglePasswordVisibility,
     handleAgreeTermsChange,
     handleSubmit,
-  } = useRegisterForm({ onSubmit });
+  } = useRegisterForm({ onRegisterSuccess });
 
   return (
     <FormContainer onSubmit={handleSubmit}>
@@ -52,6 +55,8 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
         <FormTitle>Criar conta</FormTitle>
         <FormSubtitle>Preencha os campos para começar</FormSubtitle>
       </FormHeader>
+
+      {errorMessage && <ErrorMessageBox>{errorMessage}</ErrorMessageBox>}
 
       <InputGroup>
         <InputLabel htmlFor="register-name">Nome completo</InputLabel>
@@ -140,8 +145,8 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
         </TermsText>
       </TermsRow>
 
-      <SubmitButton type="submit">
-        Criar conta
+      <SubmitButton type="submit" disabled={isLoading}>
+        {isLoading ? 'Criando conta...' : 'Criar conta'}
       </SubmitButton>
 
       <DividerRow>

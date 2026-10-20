@@ -8,6 +8,7 @@ import {
   FormHeader,
   FormTitle,
   FormSubtitle,
+  ErrorMessageBox,
   InputGroup,
   InputLabel,
   InputFieldWrapper,
@@ -27,7 +28,7 @@ import {
 } from '../styles/LoginForm.styles';
 
 export const LoginForm: React.FC<LoginFormProps> = ({
-  onSubmit,
+  onLoginSuccess,
   onGoogleLogin,
   onSwitchToRegister,
 }) => {
@@ -36,12 +37,14 @@ export const LoginForm: React.FC<LoginFormProps> = ({
     password,
     showPassword,
     rememberMe,
+    isLoading,
+    errorMessage,
     handleEmailChange,
     handlePasswordChange,
     handleTogglePasswordVisibility,
     handleRememberMeChange,
     handleSubmit,
-  } = useLoginForm({ onSubmit });
+  } = useLoginForm({ onLoginSuccess });
 
   return (
     <FormContainer onSubmit={handleSubmit}>
@@ -49,6 +52,8 @@ export const LoginForm: React.FC<LoginFormProps> = ({
         <FormTitle>Acessar plataforma</FormTitle>
         <FormSubtitle>Entre com seus dados para continuar</FormSubtitle>
       </FormHeader>
+
+      {errorMessage && <ErrorMessageBox>{errorMessage}</ErrorMessageBox>}
 
       <InputGroup>
         <InputLabel htmlFor="login-email">E-mail</InputLabel>
@@ -106,8 +111,8 @@ export const LoginForm: React.FC<LoginFormProps> = ({
         </ForgotPasswordLink>
       </ActionsRow>
 
-      <SubmitButton type="submit">
-        <span>Entrar</span>
+      <SubmitButton type="submit" disabled={isLoading}>
+        <span>{isLoading ? 'Entrando...' : 'Entrar'}</span>
         <ArrowRight size={18} />
       </SubmitButton>
 

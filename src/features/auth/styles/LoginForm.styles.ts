@@ -134,6 +134,16 @@ export const ForgotPasswordLink = styled.button`
   }
 `;
 
+export const ErrorMessageBox = styled.div`
+  background-color: rgba(239, 68, 68, 0.1);
+  border: 1px solid ${({ theme }) => theme.colors.statusDanger};
+  color: ${({ theme }) => theme.colors.statusDanger};
+  padding: 10px 14px;
+  border-radius: ${({ theme }) => theme.radii.sm};
+  font-size: 13px;
+  line-height: 1.4;
+`;
+
 export const SubmitButton = styled.button`
   background-color: ${({ theme }) => theme.colors.primary};
   color: ${({ theme }) => theme.colors.sidebarText};
@@ -154,6 +164,11 @@ export const SubmitButton = styled.button`
 
   &:active {
     opacity: 0.95;
+  }
+
+  &:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
   }
 `;
 

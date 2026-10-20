@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import type { FormEvent } from 'react';
 import type { AuthMode } from './types';
+import { setMockSession } from '../shared/api/httpClient';
 
 interface UseAuthProps {
   initialMode?: AuthMode;
@@ -18,8 +18,14 @@ export const useAuth = ({ initialMode = 'login', onLoginSuccess }: UseAuthProps)
     setAuthMode('register');
   };
 
-  const handleSubmitAuth = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+  const handleGoogleAuth = () => {
+    setMockSession({
+      id: 'mock-user-1',
+      name: 'Desenvolvedor Mock',
+      email: 'dev@exemplo.com',
+      avatarUrl: '',
+      provider: 'GOOGLE',
+    });
     onLoginSuccess();
   };
 
@@ -27,6 +33,6 @@ export const useAuth = ({ initialMode = 'login', onLoginSuccess }: UseAuthProps)
     authMode,
     handleSwitchToLogin,
     handleSwitchToRegister,
-    handleSubmitAuth,
+    handleGoogleAuth,
   };
 };
