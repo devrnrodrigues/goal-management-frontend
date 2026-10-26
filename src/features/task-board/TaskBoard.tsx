@@ -12,9 +12,6 @@ import {
 import { ConfirmDeleteModal } from '../shared';
 import {
   BoardContainer,
-  BoardPageHeader,
-  BoardTitle,
-  BoardSubtitle,
   BoardColumnsRow,
   ErrorMessageBanner,
   EmptyBoardNotice,
@@ -120,13 +117,6 @@ export const TaskBoard: React.FC = () => {
 
   return (
     <BoardContainer>
-      <BoardPageHeader>
-        <BoardTitle>Quadro de tarefas</BoardTitle>
-        <BoardSubtitle>
-          Acompanhe o fluxo de trabalho, organize etapas e gerencie suas tarefas.
-        </BoardSubtitle>
-      </BoardPageHeader>
-
       {errorMessage && <ErrorMessageBanner>{errorMessage}</ErrorMessageBanner>}
 
       <TaskBoardHeader

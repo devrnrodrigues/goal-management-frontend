@@ -3,7 +3,7 @@ import type { Task } from '../my-goals/types';
 import { initialTasks } from '../my-goals/constants/initialGoals';
 import { membersByTitle, defaultMembers } from '../my-goals/constants/members';
 import type { BoardColumn, BoardTask, ActiveGoalInfo, TaskPriority } from './types';
-import { isMockSession, getAuthToken } from '../shared/api/httpClient';
+import { useDevMode } from '../shared';
 import { goalsApi } from '../my-goals/api/goalsApi';
 import { mapSummaryToTask } from '../my-goals/api/goalMappers';
 import { taskBoardApi } from './api/taskBoardApi';
@@ -21,7 +21,7 @@ const defaultColumns: BoardColumn[] = [
 ];
 
 export const useTaskBoard = () => {
-  const isMock = isMockSession() || !getAuthToken();
+  const { isMock } = useDevMode();
   const [availableGoals, setAvailableGoals] = useState<Task[]>(isMock ? initialTasks : []);
   const [isLoading, setIsLoading] = useState<boolean>(!isMock);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -91,6 +91,41 @@ export const useTaskBoard = () => {
   const loadGoals = useCallback(async () => {
     if (isMock) {
       setAvailableGoals(initialTasks);
+      const first = initialTasks[0];
+      if (first) {
+        setActiveGoal({
+          id: first.id || 'goal-default',
+          title: first.title,
+          category: first.category,
+          deadline: first.deadline,
+          progress: first.progress,
+        });
+        setColumns(defaultColumns);
+        const firstColId = defaultColumns[0].id;
+        const goalMembers = membersByTitle[first.title] || defaultMembers;
+        setTasks(
+          (first.subtasks || []).map((st, index) => {
+            const priorities: TaskPriority[] = ['Alta', 'Média', 'Baixa'];
+            const p = priorities[index % priorities.length];
+            const memberSubset = goalMembers.slice(index % 2, (index % 2) + 2);
+
+            return {
+              id: `task-${st.id}`,
+              title: st.title.replace(/;$/, ''),
+              description: st.description,
+              completed: st.completed,
+              priority: p,
+              columnId: firstColId,
+              goalId: first.id,
+              deadline: first.deadline ? `${(index + 2) * 5} dias` : undefined,
+              attachmentsCount: (index * 3) % 8,
+              commentsCount: (index * 4) % 15,
+              members: memberSubset,
+            };
+          })
+        );
+      }
+      setIsLoading(false);
       return;
     }
 
