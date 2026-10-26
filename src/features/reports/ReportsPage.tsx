@@ -10,10 +10,6 @@ import {
 } from './components';
 import {
   ReportsContainer,
-  ReportsHeaderWrapper,
-  HeaderTitlesCol,
-  ReportsTitle,
-  ReportsSubtitle,
   ReportsContentLayout,
   TwoColumnsGrid,
 } from './ReportsPage.styles';
@@ -34,15 +30,6 @@ export const ReportsPage: React.FC = () => {
 
   return (
     <ReportsContainer>
-      <ReportsHeaderWrapper>
-        <HeaderTitlesCol>
-          <ReportsTitle>Relatórios e métricas</ReportsTitle>
-          <ReportsSubtitle>
-            Acompanhe a eficiência de entregas, velocidade e saúde de todas as metas
-          </ReportsSubtitle>
-        </HeaderTitlesCol>
-      </ReportsHeaderWrapper>
-
       <ReportsFilters
         period={filters.period}
         selectedCategory={filters.selectedCategory}
