@@ -2,15 +2,11 @@ import React from 'react';
 import { Award } from 'lucide-react';
 import { useCompletedGoals } from './useCompletedGoals';
 import {
-  CompletedGoalsFilters,
   CompletedGoalCard,
   CompletedGoalDetailModal,
 } from './components';
 import {
   CompletedGoalsContainer,
-  HeaderWrapper,
-  PageTitle,
-  PageSubtitle,
   CardsList,
   EmptyState,
   EmptyTitle,
@@ -22,43 +18,21 @@ export const CompletedGoalsPage: React.FC = () => {
   const {
     goals,
     selectedGoal,
-    filters,
-    availableCategories,
     errorMessage,
-    handleSearchChange,
-    handleCategoryChange,
-    handleSortChange,
     handleOpenDetail,
     handleCloseDetail,
   } = useCompletedGoals();
 
   return (
     <CompletedGoalsContainer>
-      <HeaderWrapper>
-        <PageTitle>Metas concluídas</PageTitle>
-        <PageSubtitle>
-          Histórico de metas finalizadas, conquistas alcançadas e entregas realizadas com sucesso
-        </PageSubtitle>
-      </HeaderWrapper>
-
       {errorMessage && <ErrorMessageBanner>{errorMessage}</ErrorMessageBanner>}
-
-      <CompletedGoalsFilters
-        searchQuery={filters.searchQuery}
-        selectedCategory={filters.selectedCategory}
-        sortBy={filters.sortBy}
-        categories={availableCategories}
-        onSearchChange={handleSearchChange}
-        onCategoryChange={handleCategoryChange}
-        onSortChange={handleSortChange}
-      />
 
       {goals.length === 0 ? (
         <EmptyState>
           <Award size={32} />
           <EmptyTitle>Nenhuma meta concluída encontrada</EmptyTitle>
           <EmptySubtitle>
-            Ajuste a busca ou o filtro de categoria para visualizar suas metas finalizadas.
+            Você ainda não possui metas finalizadas.
           </EmptySubtitle>
         </EmptyState>
       ) : (

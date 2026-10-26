@@ -6,7 +6,7 @@ import type {
   CompletedGoalsOverviewStats,
   CompletedSubTask,
 } from './types';
-import { isMockSession, getAuthToken } from '../shared/api/httpClient';
+import { useDevMode } from '../shared';
 import { goalsApi } from '../my-goals/api/goalsApi';
 import { taskBoardApi } from '../task-board/api/taskBoardApi';
 import { formatDateToDisplay, mapMemberToAvatar } from '../my-goals/api/goalMappers';
@@ -216,7 +216,7 @@ const INITIAL_COMPLETED_GOALS: CompletedGoalItem[] = [
 ];
 
 export const useCompletedGoals = () => {
-  const isMock = isMockSession() || !getAuthToken();
+  const { isMock } = useDevMode();
   const [goals, setGoals] = useState<CompletedGoalItem[]>(isMock ? INITIAL_COMPLETED_GOALS : []);
   const [selectedGoal, setSelectedGoal] = useState<CompletedGoalItem | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(!isMock);
