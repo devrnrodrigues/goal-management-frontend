@@ -31,13 +31,11 @@ export const GoalsPageArea = styled.div`
 
 export const GoalsHeader = styled.div`
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   align-items: center;
 
   @media (max-width: 768px) {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 16px;
+    justify-content: flex-end;
   }
 `;
 

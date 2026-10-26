@@ -1,6 +1,6 @@
 import React from 'react';
 import { AnimatePresence } from 'framer-motion';
-import { Plus, ChevronLeft, ChevronRight, Target } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Target } from 'lucide-react';
 import {
   GoalCard,
   GoalDetailView,
@@ -13,10 +13,6 @@ import { useMyGoals } from './useMyGoals';
 import type { SubTask, Task } from './types';
 import {
   GoalsPageArea,
-  GoalsHeader,
-  GoalsTitle,
-  GoalsSubtitle,
-  AddButton,
   CardGrid,
   GoalCardWrapper,
   ViewSelector,
@@ -84,18 +80,6 @@ export const MyGoals: React.FC = () => {
         />
       ) : (
         <>
-          <GoalsHeader>
-            <div>
-              <GoalsTitle>Minhas metas</GoalsTitle>
-              <GoalsSubtitle>
-                Acompanhe o progresso, adicione e gerencie metas.
-              </GoalsSubtitle>
-            </div>
-            <AddButton type="button" onClick={() => setIsModalOpen(true)}>
-              <Plus size={16} /> Adicionar meta
-            </AddButton>
-          </GoalsHeader>
-
           {errorMessage && <ErrorMessageBanner>{errorMessage}</ErrorMessageBanner>}
 
           <GoalStatsBar

@@ -4,7 +4,7 @@ import type { GoalConfigData } from './components';
 import { initialTasks } from './constants/initialGoals';
 import { membersByTitle, defaultMembers } from './constants/members';
 import { useCardsPerPage } from './hooks';
-import { isMockSession, getAuthToken } from '../shared/api/httpClient';
+import { useDevMode } from '../shared';
 import { goalsApi } from './api/goalsApi';
 import {
   mapSummaryToTask,
@@ -36,7 +36,7 @@ const mapTaskApiToSubTask = (t: TaskApiResponse): SubTask => ({
 });
 
 export const useMyGoals = () => {
-  const isMock = isMockSession() || !getAuthToken();
+  const { isMock } = useDevMode();
   const [tasks, setTasks] = useState<Task[]>(isMock ? initialTasks : []);
   const [isLoading, setIsLoading] = useState<boolean>(!isMock);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -74,6 +74,16 @@ export const useMyGoals = () => {
   useEffect(() => {
     loadGoals();
   }, [loadGoals]);
+
+  useEffect(() => {
+    const handleOpenModal = () => {
+      setIsModalOpen(true);
+    };
+    window.addEventListener('open-add-goal-modal', handleOpenModal);
+    return () => {
+      window.removeEventListener('open-add-goal-modal', handleOpenModal);
+    };
+  }, []);
 
   const cardsPerPage = useCardsPerPage();
   const totalPages = Math.ceil(tasks.length / cardsPerPage) || 1;
