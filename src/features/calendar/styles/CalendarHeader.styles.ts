@@ -18,8 +18,9 @@ export const HeaderContainer = styled.div`
 
 export const TitleWrapper = styled.div`
   display: flex;
-  align-items: center;
-  gap: 12px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
 `;
 
 export const MonthTitle = styled.h2`
@@ -28,6 +29,12 @@ export const MonthTitle = styled.h2`
   color: ${({ theme }) => theme.colors.textPrimary};
   letter-spacing: -0.4px;
   text-transform: capitalize;
+`;
+
+export const MonthSubtitle = styled.p`
+  font-size: clamp(13px, 0.2vw + 12px, 14px);
+  font-weight: 500;
+  color: ${({ theme }) => theme.colors.textSecondary};
 `;
 
 export const NavControls = styled.div`

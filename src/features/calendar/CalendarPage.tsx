@@ -6,10 +6,6 @@ import {
 } from './components';
 import {
   CalendarPageContainer,
-  CalendarHeaderWrapper,
-  HeaderTitlesCol,
-  CalendarTitle,
-  CalendarSubtitle,
   CalendarContentLayout,
   ErrorMessageBanner,
 } from './CalendarPage.styles';
@@ -27,15 +23,6 @@ export const CalendarPage: React.FC = () => {
 
   return (
     <CalendarPageContainer>
-      <CalendarHeaderWrapper>
-        <HeaderTitlesCol>
-          <CalendarTitle>Calendário</CalendarTitle>
-          <CalendarSubtitle>
-            Visualização das metas criadas e planejadas organizadas por data.
-          </CalendarSubtitle>
-        </HeaderTitlesCol>
-      </CalendarHeaderWrapper>
-
       {errorMessage && <ErrorMessageBanner>{errorMessage}</ErrorMessageBanner>}
 
       <CalendarContentLayout>

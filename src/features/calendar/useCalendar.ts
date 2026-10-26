@@ -19,7 +19,7 @@ import type {
   CalendarTaskStatus,
   CalendarTaskPriority,
 } from './types';
-import { isMockSession, getAuthToken } from '../shared/api/httpClient';
+import { useDevMode } from '../shared';
 import { goalsApi } from '../my-goals/api/goalsApi';
 import { taskBoardApi } from '../task-board/api/taskBoardApi';
 import { mapPriorityToDisplay } from '../task-board/api/taskBoardMappers';
@@ -199,7 +199,7 @@ const getInitials = (name?: string): string => {
 };
 
 export const useCalendar = () => {
-  const isMock = isMockSession() || !getAuthToken();
+  const { isMock } = useDevMode();
   const [currentMonthDate, setCurrentMonthDate] = useState<Date>(() => new Date());
   const [selectedDate, setSelectedDate] = useState<Date>(() => new Date());
   const [realTasks, setRealTasks] = useState<CalendarTask[]>([]);
