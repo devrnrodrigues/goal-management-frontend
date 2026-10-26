@@ -9,12 +9,12 @@ import {
 } from '../styles/ActivityEmptyState.styles';
 
 interface ActivityEmptyStateProps {
-  hasFilters: boolean;
-  onResetFilters: () => void;
+  hasFilters?: boolean;
+  onResetFilters?: () => void;
 }
 
 export const ActivityEmptyState: React.FC<ActivityEmptyStateProps> = ({
-  hasFilters,
+  hasFilters = false,
   onResetFilters,
 }) => {
   return (
@@ -24,9 +24,11 @@ export const ActivityEmptyState: React.FC<ActivityEmptyStateProps> = ({
       </EmptyIconCircle>
       <EmptyTitle>Nenhuma atividade encontrada</EmptyTitle>
       <EmptyDescription>
-        Não encontramos nenhum registro correspondente aos filtros ou busca aplicados.
+        {hasFilters
+          ? 'Não encontramos nenhum registro correspondente aos filtros aplicados.'
+          : 'Ainda não há atividades ou movimentações registradas na sua conta.'}
       </EmptyDescription>
-      {hasFilters && (
+      {hasFilters && onResetFilters && (
         <ResetFiltersButton type="button" onClick={onResetFilters}>
           <RotateCcw size={14} />
           Redefinir filtros

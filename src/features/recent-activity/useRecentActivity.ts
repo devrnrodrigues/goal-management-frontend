@@ -6,7 +6,7 @@ import type {
   DateGroupLabel,
   GoalFilterOption,
 } from './types';
-import { isMockSession, getAuthToken } from '../shared/api/httpClient';
+import { useDevMode } from '../shared';
 import { activityApi } from './api/activityApi';
 import { mapActivityToItem } from './api/activityMappers';
 import { goalsApi } from '../my-goals/api/goalsApi';
@@ -267,7 +267,7 @@ const INITIAL_FILTERS: ActivityFiltersState = {
 const DATE_GROUPS: DateGroupLabel[] = ['Hoje', 'Ontem', 'Esta semana', 'Anterior'];
 
 export const useRecentActivity = () => {
-  const isMock = isMockSession() || !getAuthToken();
+  const { isMock } = useDevMode();
   const [activities, setActivities] = useState<ActivityItem[]>(isMock ? INITIAL_ACTIVITIES : []);
   const [goalOptions, setGoalOptions] = useState<GoalFilterOption[]>(isMock ? GOAL_OPTIONS : []);
   const [isLoading, setIsLoading] = useState<boolean>(!isMock);
