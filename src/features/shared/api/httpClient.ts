@@ -10,26 +10,63 @@ export interface ApiError {
   errors?: Record<string, string>;
 }
 
+export interface StoredUser {
+  id?: string;
+  name?: string;
+  email?: string;
+  avatarUrl?: string;
+  provider?: 'LOCAL' | 'GOOGLE';
+}
+
 export const getAuthToken = (): string | null => {
   return localStorage.getItem(TOKEN_STORAGE_KEY);
+};
+
+export const getStoredUser = (): StoredUser | null => {
+  const user = localStorage.getItem(USER_STORAGE_KEY);
+  if (!user) return null;
+  try {
+    return JSON.parse(user) as StoredUser;
+  } catch {
+    return null;
+  }
 };
 
 export const setAuthSession = (token: string, user: unknown): void => {
   localStorage.setItem(TOKEN_STORAGE_KEY, token);
   localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(user));
   localStorage.removeItem(MOCK_MODE_STORAGE_KEY);
+  window.dispatchEvent(new Event('dev-mode-change'));
 };
 
 export const setMockSession = (user: unknown): void => {
   localStorage.setItem(MOCK_MODE_STORAGE_KEY, 'true');
   localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(user));
   localStorage.removeItem(TOKEN_STORAGE_KEY);
+  window.dispatchEvent(new Event('dev-mode-change'));
+};
+
+export const setDevMode = (enabled: boolean): void => {
+  if (enabled) {
+    localStorage.setItem(MOCK_MODE_STORAGE_KEY, 'true');
+  } else {
+    localStorage.removeItem(MOCK_MODE_STORAGE_KEY);
+  }
+  window.dispatchEvent(new Event('dev-mode-change'));
+};
+
+export const toggleDevModeSession = (): boolean => {
+  const current = isMockSession();
+  const next = !current;
+  setDevMode(next);
+  return next;
 };
 
 export const clearAuthSession = (): void => {
   localStorage.removeItem(TOKEN_STORAGE_KEY);
   localStorage.removeItem(USER_STORAGE_KEY);
   localStorage.removeItem(MOCK_MODE_STORAGE_KEY);
+  window.dispatchEvent(new Event('dev-mode-change'));
 };
 
 export const isMockSession = (): boolean => {

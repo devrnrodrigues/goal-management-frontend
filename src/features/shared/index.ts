@@ -4,4 +4,5 @@ export { GlobalStyles } from './GlobalStyles';
 export { ConfirmDeleteModal } from './ConfirmDeleteModal';
 export { PlaceholderPage } from './components/PlaceholderPage';
 export { useScrollbarVisibility } from './hooks/useScrollbarVisibility';
+export { useDevMode } from './hooks/useDevMode';
 export * from './api/httpClient';
