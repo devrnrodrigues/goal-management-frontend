@@ -21,13 +21,11 @@ export const DashboardContainer = styled.div`
 
 export const DashboardHeaderWrapper = styled.div`
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   align-items: center;
 
   @media (max-width: 768px) {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 16px;
+    justify-content: flex-end;
   }
 `;
 
