@@ -45,12 +45,19 @@ export function App() {
     setIsAuthenticated(false);
   };
 
+  const handleOpenAddGoal = () => {
+    setActiveTab('goals');
+    setTimeout(() => {
+      window.dispatchEvent(new Event('open-add-goal-modal'));
+    }, 0);
+  };
+
   const renderActivePage = () => {
     switch (activeTab) {
       case 'goals':
         return <MyGoals />;
       case 'dashboard':
-        return <DashboardPage onNavigateToGoals={() => setActiveTab('goals')} />;
+        return <DashboardPage />;
       case 'task-board':
         return <TaskBoard />;
       case 'recent-activity':
@@ -81,6 +88,7 @@ export function App() {
           activeNavItemId={activeTab}
           onSelectNavItem={(id) => setActiveTab(id)}
           onLogout={handleLogout}
+          onOpenAddGoal={handleOpenAddGoal}
         >
           {renderActivePage()}
         </MainLayout>

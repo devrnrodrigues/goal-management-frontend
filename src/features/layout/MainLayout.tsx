@@ -16,6 +16,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({
   searchQuery,
   onSearchChange,
   onLogout,
+  onOpenAddGoal,
 }) => {
   const {
     isSidebarOpen,
@@ -41,6 +42,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({
         searchQuery={searchQuery}
         onSearchChange={onSearchChange}
         onLogout={onLogout}
+        onOpenAddGoal={onOpenAddGoal}
       />
       <MainContentArea>
         <PageContentContainer>{children}</PageContentContainer>

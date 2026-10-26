@@ -9,6 +9,7 @@ export interface HeaderProps {
   userName?: string;
   avatarUrl?: string;
   onLogout?: () => void;
+  onOpenAddGoal?: () => void;
 }
 
 export interface NavItemConfig {
@@ -38,4 +39,5 @@ export interface MainLayoutProps {
   searchQuery?: string;
   onSearchChange?: (e: ChangeEvent<HTMLInputElement>) => void;
   onLogout?: () => void;
+  onOpenAddGoal?: () => void;
 }

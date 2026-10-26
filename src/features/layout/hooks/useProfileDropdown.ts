@@ -1,8 +1,9 @@
 import { useState, useRef, useEffect } from 'react';
+import { useDevMode } from '../../shared';
 
 export const useProfileDropdown = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [isDevMode, setIsDevMode] = useState(false);
+  const { isDevMode, toggleDevMode } = useDevMode();
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const toggleDropdown = () => {
@@ -11,10 +12,6 @@ export const useProfileDropdown = () => {
 
   const closeDropdown = () => {
     setIsOpen(false);
-  };
-
-  const toggleDevMode = () => {
-    setIsDevMode((prev) => !prev);
   };
 
   useEffect(() => {

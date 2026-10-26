@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { Search, Bell, Menu, ChevronDown, Code2, Settings, LogOut } from 'lucide-react';
+import { Search, Bell, Menu, ChevronDown, Code2, Settings, LogOut, Plus } from 'lucide-react';
 import type { HeaderProps } from './types';
 import { useProfileDropdown } from './hooks/useProfileDropdown';
+import { getStoredUser } from '../shared';
 import {
   HeaderContainer,
   HeaderContentWrapper,
@@ -11,7 +12,7 @@ import {
   SearchIconWrapper,
   SearchInput,
   HeaderRight,
-  PeriodSelectorButton,
+  AddGoalHeaderButton,
   NotificationButton,
   NotificationBadge,
   UserProfileWrapper,
@@ -32,9 +33,10 @@ export const Header: React.FC<HeaderProps> = ({
   searchQuery,
   onSearchChange,
   notificationCount = 2,
-  userName = 'Renan Rodrigues',
-  avatarUrl = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80',
+  userName,
+  avatarUrl,
   onLogout,
+  onOpenAddGoal,
 }) => {
   const [internalQuery, setInternalQuery] = useState('');
   const {
@@ -45,6 +47,13 @@ export const Header: React.FC<HeaderProps> = ({
     closeDropdown,
     toggleDevMode,
   } = useProfileDropdown();
+
+  const storedUser = getStoredUser();
+  const displayName = userName || storedUser?.name || 'Renan Rodrigues';
+  const displayAvatar =
+    avatarUrl ||
+    storedUser?.avatarUrl ||
+    'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80';
 
   const isControlled = searchQuery !== undefined && onSearchChange !== undefined;
   const currentQuery = isControlled ? searchQuery : internalQuery;
@@ -87,10 +96,10 @@ export const Header: React.FC<HeaderProps> = ({
         </HeaderLeft>
 
         <HeaderRight>
-          <PeriodSelectorButton type="button">
-            <span>Este mês</span>
-            <ChevronDown size={14} />
-          </PeriodSelectorButton>
+          <AddGoalHeaderButton type="button" onClick={onOpenAddGoal}>
+            <Plus size={16} />
+            <span>Adicionar meta</span>
+          </AddGoalHeaderButton>
 
           <NotificationButton
             type="button"
@@ -104,9 +113,9 @@ export const Header: React.FC<HeaderProps> = ({
 
           <ProfileDropdownContainer ref={dropdownRef}>
             <UserProfileWrapper onClick={toggleDropdown} role="button" tabIndex={0}>
-              <UserAvatar src={avatarUrl} alt={userName} />
+              <UserAvatar src={displayAvatar} alt={displayName} />
               <UserInfoContainer>
-                <UserNameText>{userName}</UserNameText>
+                <UserNameText>{displayName}</UserNameText>
               </UserInfoContainer>
               <ProfileChevron $isOpen={isOpen}>
                 <ChevronDown size={14} />

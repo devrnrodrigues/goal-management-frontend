@@ -119,29 +119,33 @@ export const HeaderRight = styled.div`
   }
 `;
 
-export const PeriodSelectorButton = styled.button`
+export const AddGoalHeaderButton = styled.button`
   display: flex;
   align-items: center;
   gap: 6px;
   background-color: ${({ theme }) => theme.colors.surface};
   border: 1px solid ${({ theme }) => theme.colors.border};
   border-radius: ${({ theme }) => theme.radii.full};
-  padding: 8px 14px;
+  padding: 8px 16px;
   font-size: clamp(12px, 0.15vw + 11px, 14px);
   font-weight: 500;
   color: ${({ theme }) => theme.colors.textSecondary};
-  box-shadow: ${({ theme }) => theme.shadows.card};
+  box-shadow: none;
+  cursor: pointer;
   transition: all 0.2s ease;
 
   &:hover {
     color: ${({ theme }) => theme.colors.primary};
     border-color: ${({ theme }) => theme.colors.primary};
+    background-color: ${({ theme }) => theme.colors.surfaceHover};
   }
 
-  @media (max-width: 768px) {
-    display: none;
+  @media (max-width: 600px) {
+    padding: 8px 12px;
   }
 `;
+
+export const PeriodSelectorButton = AddGoalHeaderButton;
 
 export const NotificationButton = styled.button`
   position: relative;
