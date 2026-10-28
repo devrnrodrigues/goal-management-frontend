@@ -6,3 +6,5 @@ export { PlaceholderPage } from './components/PlaceholderPage';
 export { useScrollbarVisibility } from './hooks/useScrollbarVisibility';
 export { useDevMode } from './hooks/useDevMode';
 export * from './api/httpClient';
+export * from './api/usersApi';
+export * from './utils/avatarUtils';
