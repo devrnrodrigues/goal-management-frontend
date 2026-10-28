@@ -36,6 +36,13 @@ export const taskBoardApi = {
     });
   },
 
+  reorderColumns: async (goalId: string, columnIds: string[]): Promise<BoardColumnApiResponse[]> => {
+    return httpClient<BoardColumnApiResponse[]>(`/goals/${goalId}/columns/reorder`, {
+      method: 'PUT',
+      body: JSON.stringify({ columnIds }),
+    });
+  },
+
   listTasks: async (goalId: string): Promise<TaskApiResponse[]> => {
     return httpClient<TaskApiResponse[]>(`/goals/${goalId}/tasks`, {
       method: 'GET',

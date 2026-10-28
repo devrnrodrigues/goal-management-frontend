@@ -1,4 +1,5 @@
 import styled from 'styled-components';
+import { Reorder } from 'framer-motion';
 
 export const BoardContainer = styled.div`
   padding: 24px 0 32px 0;
@@ -31,13 +32,16 @@ export const BoardSubtitle = styled.p`
   color: ${({ theme }) => theme.colors.textSecondary};
 `;
 
-export const BoardColumnsRow = styled.div`
+export const BoardColumnsRow = styled(Reorder.Group)`
   display: flex;
   align-items: flex-start;
   gap: 16px;
   overflow-x: auto;
   padding-bottom: 24px;
   min-height: calc(100vh - 220px);
+  list-style: none;
+  margin: 0;
+  padding-left: 0;
 
   &::-webkit-scrollbar {
     height: 6px;

@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Plus, MoreVertical, Pencil, Trash2, GripVertical } from 'lucide-react';
+import { useDragControls } from 'framer-motion';
 import type { BoardColumn, BoardTask } from '../types';
 import { TaskCard } from './TaskCard';
 import {
@@ -23,7 +24,7 @@ interface TaskBoardColumnProps {
   tasks: BoardTask[];
   allColumns: BoardColumn[];
   draggedTaskId: string | null;
-  draggedColumnId: string | null;
+  onColumnDragEnd: () => void;
   onAddTaskToColumn: (columnId: string) => void;
   onEditColumn: (column: BoardColumn) => void;
   onDeleteColumn: (columnId: string) => void;
@@ -35,9 +36,6 @@ interface TaskBoardColumnProps {
   onDragEndTask: () => void;
   onDropTaskOnTask: (targetTaskId: string, targetColId: string) => void;
   onDropTaskOnColumn: (targetColId: string) => void;
-  onDragStartColumn: (columnId: string) => void;
-  onDragEndColumn: () => void;
-  onDropColumn: (targetColId: string) => void;
 }
 
 export const TaskBoardColumn: React.FC<TaskBoardColumnProps> = ({
@@ -45,7 +43,7 @@ export const TaskBoardColumn: React.FC<TaskBoardColumnProps> = ({
   tasks,
   allColumns,
   draggedTaskId,
-  draggedColumnId,
+  onColumnDragEnd,
   onAddTaskToColumn,
   onEditColumn,
   onDeleteColumn,
@@ -57,16 +55,12 @@ export const TaskBoardColumn: React.FC<TaskBoardColumnProps> = ({
   onDragEndTask,
   onDropTaskOnTask,
   onDropTaskOnColumn,
-  onDragStartColumn,
-  onDragEndColumn,
-  onDropColumn,
 }) => {
+  const dragControls = useDragControls();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isColumnDragOver, setIsColumnDragOver] = useState(false);
+  const [isTaskDragOver, setIsTaskDragOver] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
-  const isDraggingThisColumn = draggedColumnId === column.id;
-  const isDraggingAnyColumn = Boolean(draggedColumnId);
   const isDraggingAnyTask = Boolean(draggedTaskId);
 
   useEffect(() => {
@@ -80,35 +74,40 @@ export const TaskBoardColumn: React.FC<TaskBoardColumnProps> = ({
   }, []);
 
   useEffect(() => {
-    if (!draggedTaskId && !draggedColumnId) {
-      setIsColumnDragOver(false);
+    if (!draggedTaskId) {
+      setIsTaskDragOver(false);
     }
-  }, [draggedTaskId, draggedColumnId]);
+  }, [draggedTaskId]);
 
   return (
     <ColumnWrapper
-      $isDragging={isDraggingThisColumn}
-      $isDragOver={isColumnDragOver}
-      onDragOver={(e) => {
-        if ((isDraggingAnyColumn && !isDraggingThisColumn) || isDraggingAnyTask) {
+      value={column}
+      dragListener={false}
+      dragControls={dragControls}
+      onDragEnd={onColumnDragEnd}
+      whileDrag={{
+        scale: 1.02,
+        boxShadow: '0 20px 30px -4px rgba(0, 0, 0, 0.15), 0 10px 15px -3px rgba(0, 0, 0, 0.08)',
+        zIndex: 50,
+      }}
+      $isTaskDragOver={isTaskDragOver && isDraggingAnyTask}
+      onDragOver={(e: React.DragEvent<HTMLDivElement>) => {
+        if (isDraggingAnyTask) {
           e.preventDefault();
           e.dataTransfer.dropEffect = 'move';
-          if (!isColumnDragOver) {
-            setIsColumnDragOver(true);
+          if (!isTaskDragOver) {
+            setIsTaskDragOver(true);
           }
         }
       }}
-      onDragLeave={(e) => {
+      onDragLeave={(e: React.DragEvent<HTMLDivElement>) => {
         if (!e.currentTarget.contains(e.relatedTarget as Node)) {
-          setIsColumnDragOver(false);
+          setIsTaskDragOver(false);
         }
       }}
-      onDrop={(e) => {
-        setIsColumnDragOver(false);
-        if (isDraggingAnyColumn && !isDraggingThisColumn) {
-          e.preventDefault();
-          onDropColumn(column.id);
-        } else if (isDraggingAnyTask) {
+      onDrop={(e: React.DragEvent<HTMLDivElement>) => {
+        setIsTaskDragOver(false);
+        if (isDraggingAnyTask) {
           e.preventDefault();
           onDropTaskOnColumn(column.id);
         }
@@ -124,15 +123,9 @@ export const TaskBoardColumn: React.FC<TaskBoardColumnProps> = ({
         <ColumnActions ref={menuRef}>
           <DragHandleBtn
             type="button"
-            draggable
-            onDragStart={(e) => {
-              e.stopPropagation();
-              e.dataTransfer.setData('text/plain', column.id);
-              e.dataTransfer.effectAllowed = 'move';
-              onDragStartColumn(column.id);
-            }}
-            onDragEnd={() => {
-              onDragEndColumn();
+            onPointerDown={(e) => {
+              e.preventDefault();
+              dragControls.start(e);
             }}
             title="Arrastar coluna"
           >
@@ -186,20 +179,7 @@ export const TaskBoardColumn: React.FC<TaskBoardColumnProps> = ({
         </ColumnActions>
       </ColumnHeader>
 
-      <CardsList
-        onDragOver={(e) => {
-          if (isDraggingAnyTask) {
-            e.preventDefault();
-            e.dataTransfer.dropEffect = 'move';
-          }
-        }}
-        onDrop={(e) => {
-          if (isDraggingAnyTask) {
-            e.preventDefault();
-            onDropTaskOnColumn(column.id);
-          }
-        }}
-      >
+      <CardsList>
         {tasks.length === 0 ? (
           <EmptyNotice>Nenhuma tarefa</EmptyNotice>
         ) : (

@@ -28,7 +28,8 @@ export const TaskBoard: React.FC = () => {
     priorityFilter,
     setPriorityFilter,
     draggedTaskId,
-    draggedColumnId,
+    handleReorderColumns,
+    handleColumnDragEnd,
     handleSelectGoal,
     handleAddColumn,
     handleEditColumn,
@@ -42,9 +43,6 @@ export const TaskBoard: React.FC = () => {
     handleTaskDragEnd,
     handleTaskDropOnTask,
     handleTaskDropOnColumn,
-    handleColumnDragStart,
-    handleColumnDragEnd,
-    handleColumnDrop,
   } = useTaskBoard();
 
   const [isColumnModalOpen, setIsColumnModalOpen] = useState(false);
@@ -135,7 +133,11 @@ export const TaskBoard: React.FC = () => {
           <p>Crie uma meta primeiro na aba "Metas" para gerenciar tarefas no quadro.</p>
         </EmptyBoardNotice>
       ) : (
-        <BoardColumnsRow>
+        <BoardColumnsRow
+          axis="x"
+          values={columns}
+          onReorder={handleReorderColumns}
+        >
           {columns.map((column) => (
             <TaskBoardColumn
               key={column.id}
@@ -143,7 +145,7 @@ export const TaskBoard: React.FC = () => {
               tasks={tasksByColumn[column.id] || []}
               allColumns={columns}
               draggedTaskId={draggedTaskId}
-              draggedColumnId={draggedColumnId}
+              onColumnDragEnd={handleColumnDragEnd}
               onAddTaskToColumn={handleOpenAddTask}
               onEditColumn={handleOpenEditColumn}
               onDeleteColumn={handleDeleteColumn}
@@ -155,9 +157,6 @@ export const TaskBoard: React.FC = () => {
               onDragEndTask={handleTaskDragEnd}
               onDropTaskOnTask={handleTaskDropOnTask}
               onDropTaskOnColumn={handleTaskDropOnColumn}
-              onDragStartColumn={handleColumnDragStart}
-              onDragEndColumn={handleColumnDragEnd}
-              onDropColumn={handleColumnDrop}
             />
           ))}
         </BoardColumnsRow>

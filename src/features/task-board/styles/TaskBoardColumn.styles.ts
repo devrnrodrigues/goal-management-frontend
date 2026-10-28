@@ -1,6 +1,9 @@
 import styled from 'styled-components';
+import { Reorder } from 'framer-motion';
 
-export const ColumnWrapper = styled.div<{ $isDragging?: boolean; $isDragOver?: boolean }>`
+export const ColumnWrapper = styled(Reorder.Item)<{
+  $isTaskDragOver?: boolean;
+}>`
   display: flex;
   flex-direction: column;
   background-color: #f6f8fa;
@@ -12,11 +15,12 @@ export const ColumnWrapper = styled.div<{ $isDragging?: boolean; $isDragOver?: b
   padding: 0 14px 14px 14px;
   flex-shrink: 0;
   border: 2px solid
-    ${({ $isDragOver, theme }) =>
-      $isDragOver ? theme.colors.primary : 'rgba(226, 232, 240, 0.6)'};
-  opacity: ${({ $isDragging }) => ($isDragging ? 0.35 : 1)};
-  transition: border-color 0.15s ease, opacity 0.15s ease;
+    ${({ $isTaskDragOver, theme }) =>
+      $isTaskDragOver ? theme.colors.primary : 'rgba(226, 232, 240, 0.6)'};
+  transition: border-color 0.15s ease;
   overflow: hidden;
+  position: relative;
+  list-style: none;
 `;
 
 export const ColumnTopBar = styled.div<{ $color?: string }>`
@@ -44,6 +48,7 @@ export const DragHandleBtn = styled.button`
   align-items: center;
   justify-content: center;
   transition: all 0.15s ease;
+  touch-action: none;
 
   &:hover {
     background-color: #e2e8f0;

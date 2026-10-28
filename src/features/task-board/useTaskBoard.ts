@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useCallback } from 'react';
+import { useState, useMemo, useEffect, useCallback, useRef } from 'react';
 import type { Task } from '../my-goals/types';
 import { initialTasks } from '../my-goals/constants/initialGoals';
 import { membersByTitle, defaultMembers } from '../my-goals/constants/members';
@@ -70,7 +70,10 @@ export const useTaskBoard = () => {
   const [searchFilter, setSearchFilter] = useState('');
   const [priorityFilter, setPriorityFilter] = useState<string>('all');
   const [draggedTaskId, setDraggedTaskId] = useState<string | null>(null);
-  const [draggedColumnId, setDraggedColumnId] = useState<string | null>(null);
+
+  const lastSavedColumnsOrderRef = useRef<string>('');
+  const columnsRef = useRef<BoardColumn[]>(columns);
+  columnsRef.current = columns;
 
   const loadGoalBoard = useCallback(async (goalId: string) => {
     if (isMock) return;
@@ -81,7 +84,9 @@ export const useTaskBoard = () => {
         taskBoardApi.listTasks(goalId),
       ]);
       const displayColumns = colRes.map(mapColumnToDisplay);
-      setColumns(displayColumns.length > 0 ? displayColumns : defaultColumns);
+      const finalColumns = displayColumns.length > 0 ? displayColumns : defaultColumns;
+      setColumns(finalColumns);
+      lastSavedColumnsOrderRef.current = finalColumns.map((c) => c.id).join(',');
       setTasks(taskRes.map(mapTaskToDisplay));
     } catch {
       setErrorMessage('Não foi possível carregar as colunas e tarefas do quadro.');
@@ -401,6 +406,9 @@ export const useTaskBoard = () => {
   };
 
   const handleMoveTask = async (taskId: string, targetColumnId: string) => {
+    const currentTask = tasks.find((t) => t.id === taskId);
+    if (!currentTask || currentTask.columnId === targetColumnId) return;
+
     const isDoneCol =
       targetColumnId === 'col-done' ||
       columns.find((c) => c.id === targetColumnId)?.title.toLowerCase().includes('conclu');
@@ -460,7 +468,6 @@ export const useTaskBoard = () => {
 
   const handleTaskDragStart = (taskId: string) => {
     setDraggedTaskId(taskId);
-    setDraggedColumnId(null);
   };
 
   const handleTaskDragEnd = () => {
@@ -472,6 +479,9 @@ export const useTaskBoard = () => {
       setDraggedTaskId(null);
       return;
     }
+
+    const currentTask = tasks.find((t) => t.id === draggedTaskId);
+    const columnChanged = Boolean(currentTask && currentTask.columnId !== targetColumnId);
 
     const isDoneCol =
       targetColumnId === 'col-done' ||
@@ -495,42 +505,38 @@ export const useTaskBoard = () => {
       return next;
     });
 
-    if (!isMock && draggedTaskId) {
-      taskBoardApi.moveTask(draggedTaskId, { targetColumnId }).catch(() => {});
-    }
-
+    const taskId = draggedTaskId;
     setDraggedTaskId(null);
+
+    if (!isMock && columnChanged) {
+      taskBoardApi.moveTask(taskId, { targetColumnId }).catch(() => {});
+    }
   };
 
   const handleTaskDropOnColumn = (targetColumnId: string) => {
     if (draggedTaskId) {
-      handleMoveTask(draggedTaskId, targetColumnId);
+      const taskId = draggedTaskId;
       setDraggedTaskId(null);
+      handleMoveTask(taskId, targetColumnId);
     }
   };
 
-  const handleColumnDragStart = (columnId: string) => {
-    setDraggedColumnId(columnId);
-    setDraggedTaskId(null);
+  const handleReorderColumns = (newColumns: BoardColumn[]) => {
+    setColumns(newColumns);
   };
 
   const handleColumnDragEnd = () => {
-    setDraggedColumnId(null);
-  };
-
-  const handleColumnDrop = (targetColumnId: string) => {
-    if (draggedColumnId && draggedColumnId !== targetColumnId) {
-      setColumns((prev) => {
-        const sourceIndex = prev.findIndex((c) => c.id === draggedColumnId);
-        const targetIndex = prev.findIndex((c) => c.id === targetColumnId);
-        if (sourceIndex === -1 || targetIndex === -1) return prev;
-        const next = [...prev];
-        const [removed] = next.splice(sourceIndex, 1);
-        next.splice(targetIndex, 0, removed);
-        return next;
-      });
+    if (!isMock && activeGoal) {
+      const currentCols = columnsRef.current;
+      const currentOrder = currentCols.map((c) => c.id).join(',');
+      if (currentOrder && currentOrder !== lastSavedColumnsOrderRef.current) {
+        lastSavedColumnsOrderRef.current = currentOrder;
+        const orderedIds = currentCols.map((c) => c.id);
+        taskBoardApi.reorderColumns(activeGoal.id, orderedIds).catch(() => {
+          setErrorMessage('Erro ao salvar a ordem das colunas.');
+        });
+      }
     }
-    setDraggedColumnId(null);
   };
 
   const filteredTasks = useMemo(() => {
@@ -585,7 +591,6 @@ export const useTaskBoard = () => {
     priorityFilter,
     setPriorityFilter,
     draggedTaskId,
-    draggedColumnId,
     stats,
     handleSelectGoal,
     handleAddColumn,
@@ -600,8 +605,7 @@ export const useTaskBoard = () => {
     handleTaskDragEnd,
     handleTaskDropOnTask,
     handleTaskDropOnColumn,
-    handleColumnDragStart,
+    handleReorderColumns,
     handleColumnDragEnd,
-    handleColumnDrop,
   };
 };
