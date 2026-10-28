@@ -37,7 +37,7 @@ export const TaskItemLeft = styled.div`
   min-width: 0;
 `;
 
-export const CheckboxWrapper = styled.label`
+export const CheckboxWrapper = styled.button.attrs({ type: 'button' })`
   display: flex;
   align-items: center;
   justify-content: center;
@@ -46,6 +46,9 @@ export const CheckboxWrapper = styled.label`
   width: 20px;
   height: 20px;
   flex-shrink: 0;
+  background: none;
+  border: none;
+  padding: 0;
 `;
 
 export const HiddenCheckbox = styled.input.attrs({ type: 'checkbox' })`

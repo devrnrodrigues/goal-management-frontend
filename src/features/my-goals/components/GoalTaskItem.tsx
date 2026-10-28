@@ -73,11 +73,11 @@ export const GoalTaskItem: React.FC<GoalTaskItemProps> = ({
     >
       <TaskItemMainRow>
         <TaskItemLeft>
-          <CheckboxWrapper onClick={handleCheckboxClick}>
-            <HiddenCheckbox
-              checked={subtask.completed}
-              onChange={() => {}}
-            />
+          <CheckboxWrapper
+            type="button"
+            onClick={handleCheckboxClick}
+            aria-label={subtask.completed ? 'Marcar como pendente' : 'Marcar como concluída'}
+          >
             <CustomCheckbox $checked={subtask.completed} />
           </CheckboxWrapper>
           <TaskTitleText $completed={subtask.completed} title={subtask.title}>
