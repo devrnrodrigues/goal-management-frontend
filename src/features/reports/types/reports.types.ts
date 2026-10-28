@@ -65,3 +65,12 @@ export interface ReportApiResponse {
   }[];
   availableCategories: string[];
 }
+
+export interface TeamMemberReport {
+  id: string;
+  name: string;
+  initials: string;
+  avatarUrl?: string;
+  completedTasks: number;
+  onTimePercentage: number;
+}
