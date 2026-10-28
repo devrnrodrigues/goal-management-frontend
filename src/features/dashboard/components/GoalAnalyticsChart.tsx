@@ -25,8 +25,8 @@ export const GoalAnalyticsChart: React.FC<GoalAnalyticsChartProps> = ({ data }) 
       <ChartHeader>
         <ChartTitle>Evolução de metas</ChartTitle>
         <LegendContainer>
-          <LegendItem $color={theme.colors.primary}>Planejado</LegendItem>
-          <LegendItem $color={theme.colors.statusWarning}>Concluído</LegendItem>
+          <LegendItem $color={theme.colors.statusWarning}>Planejado</LegendItem>
+          <LegendItem $color={theme.colors.statusSuccess}>Concluído</LegendItem>
         </LegendContainer>
       </ChartHeader>
 
@@ -74,7 +74,7 @@ export const GoalAnalyticsChart: React.FC<GoalAnalyticsChartProps> = ({ data }) 
                   y={chartHeight - plannedHeight + 10}
                   width={barWidth}
                   height={plannedHeight}
-                  fill={theme.colors.primary}
+                  fill={theme.colors.statusWarning}
                   rx="4"
                 >
                   <title>{`${item.month} - Planejado: ${item.planned}`}</title>
@@ -85,7 +85,7 @@ export const GoalAnalyticsChart: React.FC<GoalAnalyticsChartProps> = ({ data }) 
                   y={chartHeight - completedHeight + 10}
                   width={barWidth}
                   height={completedHeight}
-                  fill={theme.colors.statusWarning}
+                  fill={theme.colors.statusSuccess}
                   rx="4"
                 >
                   <title>{`${item.month} - Concluído: ${item.completed}`}</title>

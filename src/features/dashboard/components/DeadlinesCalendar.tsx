@@ -100,12 +100,18 @@ export const DeadlinesCalendar: React.FC<DeadlinesCalendarProps> = ({
 
       <UpcomingSection>
         <UpcomingHeader>Prazos próximos</UpcomingHeader>
-        {deadlines.map((item) => (
-          <DeadlineItem key={item.title}>
-            <DeadlineTitle title={item.title}>{item.title}</DeadlineTitle>
-            <DeadlineBadge>{item.day}/10</DeadlineBadge>
+        {deadlines.length === 0 ? (
+          <DeadlineItem>
+            <DeadlineTitle title="Nenhum prazo próximo">Nenhum prazo próximo</DeadlineTitle>
           </DeadlineItem>
-        ))}
+        ) : (
+          deadlines.map((item) => (
+            <DeadlineItem key={item.id}>
+              <DeadlineTitle title={item.title}>{item.title}</DeadlineTitle>
+              <DeadlineBadge>{item.day}/{String(item.month).padStart(2, '0')}</DeadlineBadge>
+            </DeadlineItem>
+          ))
+        )}
       </UpcomingSection>
     </CalendarCardContainer>
   );

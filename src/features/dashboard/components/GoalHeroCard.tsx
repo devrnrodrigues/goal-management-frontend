@@ -51,6 +51,28 @@ export const GoalHeroCard: React.FC<GoalHeroCardProps> = ({
     onNext();
   };
 
+  if (!goal) {
+    return (
+      <HeroCardContainer>
+        <HeroHeader>
+          <HeroBadge>Meta em foco</HeroBadge>
+          <HeroSubtitle>Nenhuma meta ativa</HeroSubtitle>
+        </HeroHeader>
+        <CarouselSection>
+          <GoalAvatarWrapper>
+            <Award size={42} />
+          </GoalAvatarWrapper>
+        </CarouselSection>
+        <GoalInfoSection>
+          <GoalTitle title="Nenhuma meta prioritária no momento">
+            Nenhuma meta ativa
+          </GoalTitle>
+          <GoalMetaText>Cadastre uma meta para acompanhá-la em foco.</GoalMetaText>
+        </GoalInfoSection>
+      </HeroCardContainer>
+    );
+  }
+
   return (
     <HeroCardContainer>
       <HeroHeader>
