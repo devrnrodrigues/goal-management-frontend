@@ -6,7 +6,6 @@ import {
   TaskItemMainRow,
   TaskItemLeft,
   CheckboxWrapper,
-  HiddenCheckbox,
   CustomCheckbox,
   TaskTitleText,
   TaskItemActions,
