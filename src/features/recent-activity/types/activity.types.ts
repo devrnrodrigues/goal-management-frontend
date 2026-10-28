@@ -12,7 +12,8 @@ export type ActivityActionType =
   | 'task_updated'
   | 'task_deleted'
   | 'goal_created'
-  | 'goal_updated';
+  | 'goal_updated'
+  | 'column_reordered';
 
 export type ActivityActionTypeApi =
   | 'TASK_MOVED'
@@ -21,7 +22,8 @@ export type ActivityActionTypeApi =
   | 'TASK_UPDATED'
   | 'TASK_DELETED'
   | 'GOAL_CREATED'
-  | 'GOAL_UPDATED';
+  | 'GOAL_UPDATED'
+  | 'COLUMN_REORDERED';
 
 export type DateGroupLabel = 'Hoje' | 'Ontem' | 'Esta semana' | 'Anterior';
 

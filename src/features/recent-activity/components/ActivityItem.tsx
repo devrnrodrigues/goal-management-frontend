@@ -88,6 +88,13 @@ export const ActivityItem: React.FC<ActivityItemProps> = ({ activity }) => {
           </ItemSentence>
         );
 
+      case 'column_reordered':
+        return (
+          <ItemSentence>
+            {authorName} reorganizou as colunas do quadro
+          </ItemSentence>
+        );
+
       default:
         return (
           <ItemSentence>

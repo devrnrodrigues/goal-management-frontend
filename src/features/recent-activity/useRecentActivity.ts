@@ -290,7 +290,11 @@ export const useRecentActivity = () => {
         goalsApi.listGoals(0, 50),
       ]);
 
-      setActivities(actRes.content.map(mapActivityToItem));
+      const items = actRes.content.map(mapActivityToItem);
+      const uniqueItems = items.filter(
+        (item, index, self) => index === self.findIndex((i) => i.id === item.id)
+      );
+      setActivities(uniqueItems);
       const options: GoalFilterOption[] = goalsRes.content.map((g) => ({
         id: g.title,
         title: g.title,
@@ -347,7 +351,11 @@ export const useRecentActivity = () => {
         counts.created += 1;
       } else if (item.actionType === 'task_completed') {
         counts.completed += 1;
-      } else if (item.actionType === 'task_updated' || item.actionType === 'goal_updated') {
+      } else if (
+        item.actionType === 'task_updated' ||
+        item.actionType === 'goal_updated' ||
+        item.actionType === 'column_reordered'
+      ) {
         counts.updated += 1;
       }
     });
@@ -379,7 +387,8 @@ export const useRecentActivity = () => {
       if (
         filters.category === 'updated' &&
         item.actionType !== 'task_updated' &&
-        item.actionType !== 'goal_updated'
+        item.actionType !== 'goal_updated' &&
+        item.actionType !== 'column_reordered'
       ) {
         return false;
       }
