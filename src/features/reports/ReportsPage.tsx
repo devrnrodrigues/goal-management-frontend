@@ -5,7 +5,7 @@ import {
   ReportsOverviewCards,
   ReportsVelocityChart,
   ReportsCategoryDistribution,
-  ReportsTeamPerformance,
+  ReportsPriorityEfficiency,
   ReportsGoalsHealthTable,
 } from './components';
 import {
@@ -20,7 +20,7 @@ export const ReportsPage: React.FC = () => {
     metrics,
     velocityData,
     categoryDistribution,
-    teamMembers,
+    priorityEfficiencies,
     goalsHealth,
     availableCategories,
     handlePeriodChange,
@@ -48,7 +48,7 @@ export const ReportsPage: React.FC = () => {
         </TwoColumnsGrid>
 
         <TwoColumnsGrid>
-          <ReportsTeamPerformance members={teamMembers} />
+          <ReportsPriorityEfficiency items={priorityEfficiencies} />
           <ReportsGoalsHealthTable goals={goalsHealth} />
         </TwoColumnsGrid>
       </ReportsContentLayout>

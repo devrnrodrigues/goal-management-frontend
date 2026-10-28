@@ -30,9 +30,12 @@ export const ReportsGoalsHealthTable: React.FC<ReportsGoalsHealthTableProps> = (
         return 'Concluída';
       case 'on_track':
         return 'No prazo';
+      case 'delayed':
+        return 'Atrasada';
+      case 'at_risk':
       case 'attention':
       default:
-        return 'Requer atenção';
+        return 'Em risco';
     }
   };
 

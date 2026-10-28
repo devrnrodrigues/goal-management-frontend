@@ -24,12 +24,9 @@ export interface CategoryDistributionItem {
   color: string;
 }
 
-export interface TeamMemberReport {
-  id: string;
-  name: string;
-  role: string;
-  avatarUrl?: string;
-  initials: string;
+export interface PriorityEfficiencyItem {
+  priority: string;
+  label: string;
   completedTasks: number;
   activeTasks: number;
   onTimePercentage: number;
@@ -43,10 +40,28 @@ export interface GoalHealthReportItem {
   completedTasks: number;
   totalTasks: number;
   deadline: string;
-  healthStatus: 'on_track' | 'attention' | 'completed';
+  healthStatus: 'on_track' | 'at_risk' | 'delayed' | 'attention' | 'completed';
 }
 
 export interface ReportFiltersState {
   period: ReportPeriod;
   selectedCategory: string;
+}
+
+export interface ReportApiResponse {
+  metrics: ReportOverviewMetric[];
+  velocityData: MonthlyVelocityItem[];
+  categoryDistribution: CategoryDistributionItem[];
+  priorityEfficiencies: PriorityEfficiencyItem[];
+  goalsHealth: {
+    id: string;
+    goalTitle: string;
+    category: string;
+    progress: number;
+    completedTasks: number;
+    totalTasks: number;
+    deadline: string;
+    healthStatus: string;
+  }[];
+  availableCategories: string[];
 }

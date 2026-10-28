@@ -122,7 +122,7 @@ export const ProgressText = styled.span`
   min-width: 32px;
 `;
 
-export const HealthBadge = styled.span<{ $status: 'on_track' | 'attention' | 'completed' }>`
+export const HealthBadge = styled.span<{ $status: 'on_track' | 'at_risk' | 'delayed' | 'attention' | 'completed' }>`
   display: inline-flex;
   align-items: center;
   gap: 4px;
@@ -138,6 +138,9 @@ export const HealthBadge = styled.span<{ $status: 'on_track' | 'attention' | 'co
         return theme.colors.primaryDark;
       case 'on_track':
         return theme.colors.statusSuccess;
+      case 'delayed':
+        return theme.colors.statusDanger;
+      case 'at_risk':
       case 'attention':
       default:
         return theme.colors.statusWarning;

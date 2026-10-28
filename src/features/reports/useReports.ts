@@ -1,125 +1,58 @@
-import { useState, useMemo } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import type {
   ReportPeriod,
   ReportFiltersState,
   ReportOverviewMetric,
   MonthlyVelocityItem,
   CategoryDistributionItem,
-  TeamMemberReport,
+  PriorityEfficiencyItem,
   GoalHealthReportItem,
+  ReportApiResponse,
 } from './types';
+import { reportsApi } from './api/reportsApi';
+import { useDevMode } from '../shared/hooks/useDevMode';
 
 const INITIAL_FILTERS: ReportFiltersState = {
   period: '30_days',
   selectedCategory: 'all',
 };
 
-const METRICS_BY_PERIOD: Record<ReportPeriod, ReportOverviewMetric[]> = {
-  '30_days': [
-    {
-      id: 'm-1',
-      label: 'Taxa de conclusão',
-      value: '78%',
-      change: '+6.2%',
-      isPositive: true,
-      subtitle: 'vs. mês anterior',
-    },
-    {
-      id: 'm-2',
-      label: 'Tempo médio de ciclo',
-      value: '4.2 dias',
-      change: '-0.8 dias',
-      isPositive: true,
-      subtitle: 'agilidade na entrega',
-    },
-    {
-      id: 'm-3',
-      label: 'Metas no prazo',
-      value: '91%',
-      change: '+3.4%',
-      isPositive: true,
-      subtitle: 'aderência ao cronograma',
-    },
-    {
-      id: 'm-4',
-      label: 'Tarefas entregues',
-      value: '38',
-      change: '+14%',
-      isPositive: true,
-      subtitle: 'neste ciclo',
-    },
-  ],
-  quarter: [
-    {
-      id: 'm-1',
-      label: 'Taxa de conclusão',
-      value: '72%',
-      change: '+4.5%',
-      isPositive: true,
-      subtitle: 'vs. trimestre anterior',
-    },
-    {
-      id: 'm-2',
-      label: 'Tempo médio de ciclo',
-      value: '4.8 dias',
-      change: '-0.3 dias',
-      isPositive: true,
-      subtitle: 'tempo por tarefa',
-    },
-    {
-      id: 'm-3',
-      label: 'Metas no prazo',
-      value: '88%',
-      change: '+2.1%',
-      isPositive: true,
-      subtitle: 'entregas trimestrais',
-    },
-    {
-      id: 'm-4',
-      label: 'Tarefas entregues',
-      value: '112',
-      change: '+18%',
-      isPositive: true,
-      subtitle: 'no trimestre',
-    },
-  ],
-  year: [
-    {
-      id: 'm-1',
-      label: 'Taxa de conclusão',
-      value: '81%',
-      change: '+12.0%',
-      isPositive: true,
-      subtitle: 'evolução anual acumulada',
-    },
-    {
-      id: 'm-2',
-      label: 'Tempo médio de ciclo',
-      value: '4.5 dias',
-      change: '-1.2 dias',
-      isPositive: true,
-      subtitle: 'média do ano',
-    },
-    {
-      id: 'm-3',
-      label: 'Metas no prazo',
-      value: '89%',
-      change: '+5.0%',
-      isPositive: true,
-      subtitle: 'média histórica',
-    },
-    {
-      id: 'm-4',
-      label: 'Tarefas entregues',
-      value: '346',
-      change: '+24%',
-      isPositive: true,
-      subtitle: 'total no ano',
-    },
-  ],
-};
+const DEFAULT_METRICS: ReportOverviewMetric[] = [
+  {
+    id: 'm-1',
+    label: 'Taxa de conclusão',
+    value: '78%',
+    change: '+6.2%',
+    isPositive: true,
+    subtitle: 'vs. mês anterior',
+  },
+  {
+    id: 'm-2',
+    label: 'Tempo médio de ciclo',
+    value: '4.2 dias',
+    change: '-0.8 dias',
+    isPositive: true,
+    subtitle: 'agilidade na entrega',
+  },
+  {
+    id: 'm-3',
+    label: 'Metas no prazo',
+    value: '91%',
+    change: '+3.4%',
+    isPositive: true,
+    subtitle: 'aderência ao cronograma',
+  },
+  {
+    id: 'm-4',
+    label: 'Tarefas entregues',
+    value: '38',
+    change: '+14%',
+    isPositive: true,
+    subtitle: 'neste ciclo',
+  },
+];
 
-const VELOCITY_DATA: MonthlyVelocityItem[] = [
+const DEFAULT_VELOCITY: MonthlyVelocityItem[] = [
   { id: 'v-1', monthLabel: 'Jun', completedTasks: 22, createdTasks: 26 },
   { id: 'v-2', monthLabel: 'Jul', completedTasks: 28, createdTasks: 31 },
   { id: 'v-3', monthLabel: 'Ago', completedTasks: 34, createdTasks: 30 },
@@ -127,7 +60,7 @@ const VELOCITY_DATA: MonthlyVelocityItem[] = [
   { id: 'v-5', monthLabel: 'Out', completedTasks: 38, createdTasks: 28 },
 ];
 
-const CATEGORY_DISTRIBUTION: CategoryDistributionItem[] = [
+const DEFAULT_CATEGORIES: CategoryDistributionItem[] = [
   {
     id: 'cat-1',
     category: 'Engenharia de Software',
@@ -158,40 +91,31 @@ const CATEGORY_DISTRIBUTION: CategoryDistributionItem[] = [
   },
 ];
 
-const TEAM_MEMBERS: TeamMemberReport[] = [
+const DEFAULT_PRIORITIES: PriorityEfficiencyItem[] = [
   {
-    id: 'tm-1',
-    name: 'Renan Rodrigues',
-    role: 'Tech Lead',
-    avatarUrl: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=120&q=80',
-    initials: 'RR',
+    priority: 'HIGH',
+    label: 'Alta',
     completedTasks: 18,
     activeTasks: 3,
     onTimePercentage: 94,
   },
   {
-    id: 'tm-2',
-    name: 'Camila Santos',
-    role: 'Product Designer',
-    avatarUrl: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=120&q=80',
-    initials: 'CS',
+    priority: 'MEDIUM',
+    label: 'Média',
     completedTasks: 12,
     activeTasks: 2,
     onTimePercentage: 91,
   },
   {
-    id: 'tm-3',
-    name: 'Lucas Mendes',
-    role: 'Frontend Engineer',
-    avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=120&q=80',
-    initials: 'LM',
+    priority: 'LOW',
+    label: 'Baixa',
     completedTasks: 8,
     activeTasks: 4,
     onTimePercentage: 88,
   },
 ];
 
-const GOALS_HEALTH: GoalHealthReportItem[] = [
+const DEFAULT_GOALS_HEALTH: GoalHealthReportItem[] = [
   {
     id: 'gh-1',
     goalTitle: 'Certificação Cloud Architecture',
@@ -220,7 +144,7 @@ const GOALS_HEALTH: GoalHealthReportItem[] = [
     completedTasks: 5,
     totalTasks: 11,
     deadline: '20/01/2027',
-    healthStatus: 'attention',
+    healthStatus: 'at_risk',
   },
   {
     id: 'gh-4',
@@ -235,22 +159,73 @@ const GOALS_HEALTH: GoalHealthReportItem[] = [
 ];
 
 export const useReports = () => {
+  const { isMock } = useDevMode();
   const [filters, setFilters] = useState<ReportFiltersState>(INITIAL_FILTERS);
+  const [isLoading, setIsLoading] = useState(!isMock);
 
-  const metrics = useMemo(() => {
-    return METRICS_BY_PERIOD[filters.period];
-  }, [filters.period]);
+  const [metrics, setMetrics] = useState<ReportOverviewMetric[]>(isMock ? DEFAULT_METRICS : []);
+  const [velocityData, setVelocityData] = useState<MonthlyVelocityItem[]>(isMock ? DEFAULT_VELOCITY : []);
+  const [categoryDistribution, setCategoryDistribution] = useState<CategoryDistributionItem[]>(isMock ? DEFAULT_CATEGORIES : []);
+  const [priorityEfficiencies, setPriorityEfficiencies] = useState<PriorityEfficiencyItem[]>(isMock ? DEFAULT_PRIORITIES : []);
+  const [goalsHealth, setGoalsHealth] = useState<GoalHealthReportItem[]>(isMock ? DEFAULT_GOALS_HEALTH : []);
+  const [availableCategories, setAvailableCategories] = useState<string[]>([]);
 
-  const availableCategories = useMemo(() => {
-    return CATEGORY_DISTRIBUTION.map((item) => item.category);
-  }, []);
+  const mapApiResponseToState = (data: ReportApiResponse) => {
+    setMetrics(data.metrics);
+    setVelocityData(data.velocityData);
+    setCategoryDistribution(data.categoryDistribution);
+    setPriorityEfficiencies(data.priorityEfficiencies);
+    setAvailableCategories(data.availableCategories);
 
-  const filteredGoalsHealth = useMemo(() => {
-    if (filters.selectedCategory === 'all') {
-      return GOALS_HEALTH;
+    const mappedGoalsHealth: GoalHealthReportItem[] = data.goalsHealth.map((g) => ({
+      id: g.id,
+      goalTitle: g.goalTitle,
+      category: g.category,
+      progress: g.progress,
+      completedTasks: g.completedTasks,
+      totalTasks: g.totalTasks,
+      deadline: g.deadline,
+      healthStatus: (g.healthStatus === 'delayed'
+        ? 'delayed'
+        : g.healthStatus === 'at_risk'
+        ? 'at_risk'
+        : g.progress >= 100
+        ? 'completed'
+        : 'on_track') as GoalHealthReportItem['healthStatus'],
+    }));
+    setGoalsHealth(mappedGoalsHealth);
+  };
+
+  const loadReport = useCallback(async () => {
+    if (isMock) {
+      setMetrics(DEFAULT_METRICS);
+      setVelocityData(DEFAULT_VELOCITY);
+      setCategoryDistribution(DEFAULT_CATEGORIES);
+      setPriorityEfficiencies(DEFAULT_PRIORITIES);
+      setGoalsHealth(DEFAULT_GOALS_HEALTH);
+      setAvailableCategories(DEFAULT_CATEGORIES.map((c) => c.category));
+      return;
     }
-    return GOALS_HEALTH.filter((item) => item.category === filters.selectedCategory);
-  }, [filters.selectedCategory]);
+
+    setIsLoading(true);
+    try {
+      const response = await reportsApi.getReport(filters.period, filters.selectedCategory);
+      mapApiResponseToState(response);
+    } catch {
+      setMetrics([]);
+      setVelocityData([]);
+      setCategoryDistribution([]);
+      setPriorityEfficiencies([]);
+      setGoalsHealth([]);
+      setAvailableCategories([]);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [isMock, filters.period, filters.selectedCategory]);
+
+  useEffect(() => {
+    loadReport();
+  }, [loadReport]);
 
   const handlePeriodChange = (period: ReportPeriod) => {
     setFilters((prev) => ({ ...prev, period }));
@@ -264,7 +239,7 @@ export const useReports = () => {
     const csvContent =
       'data:text/csv;charset=utf-8,' +
       'Meta,Categoria,Progresso,Tarefas Concluidas,Total Tarefas,Prazo,Status\n' +
-      filteredGoalsHealth
+      goalsHealth
         .map(
           (g) =>
             `"${g.goalTitle}","${g.category}",${g.progress}%,${g.completedTasks},${g.totalTasks},"${g.deadline}","${g.healthStatus}"`
@@ -283,11 +258,13 @@ export const useReports = () => {
   return {
     filters,
     metrics,
-    velocityData: VELOCITY_DATA,
-    categoryDistribution: CATEGORY_DISTRIBUTION,
-    teamMembers: TEAM_MEMBERS,
-    goalsHealth: filteredGoalsHealth,
+    velocityData,
+    categoryDistribution,
+    priorityEfficiencies,
+    goalsHealth,
     availableCategories,
+    isLoading,
+    refetch: loadReport,
     handlePeriodChange,
     handleCategoryChange,
     handleExport,
