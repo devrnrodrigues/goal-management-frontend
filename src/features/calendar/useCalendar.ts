@@ -20,9 +20,7 @@ import type {
   CalendarTaskPriority,
 } from './types';
 import { useDevMode } from '../shared';
-import { goalsApi } from '../my-goals/api/goalsApi';
-import { taskBoardApi } from '../task-board/api/taskBoardApi';
-import { mapPriorityToDisplay } from '../task-board/api/taskBoardMappers';
+import { calendarApi } from './api/calendarApi';
 
 const AUTHOR_RENAN: CalendarTaskAuthor = {
   id: 'u-1',
@@ -213,57 +211,17 @@ export const useCalendar = () => {
     setErrorMessage(null);
 
     try {
-      const goalsResponse = await goalsApi.listGoals(0, 50);
-      const goals = goalsResponse.content;
-
-      const tasksPromises = goals.map(async (goal) => {
-        try {
-          const taskList = await taskBoardApi.listTasks(goal.id);
-          return taskList.map((t): CalendarTask => {
-            const dateKey = t.deadline || (t.createdAt ? t.createdAt.slice(0, 10) : format(new Date(), 'yyyy-MM-dd'));
-            const dateParts = dateKey.split('-');
-            const formattedDate = dateParts.length === 3 ? `${dateParts[2]}/${dateParts[1]}` : dateKey;
-
-            const priority: CalendarTaskPriority = mapPriorityToDisplay(t.priority);
-            const status: CalendarTaskStatus = t.completed
-              ? 'completed'
-              : t.columnTitle?.toLowerCase().includes('progresso')
-              ? 'in_progress'
-              : 'pending';
-
-            const firstMember = t.members?.[0];
-            const author: CalendarTaskAuthor = {
-              id: firstMember?.userId || 'u-user',
-              name: firstMember?.name || 'Membro',
-              avatarUrl: firstMember?.avatarUrl,
-              initials: getInitials(firstMember?.name),
-            };
-
-            return {
-              id: t.id,
-              title: t.title,
-              createdAt: dateKey,
-              formattedDate,
-              goalTitle: goal.title,
-              priority,
-              status,
-              author,
-              columnName: t.columnTitle || 'A Fazer',
-            };
-          });
-        } catch {
-          return [];
-        }
-      });
-
-      const results = await Promise.all(tasksPromises);
-      setRealTasks(results.flat());
+      const year = currentMonthDate.getFullYear();
+      const month = currentMonthDate.getMonth() + 1;
+      const tasks = await calendarApi.getCalendarTasks(year, month);
+      setRealTasks(tasks);
     } catch {
       setErrorMessage('Não foi possível carregar as entregas no calendário.');
+      setRealTasks([]);
     } finally {
       setIsLoading(false);
     }
-  }, [isMock]);
+  }, [isMock, currentMonthDate]);
 
   useEffect(() => {
     loadRealCalendarTasks();
