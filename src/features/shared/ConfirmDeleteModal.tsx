@@ -20,6 +20,7 @@ interface ConfirmDeleteModalProps {
     onConfirm: () => void;
     title?: string;
     message?: string;
+    showIcon?: boolean;
 }
 
 export const ConfirmDeleteModal: React.FC<ConfirmDeleteModalProps> = ({
@@ -27,7 +28,8 @@ export const ConfirmDeleteModal: React.FC<ConfirmDeleteModalProps> = ({
     onClose,
     onConfirm,
     title = "Excluir Meta",
-    message = "Tem certeza que deseja excluir esta meta? Esta ação não poderá ser desfeita."
+    message = "Tem certeza que deseja excluir esta meta? Esta ação não poderá ser desfeita.",
+    showIcon = false,
 }) => {
     if (!isOpen) return null;
 
@@ -47,9 +49,11 @@ export const ConfirmDeleteModal: React.FC<ConfirmDeleteModalProps> = ({
                 onClick={(e) => e.stopPropagation()}
             >
                 <ModalContent>
-                    <IconWrapper>
-                        <AlertTriangle size={22} />
-                    </IconWrapper>
+                    {showIcon && (
+                        <IconWrapper>
+                            <AlertTriangle size={22} />
+                        </IconWrapper>
+                    )}
 
                     <TextContent>
                         <ModalTitle>{title}</ModalTitle>
