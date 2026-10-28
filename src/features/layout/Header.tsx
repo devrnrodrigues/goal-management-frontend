@@ -26,7 +26,9 @@ import {
   ProfileItemLeft,
   ProfileDropdownDivider,
   DevModeBadge,
+  UserAvatarInitials,
 } from './styles/Header.styles';
+import { getInitials } from '../shared/utils/avatarUtils';
 
 export const Header: React.FC<HeaderProps> = ({
   onToggleSidebar,
@@ -49,11 +51,11 @@ export const Header: React.FC<HeaderProps> = ({
   } = useProfileDropdown();
 
   const storedUser = getStoredUser();
-  const displayName = userName || storedUser?.name || 'Renan Rodrigues';
+  const displayName = userName || storedUser?.name || (isDevMode ? 'Renan Rodrigues' : 'Usuário');
   const displayAvatar =
     avatarUrl ||
     storedUser?.avatarUrl ||
-    'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80';
+    (isDevMode ? 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80' : '');
 
   const isControlled = searchQuery !== undefined && onSearchChange !== undefined;
   const currentQuery = isControlled ? searchQuery : internalQuery;
@@ -113,7 +115,11 @@ export const Header: React.FC<HeaderProps> = ({
 
           <ProfileDropdownContainer ref={dropdownRef}>
             <UserProfileWrapper onClick={toggleDropdown} role="button" tabIndex={0}>
-              <UserAvatar src={displayAvatar} alt={displayName} />
+              {displayAvatar ? (
+                <UserAvatar src={displayAvatar} alt={displayName} />
+              ) : (
+                <UserAvatarInitials>{getInitials(displayName)}</UserAvatarInitials>
+              )}
               <UserInfoContainer>
                 <UserNameText>{displayName}</UserNameText>
               </UserInfoContainer>

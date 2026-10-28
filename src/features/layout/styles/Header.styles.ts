@@ -207,6 +207,21 @@ export const UserAvatar = styled.img`
   border: 2px solid ${({ theme }) => theme.colors.primaryLight};
 `;
 
+export const UserAvatarInitials = styled.div`
+  width: 38px;
+  height: 38px;
+  border-radius: ${({ theme }) => theme.radii.full};
+  background-color: rgba(0, 0, 0, 0.06);
+  color: ${({ theme }) => theme.colors.textPrimary};
+  border: 2px solid ${({ theme }) => theme.colors.primaryLight};
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+  flex-shrink: 0;
+`;
+
 export const UserInfoContainer = styled.div`
   display: flex;
   flex-direction: column;
