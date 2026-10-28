@@ -66,6 +66,7 @@ export const useMyGoals = () => {
       setTasks(mappedTasks);
     } catch {
       setErrorMessage('Não foi possível carregar as metas do servidor.');
+      setTasks([]);
     } finally {
       setIsLoading(false);
     }
@@ -206,7 +207,7 @@ export const useMyGoals = () => {
   const handleOpenConfigModal = (task: Task, tab: 'details' | 'members' = 'details', memberId?: string) => {
     const existingMembers = task.members && task.members.length > 0
       ? task.members
-      : (membersByTitle[task.title] || defaultMembers);
+      : (isMock ? (membersByTitle[task.title] || defaultMembers) : []);
 
     setConfigModalTab(tab);
     setHighlightedMemberId(memberId || null);
@@ -252,6 +253,25 @@ export const useMyGoals = () => {
         status: mapStatusToApi(updatedData.status),
         deadline: formatDateToApi(updatedData.deadline),
       });
+
+      const originalMembers = goalForConfig.members || [];
+      const newMembers = updatedData.members || [];
+
+      const added = newMembers.filter((m) => !originalMembers.some((om) => om.id === m.id));
+      for (const m of added) {
+        try {
+          await goalsApi.addMember(goalForConfig.id, m.id, m.role || 'viewer');
+        } catch {
+        }
+      }
+
+      const removed = originalMembers.filter((om) => !newMembers.some((m) => m.id === om.id));
+      for (const m of removed) {
+        try {
+          await goalsApi.removeMember(goalForConfig.id, m.id);
+        } catch {
+        }
+      }
 
       const updatedTask = mapDetailToTask(response);
 

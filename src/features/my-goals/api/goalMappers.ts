@@ -75,7 +75,7 @@ export const mapMemberToAvatar = (member: GoalMemberApiResponse): MemberAvatar =
   return {
     id: member.userId,
     name: member.name,
-    avatarUrl: member.avatarUrl || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=80&q=80',
+    avatarUrl: member.avatarUrl || '',
     role: member.role.toLowerCase() as MemberRole,
   };
 };
@@ -90,7 +90,7 @@ export const mapSummaryToTask = (summary: GoalSummaryApiResponse): Task => {
     status: mapStatusToDisplay(summary.status),
     priority: mapPriorityToDisplay(summary.priority),
     deadline: summary.deadline ? formatDateToDisplay(summary.deadline) : undefined,
-    members: [],
+    members: (summary.members || []).map(mapMemberToAvatar),
     subtasks: [],
   };
 };

@@ -54,6 +54,7 @@ export interface GoalSummaryApiResponse {
   memberCount: number;
   userRole: GoalRoleApi;
   createdAt: string;
+  members?: GoalMemberApiResponse[];
 }
 
 export interface GoalDetailApiResponse {

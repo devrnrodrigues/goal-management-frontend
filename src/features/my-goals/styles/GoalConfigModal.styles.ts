@@ -355,6 +355,21 @@ export const MemberAvatarImg = styled.img`
     border: 1px solid ${({ theme }) => theme.colors.borderLight};
 `;
 
+export const MemberAvatarInitials = styled.div`
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background-color: rgba(0, 0, 0, 0.06);
+    color: ${({ theme }) => theme.colors.textPrimary};
+    border: 1px solid ${({ theme }) => theme.colors.borderLight};
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 700;
+    flex-shrink: 0;
+`;
+
 export const MemberName = styled.span`
     font-size: 13px;
     font-weight: 500;

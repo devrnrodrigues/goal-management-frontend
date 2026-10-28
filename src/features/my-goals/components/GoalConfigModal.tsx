@@ -48,6 +48,7 @@ import {
     MemberCard,
     MemberInfo,
     MemberAvatarImg,
+    MemberAvatarInitials,
     MemberName,
     MemberControls,
     RemoveMemberBtn,
@@ -76,6 +77,10 @@ import {
     SaveBtn
 } from '../styles/GoalConfigModal.styles';
 import { RoleSelectDropdown } from './RoleSelectDropdown';
+import { useDevMode } from '../../shared/hooks/useDevMode';
+import { getStoredUser } from '../../shared/api/httpClient';
+import { usersApi } from '../../shared/api/usersApi';
+import { getInitials } from '../../shared/utils/avatarUtils';
 import { type MemberAvatar, type MemberRole, systemUsers, currentUser } from '../constants/members';
 
 export type { MemberAvatar, MemberRole };
@@ -132,8 +137,11 @@ export const GoalConfigModal: React.FC<GoalConfigModalProps> = ({
     const [priority, setPriority] = useState(goal.priority || 'Média prioridade');
     const [status, setStatus] = useState(goal.status || 'Em progresso');
     const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+    const { isMock } = useDevMode();
     const [members, setMembers] = useState<MemberAvatar[]>([]);
     const [searchQuery, setSearchQuery] = useState('');
+    const [searchedUsers, setSearchedUsers] = useState<MemberAvatar[]>([]);
+    const [isSearching, setIsSearching] = useState<boolean>(false);
     const [memberToRemove, setMemberToRemove] = useState<MemberAvatar | null>(null);
     const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
     const [containerHeight, setContainerHeight] = useState<number | 'auto'>('auto');
@@ -201,18 +209,30 @@ export const GoalConfigModal: React.FC<GoalConfigModalProps> = ({
         setPriority(goal.priority || 'Média prioridade');
         setStatus(goal.status || 'Em progresso');
         setSearchQuery('');
+        setSearchedUsers([]);
+        setIsSearching(false);
         setMemberToRemove(null);
         setIsConfirmingDelete(false);
 
-        const initialMembers = goal.members && goal.members.length > 0
-            ? [...goal.members]
-            : [currentUser];
+        const storedUser = getStoredUser();
 
-        const hasCurrentUser = initialMembers.some((m) => m.id === currentUser.id);
-        const mergedMembers = hasCurrentUser ? initialMembers : [currentUser, ...initialMembers];
+        let initialMembers: MemberAvatar[] = [];
+        if (goal.members && goal.members.length > 0) {
+            initialMembers = [...goal.members];
+        } else if (isMock) {
+            initialMembers = [currentUser];
+        } else if (storedUser && storedUser.id) {
+            initialMembers = [{
+                id: storedUser.id,
+                name: storedUser.name || 'Você',
+                avatarUrl: storedUser.avatarUrl || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=80&q=80',
+                role: 'owner',
+                email: storedUser.email,
+            }];
+        }
 
         let ownerFound = false;
-        const normalizedMembers = mergedMembers.map((m) => {
+        const normalizedMembers = initialMembers.map((m) => {
             if (m.role === 'owner') {
                 if (ownerFound) {
                     return { ...m, role: 'admin' as MemberRole };
@@ -239,7 +259,7 @@ export const GoalConfigModal: React.FC<GoalConfigModalProps> = ({
         } else {
             setSelectedDate(null);
         }
-    }, [goal, initialTab]);
+    }, [goal, initialTab, isMock]);
 
     if (!isOpen) return null;
 
@@ -262,20 +282,66 @@ export const GoalConfigModal: React.FC<GoalConfigModalProps> = ({
     };
 
     const handleAddMember = (newMember: MemberAvatar) => {
-        if (!members.some((m) => m.name === newMember.name)) {
+        if (!members.some((m) => m.id === newMember.id || m.name === newMember.name)) {
             setMembers((prev) => [...prev, { ...newMember, role: newMember.role || 'viewer' }]);
         }
     };
 
-    const availableMembers = systemUsers.filter(
-        (dirMember) => !members.some((m) => m.name === dirMember.name)
-    );
+    useEffect(() => {
+        if (isMock) {
+            setSearchedUsers([]);
+            return;
+        }
 
-    const filteredMembers = searchQuery.trim() === ''
-        ? []
-        : availableMembers.filter((m) =>
-            m.name.toLowerCase().includes(searchQuery.trim().toLowerCase())
-        );
+        const trimmed = searchQuery.trim();
+        if (!trimmed) {
+            setSearchedUsers([]);
+            setIsSearching(false);
+            return;
+        }
+
+        let isCancelled = false;
+        setIsSearching(true);
+
+        const timer = setTimeout(async () => {
+            try {
+                const response = await usersApi.searchUsers(trimmed);
+                if (!isCancelled) {
+                    const mapped: MemberAvatar[] = response.content
+                        .filter((u) => !members.some((m) => m.id === u.id || (m.email && m.email === u.email)))
+                        .map((u) => ({
+                            id: u.id,
+                            name: u.name,
+                            email: u.email,
+                            avatarUrl: u.avatarUrl || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=80&q=80',
+                            role: 'viewer' as MemberRole,
+                        }));
+                    setSearchedUsers(mapped);
+                }
+            } catch {
+                if (!isCancelled) {
+                    setSearchedUsers([]);
+                }
+            } finally {
+                if (!isCancelled) {
+                    setIsSearching(false);
+                }
+            }
+        }, 250);
+
+        return () => {
+            isCancelled = true;
+            clearTimeout(timer);
+        };
+    }, [searchQuery, isMock, members]);
+
+    const filteredMembers = isMock
+        ? (searchQuery.trim() === ''
+            ? []
+            : systemUsers
+                .filter((dirMember) => !members.some((m) => m.id === dirMember.id || m.name === dirMember.name))
+                .filter((m) => m.name.toLowerCase().includes(searchQuery.trim().toLowerCase())))
+        : searchedUsers;
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -510,7 +576,10 @@ export const GoalConfigModal: React.FC<GoalConfigModalProps> = ({
                                         <MemberList>
                                             <AnimatePresence initial={false}>
                                                 {members.map((member) => {
-                                                    const isOwnerSelf = member.id === currentUser.id && member.role === 'owner';
+                                                    const storedUser = getStoredUser();
+                                                    const currentUserId = isMock ? currentUser.id : (storedUser?.id || '');
+                                                    const isSelf = member.id === currentUserId || (Boolean(storedUser?.email) && member.email === storedUser?.email);
+                                                    const isOwnerSelf = isSelf && member.role === 'owner';
                                                     const isHighlighted = member.id === highlightedMemberId || member.name === highlightedMemberId;
                                                     return (
                                                         <MemberItemWrapper
@@ -521,9 +590,13 @@ export const GoalConfigModal: React.FC<GoalConfigModalProps> = ({
                                                         >
                                                             <MemberCard $isHighlighted={isHighlighted}>
                                                                 <MemberInfo>
-                                                                    <MemberAvatarImg src={member.avatarUrl} alt={member.name} />
+                                                                    {member.avatarUrl ? (
+                                                                        <MemberAvatarImg src={member.avatarUrl} alt={member.name} />
+                                                                    ) : (
+                                                                        <MemberAvatarInitials>{getInitials(member.name)}</MemberAvatarInitials>
+                                                                    )}
                                                                     <MemberName>
-                                                                        {member.name}{member.id === currentUser.id ? ' (Você)' : ''}
+                                                                        {member.name}{isSelf ? ' (Você)' : ''}
                                                                     </MemberName>
                                                                 </MemberInfo>
                                                                 <MemberControls>
@@ -612,12 +685,18 @@ export const GoalConfigModal: React.FC<GoalConfigModalProps> = ({
                                         </SearchInputWrapper>
 
                                         {searchQuery.trim().length > 0 && (
-                                            filteredMembers.length > 0 ? (
+                                            isSearching ? (
+                                                <EmptyNotice>Buscando usuários...</EmptyNotice>
+                                            ) : filteredMembers.length > 0 ? (
                                                 <SearchResultsList>
                                                     {filteredMembers.map((dirMember) => (
                                                         <SearchResultCard key={dirMember.id}>
                                                             <MemberInfo>
-                                                                <MemberAvatarImg src={dirMember.avatarUrl} alt={dirMember.name} />
+                                                                {dirMember.avatarUrl ? (
+                                                                    <MemberAvatarImg src={dirMember.avatarUrl} alt={dirMember.name} />
+                                                                ) : (
+                                                                    <MemberAvatarInitials>{getInitials(dirMember.name)}</MemberAvatarInitials>
+                                                                )}
                                                                 <MemberName>{dirMember.name}</MemberName>
                                                             </MemberInfo>
                                                             <AddMemberBtn

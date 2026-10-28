@@ -4,6 +4,7 @@ export interface MemberAvatar {
     id: string;
     avatarUrl: string;
     name: string;
+    email?: string;
     role?: MemberRole;
 }
 

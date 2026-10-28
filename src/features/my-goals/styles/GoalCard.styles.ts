@@ -240,6 +240,33 @@ export const AvatarImage = styled.img`
     }
 `;
 
+export const AvatarInitialsBadge = styled.div`
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 2px solid ${({ theme }) => theme.colors.surface};
+    margin-left: -10px;
+    background-color: rgba(0, 0, 0, 0.06);
+    color: ${({ theme }) => theme.colors.textPrimary};
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 700;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+    &:first-child {
+        margin-left: 0;
+    }
+
+    &:hover {
+        transform: translateY(-2px) scale(1.1);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.18);
+        z-index: 2;
+    }
+`;
+
 export const AvatarMoreBadge = styled.div`
     width: 32px;
     height: 32px;

@@ -26,6 +26,7 @@ import {
     PriorityBadge,
     AvatarGroup,
     AvatarImage,
+    AvatarInitialsBadge,
     AvatarMoreBadge,
     CardBackNav,
     CardActionBtn,
@@ -34,7 +35,9 @@ import {
     NoDescriptionText,
     TooltipContainer
 } from '../styles/GoalCard.styles';
-import { defaultMembers, membersByTitle, type MemberAvatar } from '../constants/members';
+import { useDevMode } from '../../shared/hooks/useDevMode';
+import { getInitials } from '../../shared/utils/avatarUtils';
+import { type MemberAvatar, membersByTitle, defaultMembers } from '../constants/members';
 
 interface GoalCardProps {
     category: string;
@@ -115,7 +118,10 @@ export const GoalCard: React.FC<GoalCardProps> = ({
 
     const hasDescription = Boolean(description && description.trim() !== '');
     const currentPriority = resolvePriority(title, priority);
-    const cardMembers = members && members.length > 0 ? members : (membersByTitle[title] || defaultMembers);
+    const { isMock } = useDevMode();
+    const cardMembers = members && members.length > 0
+        ? members
+        : (isMock ? (membersByTitle[title] || defaultMembers) : []);
     const visibleMembers = cardMembers.slice(0, 3);
     const extraMembersCount = cardMembers.length - 3;
 
@@ -257,16 +263,29 @@ export const GoalCard: React.FC<GoalCardProps> = ({
                                     onMouseLeave={() => setIsAvatarHovered(false)}
                                 >
                                     {visibleMembers.map((member) => (
-                                        <AvatarImage
-                                            key={member.id}
-                                            src={member.avatarUrl}
-                                            alt={member.name}
-                                            title={member.name}
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                onOpenSettings?.('members', member.id);
-                                            }}
-                                        />
+                                        member.avatarUrl ? (
+                                            <AvatarImage
+                                                key={member.id}
+                                                src={member.avatarUrl}
+                                                alt={member.name}
+                                                title={member.name}
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    onOpenSettings?.('members', member.id);
+                                                }}
+                                            />
+                                        ) : (
+                                            <AvatarInitialsBadge
+                                                key={member.id}
+                                                title={member.name}
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    onOpenSettings?.('members', member.id);
+                                                }}
+                                            >
+                                                {getInitials(member.name)}
+                                            </AvatarInitialsBadge>
+                                        )
                                     ))}
                                     {extraMembersCount > 0 && (
                                         <AvatarMoreBadge

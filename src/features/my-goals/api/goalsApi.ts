@@ -41,10 +41,10 @@ export const goalsApi = {
     });
   },
 
-  addMember: async (goalId: string, email: string, role: string): Promise<GoalMemberApiResponse> => {
+  addMember: async (goalId: string, userId: string, role: string): Promise<GoalMemberApiResponse> => {
     return httpClient<GoalMemberApiResponse>(`/goals/${goalId}/members`, {
       method: 'POST',
-      body: JSON.stringify({ email, role }),
+      body: JSON.stringify({ userId, role: role.toUpperCase() }),
     });
   },
 
