@@ -283,6 +283,7 @@ export const useCompletedGoals = () => {
       setGoals(valid);
     } catch {
       setErrorMessage('Não foi possível carregar as metas concluídas.');
+      setGoals([]);
     } finally {
       setIsLoading(false);
     }

@@ -298,6 +298,8 @@ export const useRecentActivity = () => {
       setGoalOptions(options);
     } catch {
       setErrorMessage('Não foi possível carregar as atividades recentes.');
+      setActivities([]);
+      setGoalOptions([]);
     } finally {
       setIsLoading(false);
     }
