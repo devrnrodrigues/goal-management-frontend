@@ -16,8 +16,6 @@ import type {
   CalendarTask,
   CalendarDayInfo,
   CalendarTaskAuthor,
-  CalendarTaskStatus,
-  CalendarTaskPriority,
 } from './types';
 import { useDevMode } from '../shared';
 import { calendarApi } from './api/calendarApi';
@@ -185,15 +183,6 @@ const buildMockTasks = (referenceDate: Date): CalendarTask[] => {
       columnName: 'Concluído',
     },
   ];
-};
-
-const getInitials = (name?: string): string => {
-  if (!name) return 'U';
-  const parts = name.trim().split(' ');
-  if (parts.length >= 2) {
-    return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase();
-  }
-  return parts[0].slice(0, 2).toUpperCase();
 };
 
 export const useCalendar = () => {
