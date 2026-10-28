@@ -44,7 +44,7 @@ export const mapMemberSummaryToMember = (member: TaskMemberSummaryApiResponse): 
   return {
     id: member.userId,
     name: member.name,
-    avatarUrl: member.avatarUrl || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=80&q=80',
+    avatarUrl: member.avatarUrl || '',
   };
 };
 

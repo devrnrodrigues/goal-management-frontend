@@ -85,6 +85,8 @@ export const useTaskBoard = () => {
       setTasks(taskRes.map(mapTaskToDisplay));
     } catch {
       setErrorMessage('Não foi possível carregar as colunas e tarefas do quadro.');
+      setColumns([]);
+      setTasks([]);
     }
   }, [isMock]);
 
@@ -157,6 +159,10 @@ export const useTaskBoard = () => {
       }
     } catch {
       setErrorMessage('Não foi possível carregar as metas.');
+      setAvailableGoals([]);
+      setActiveGoal(null);
+      setColumns([]);
+      setTasks([]);
     } finally {
       setIsLoading(false);
     }
@@ -238,7 +244,7 @@ export const useTaskBoard = () => {
     const trimmed = title.trim();
     if (!trimmed) return;
 
-    if (isMock || !activeGoal?.id) {
+    if (isMock) {
       const newCol: BoardColumn = {
         id: `col-${Date.now()}`,
         title: trimmed,
@@ -247,6 +253,8 @@ export const useTaskBoard = () => {
       setColumns((prev) => [...prev, newCol]);
       return;
     }
+
+    if (!activeGoal?.id) return;
 
     try {
       const res = await taskBoardApi.createColumn(activeGoal.id, { title: trimmed, color });
@@ -302,7 +310,7 @@ export const useTaskBoard = () => {
     const trimmed = title.trim();
     if (!trimmed) return;
 
-    if (isMock || !activeGoal?.id) {
+    if (isMock) {
       const goalMembers = activeGoal ? (membersByTitle[activeGoal.title] || defaultMembers) : defaultMembers;
       const newTask: BoardTask = {
         id: `task-${Date.now()}`,
@@ -320,6 +328,8 @@ export const useTaskBoard = () => {
       setTasks((prev) => [...prev, newTask]);
       return;
     }
+
+    if (!activeGoal?.id) return;
 
     try {
       const created = await taskBoardApi.createTask(activeGoal.id, {

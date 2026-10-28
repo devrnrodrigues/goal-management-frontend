@@ -131,6 +131,26 @@ export const MemberImg = styled.img`
   }
 `;
 
+export const MemberInitialsBadge = styled.div`
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 2px solid #ffffff;
+  margin-left: -7px;
+  background-color: rgba(0, 0, 0, 0.06);
+  color: #334155;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 700;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+
+  &:first-child {
+    margin-left: 0;
+  }
+`;
+
 export const AddMemberCircle = styled.div`
   width: 26px;
   height: 26px;

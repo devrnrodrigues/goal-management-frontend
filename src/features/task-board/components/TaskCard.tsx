@@ -19,10 +19,15 @@ import {
   CardFooter,
   AvatarsGroup,
   MemberImg,
+  MemberInitialsBadge,
   AddMemberCircle,
   HoverActions,
   ActionBtn,
 } from '../styles/TaskCard.styles';
+import { useDevMode } from '../../shared/hooks/useDevMode';
+import { getStoredUser } from '../../shared/api/httpClient';
+import { getInitials } from '../../shared/utils/avatarUtils';
+import type { TaskMember } from '../types';
 
 interface TaskCardProps {
   task: BoardTask;
@@ -57,6 +62,19 @@ export const TaskCard: React.FC<TaskCardProps> = ({
     currentColumnIndex >= 0 && currentColumnIndex < columns.length - 1
       ? columns[currentColumnIndex + 1]
       : null;
+
+  const { isMock } = useDevMode();
+  const storedUser = getStoredUser();
+
+  const fallbackOwner: TaskMember = {
+    id: isMock ? 'usr-renan' : (storedUser?.id || 'owner'),
+    name: isMock ? 'Renan Rodrigues' : (storedUser?.name || 'Você'),
+    avatarUrl: isMock
+      ? 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=80&q=80'
+      : (storedUser?.avatarUrl || ''),
+  };
+
+  const cardMembers = task.members && task.members.length > 0 ? task.members : [fallbackOwner];
 
   return (
     <CardContainer
@@ -105,18 +123,20 @@ export const TaskCard: React.FC<TaskCardProps> = ({
       </CardBody>
 
       <CardFooter onClick={(e) => e.stopPropagation()}>
-        {task.members && task.members.length > 0 ? (
-          <AvatarsGroup>
-            {task.members.map((m) => (
+        <AvatarsGroup>
+          {cardMembers.map((m) =>
+            m.avatarUrl ? (
               <MemberImg key={m.id} src={m.avatarUrl} alt={m.name} title={m.name} />
-            ))}
-            <AddMemberCircle title="Atribuir">
-              <Plus size={11} />
-            </AddMemberCircle>
-          </AvatarsGroup>
-        ) : (
-          <div />
-        )}
+            ) : (
+              <MemberInitialsBadge key={m.id} title={m.name}>
+                {getInitials(m.name)}
+              </MemberInitialsBadge>
+            )
+          )}
+          <AddMemberCircle title="Atribuir">
+            <Plus size={11} />
+          </AddMemberCircle>
+        </AvatarsGroup>
 
         <HoverActions>
           <ActionBtn
