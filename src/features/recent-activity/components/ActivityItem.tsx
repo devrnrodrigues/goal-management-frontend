@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Clock, Target, ArrowRight } from 'lucide-react';
 import type { ActivityItem as ActivityItemType } from '../types';
 import {
@@ -25,6 +25,8 @@ interface ActivityItemProps {
 }
 
 export const ActivityItem: React.FC<ActivityItemProps> = ({ activity }) => {
+  const [avatarError, setAvatarError] = useState(false);
+
   const renderActionSentence = () => {
     const authorName = <strong>{activity.author.name}</strong>;
     const taskTag = <TargetTaskText>{activity.title}</TargetTaskText>;
@@ -107,11 +109,12 @@ export const ActivityItem: React.FC<ActivityItemProps> = ({ activity }) => {
   return (
     <ItemCard>
       <AuthorAvatarWrapper title={activity.author.name}>
-        {activity.author.avatarUrl ? (
+        {activity.author.avatarUrl && !avatarError ? (
           <AuthorAvatarImg
             src={activity.author.avatarUrl}
             alt={activity.author.name}
             loading="lazy"
+            onError={() => setAvatarError(true)}
           />
         ) : (
           activity.author.initials

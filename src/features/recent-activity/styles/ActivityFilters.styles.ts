@@ -68,7 +68,7 @@ export const SearchInput = styled.input`
   &:focus {
     background-color: ${({ theme }) => theme.colors.surface};
     border-color: ${({ theme }) => theme.colors.primary};
-    box-shadow: 0 0 0 2px rgba(0, 168, 107, 0.1);
+    box-shadow: none;
   }
 `;
 

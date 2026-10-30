@@ -7,9 +7,9 @@ export const EmptyContainer = styled.div`
   justify-content: center;
   padding: 56px 24px;
   background-color: ${({ theme }) => theme.colors.surface};
-  border: none;
+  border: 1px solid rgba(0, 0, 0, 0.05);
   border-radius: ${({ theme }) => theme.radii.lg};
-  box-shadow: ${({ theme }) => theme.shadows.card};
+  box-shadow: none;
   text-align: center;
   gap: 14px;
   width: 100%;

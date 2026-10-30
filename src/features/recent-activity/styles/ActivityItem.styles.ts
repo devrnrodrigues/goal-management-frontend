@@ -10,13 +10,14 @@ export const ItemCard = styled.div`
   min-width: 0;
   box-sizing: border-box;
   background-color: ${({ theme }) => theme.colors.surface};
-  border: none;
+  border: 1px solid rgba(0, 0, 0, 0.05);
   border-radius: ${({ theme }) => theme.radii.lg};
-  box-shadow: ${({ theme }) => theme.shadows.card};
-  transition: box-shadow 0.15s ease;
+  box-shadow: none;
+  transition: border-color 0.15s ease;
 
   &:hover {
-    box-shadow: ${({ theme }) => theme.shadows.dropdown};
+    border-color: rgba(0, 0, 0, 0.14);
+    box-shadow: none;
   }
 
   @media (max-width: 640px) {
@@ -36,11 +37,14 @@ export const AuthorAvatarWrapper = styled.div`
   border-radius: ${({ theme }) => theme.radii.full};
   flex-shrink: 0;
   overflow: hidden;
-  background-color: rgba(0, 0, 0, 0.05);
+  background-color: #f1f5f9;
+  border: 2px solid #ffffff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: ${({ theme }) => theme.colors.textSecondary};
+  color: #334155;
+  font-weight: 700;
   font-size: 13px;
   font-weight: 700;
 
