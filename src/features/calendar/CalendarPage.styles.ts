@@ -28,13 +28,11 @@ export const CalendarHeaderWrapper = styled.div`
   align-items: flex-start;
   gap: 16px;
   width: 100%;
-  max-width: 1080px;
-  margin: 0 auto;
+  max-width: 100%;
   min-width: 0;
   box-sizing: border-box;
 
   @media (max-width: 900px) {
-    max-width: 100%;
     flex-direction: column;
     gap: 6px;
   }
@@ -68,16 +66,11 @@ export const CalendarSubtitle = styled.p`
 export const CalendarContentLayout = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 16px;
   width: 100%;
-  max-width: 1080px;
-  margin: 0 auto;
+  max-width: 100%;
   min-width: 0;
   box-sizing: border-box;
-
-  @media (max-width: 900px) {
-    max-width: 100%;
-  }
 `;
 
 export const ErrorMessageBanner = styled.div`
@@ -87,8 +80,7 @@ export const ErrorMessageBanner = styled.div`
   padding: 12px 16px;
   border-radius: ${({ theme }) => theme.radii.md};
   font-size: 14px;
-  max-width: 1080px;
-  margin: 0 auto;
   width: 100%;
+  max-width: 100%;
   box-sizing: border-box;
 `;

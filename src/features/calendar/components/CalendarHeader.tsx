@@ -6,7 +6,6 @@ import {
   HeaderContainer,
   TitleWrapper,
   MonthTitle,
-  MonthSubtitle,
   NavControls,
   TodayButton,
   ArrowNavButton,
@@ -31,9 +30,6 @@ export const CalendarHeader: React.FC<CalendarHeaderProps> = ({
     <HeaderContainer>
       <TitleWrapper>
         <MonthTitle>{formattedMonthTitle}</MonthTitle>
-        <MonthSubtitle>
-          Visualização das metas criadas e planejadas organizadas por data.
-        </MonthSubtitle>
       </TitleWrapper>
 
       <NavControls>

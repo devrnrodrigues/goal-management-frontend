@@ -18,23 +18,16 @@ export const HeaderContainer = styled.div`
 
 export const TitleWrapper = styled.div`
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 4px;
+  align-items: center;
 `;
 
 export const MonthTitle = styled.h2`
-  font-size: clamp(18px, 1.2vw + 14px, 24px);
+  font-size: 22px;
   font-weight: 700;
   color: ${({ theme }) => theme.colors.textPrimary};
   letter-spacing: -0.4px;
   text-transform: capitalize;
-`;
-
-export const MonthSubtitle = styled.p`
-  font-size: clamp(13px, 0.2vw + 12px, 14px);
-  font-weight: 500;
-  color: ${({ theme }) => theme.colors.textSecondary};
+  margin: 0;
 `;
 
 export const NavControls = styled.div`

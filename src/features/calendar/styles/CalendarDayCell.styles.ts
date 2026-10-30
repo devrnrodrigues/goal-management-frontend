@@ -10,11 +10,9 @@ export const CellWrapper = styled.button<{
   flex-direction: column;
   justify-content: flex-start;
   align-items: stretch;
-  gap: 4px;
-  aspect-ratio: 1.15 / 1;
-  min-height: 85px;
-  max-height: 125px;
-  padding: 8px 7px;
+  gap: 6px;
+  min-height: clamp(105px, 8.5vw, 135px);
+  padding: 10px 9px;
   background-color: ${({ $isSelected }) =>
     $isSelected ? 'rgba(0, 0, 0, 0.04)' : 'transparent'};
   border: none;
@@ -34,19 +32,16 @@ export const CellWrapper = styled.button<{
   }
 
   &:hover {
-    background-color: rgba(0, 0, 0, 0.03);
+    background-color: rgba(0, 0, 0, 0.02);
   }
 
   @media (max-width: 768px) {
-    aspect-ratio: 1 / 1;
     min-height: 64px;
-    max-height: none;
     padding: 6px 4px;
     gap: 2px;
   }
 
   @media (max-width: 480px) {
-    aspect-ratio: 1 / 1;
     min-height: 48px;
     padding: 4px 2px;
     justify-content: space-between;

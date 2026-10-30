@@ -1,8 +1,10 @@
-import React from 'react';
+import React, { useState, useMemo } from 'react';
+import { isSameDay } from 'date-fns';
 import { useCalendar } from './useCalendar';
 import {
   CalendarHeader,
   CalendarGrid,
+  CalendarDayDetailsModal,
 } from './components';
 import {
   CalendarPageContainer,
@@ -21,6 +23,22 @@ export const CalendarPage: React.FC = () => {
     handleSelectDay,
   } = useCalendar();
 
+  const [activeModalDate, setActiveModalDate] = useState<Date | null>(null);
+
+  const selectedDayInfo = useMemo(() => {
+    if (!activeModalDate) return null;
+    return calendarDays.find((day) => isSameDay(day.date, activeModalDate)) || null;
+  }, [calendarDays, activeModalDate]);
+
+  const onSelectDay = (date: Date) => {
+    handleSelectDay(date);
+    setActiveModalDate(date);
+  };
+
+  const handleCloseModal = () => {
+    setActiveModalDate(null);
+  };
+
   return (
     <CalendarPageContainer>
       {errorMessage && <ErrorMessageBanner>{errorMessage}</ErrorMessageBanner>}
@@ -35,9 +53,14 @@ export const CalendarPage: React.FC = () => {
 
         <CalendarGrid
           days={calendarDays}
-          onSelectDay={handleSelectDay}
+          onSelectDay={onSelectDay}
         />
       </CalendarContentLayout>
+
+      <CalendarDayDetailsModal
+        dayInfo={selectedDayInfo}
+        onClose={handleCloseModal}
+      />
     </CalendarPageContainer>
   );
 };
