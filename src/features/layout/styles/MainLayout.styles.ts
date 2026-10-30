@@ -35,6 +35,11 @@ export const MainContentArea = styled.main`
     padding-right: 48px;
   }
 
+  @media (max-width: 1200px) {
+    padding-left: ${({ theme }) => theme.spacing.lg};
+    padding-right: ${({ theme }) => theme.spacing.lg};
+  }
+
   @media (max-width: 900px) {
     margin-left: 0;
     padding-left: ${({ theme }) => theme.spacing.md};

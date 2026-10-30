@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Search, Bell, Menu, ChevronDown, Code2, Settings, LogOut, Plus } from 'lucide-react';
 import type { HeaderProps } from './types';
 import { useProfileDropdown } from './hooks/useProfileDropdown';
-import { getStoredUser } from '../shared';
+import { getStoredUser, type StoredUser } from '../shared';
+import { ProfileSettingsModal } from '../profile';
 import {
   HeaderContainer,
   HeaderContentWrapper,
@@ -41,6 +42,9 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenAddGoal,
 }) => {
   const [internalQuery, setInternalQuery] = useState('');
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [avatarError, setAvatarError] = useState(false);
+  const [localUser, setLocalUser] = useState<StoredUser | null>(() => getStoredUser());
   const {
     isOpen,
     isDevMode,
@@ -50,12 +54,25 @@ export const Header: React.FC<HeaderProps> = ({
     toggleDevMode,
   } = useProfileDropdown();
 
-  const storedUser = getStoredUser();
-  const displayName = userName || storedUser?.name || (isDevMode ? 'Renan Rodrigues' : 'Usuário');
+  useEffect(() => {
+    const handleProfileChange = () => {
+      setLocalUser(getStoredUser());
+    };
+    window.addEventListener('user-profile-change', handleProfileChange);
+    return () => {
+      window.removeEventListener('user-profile-change', handleProfileChange);
+    };
+  }, []);
+
+  const displayName = userName || localUser?.name || (isDevMode ? 'Renan Rodrigues' : 'Usuário');
   const displayAvatar =
     avatarUrl ||
-    storedUser?.avatarUrl ||
+    localUser?.avatarUrl ||
     (isDevMode ? 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80' : '');
+
+  useEffect(() => {
+    setAvatarError(false);
+  }, [displayAvatar]);
 
   const isControlled = searchQuery !== undefined && onSearchChange !== undefined;
   const currentQuery = isControlled ? searchQuery : internalQuery;
@@ -115,8 +132,12 @@ export const Header: React.FC<HeaderProps> = ({
 
           <ProfileDropdownContainer ref={dropdownRef}>
             <UserProfileWrapper onClick={toggleDropdown} role="button" tabIndex={0}>
-              {displayAvatar ? (
-                <UserAvatar src={displayAvatar} alt={displayName} />
+              {displayAvatar && !avatarError ? (
+                <UserAvatar
+                  src={displayAvatar}
+                  alt={displayName}
+                  onError={() => setAvatarError(true)}
+                />
               ) : (
                 <UserAvatarInitials>{getInitials(displayName)}</UserAvatarInitials>
               )}
@@ -140,7 +161,13 @@ export const Header: React.FC<HeaderProps> = ({
                   </DevModeBadge>
                 </ProfileDropdownItem>
 
-                <ProfileDropdownItem type="button" onClick={closeDropdown}>
+                <ProfileDropdownItem
+                  type="button"
+                  onClick={() => {
+                    closeDropdown();
+                    setIsSettingsOpen(true);
+                  }}
+                >
                   <ProfileItemLeft>
                     <Settings size={16} />
                     <span>Configurações</span>
@@ -164,6 +191,11 @@ export const Header: React.FC<HeaderProps> = ({
           </ProfileDropdownContainer>
         </HeaderRight>
       </HeaderContentWrapper>
+
+      <ProfileSettingsModal
+        isOpen={isSettingsOpen}
+        onClose={() => setIsSettingsOpen(false)}
+      />
     </HeaderContainer>
   );
 };

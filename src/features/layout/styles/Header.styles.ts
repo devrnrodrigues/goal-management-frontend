@@ -204,16 +204,18 @@ export const UserAvatar = styled.img`
   height: 38px;
   border-radius: ${({ theme }) => theme.radii.full};
   object-fit: cover;
-  border: 2px solid ${({ theme }) => theme.colors.primaryLight};
+  border: 2px solid #ffffff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 `;
 
 export const UserAvatarInitials = styled.div`
   width: 38px;
   height: 38px;
   border-radius: ${({ theme }) => theme.radii.full};
-  background-color: rgba(0, 0, 0, 0.06);
-  color: ${({ theme }) => theme.colors.textPrimary};
-  border: 2px solid ${({ theme }) => theme.colors.primaryLight};
+  background-color: #f1f5f9;
+  color: #334155;
+  border: 2px solid #ffffff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   display: flex;
   align-items: center;
   justify-content: center;
