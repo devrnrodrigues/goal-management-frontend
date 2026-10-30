@@ -46,6 +46,14 @@ export const getStoredUser = (): StoredUser | null => {
   }
 };
 
+export const updateStoredUser = (updatedUser: Partial<StoredUser>): StoredUser => {
+  const current = getStoredUser() || {};
+  const merged: StoredUser = { ...current, ...updatedUser };
+  localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(merged));
+  window.dispatchEvent(new Event('user-profile-change'));
+  return merged;
+};
+
 export const setAuthSession = (token: string, user: StoredUser, refreshToken?: string): void => {
   localStorage.setItem(TOKEN_STORAGE_KEY, token);
   if (refreshToken) {
