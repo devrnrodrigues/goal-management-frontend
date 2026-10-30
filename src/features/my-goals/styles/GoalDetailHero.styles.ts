@@ -115,7 +115,7 @@ export const MemberAvatarImage = styled.img`
   width: 24px;
   height: 24px;
   border-radius: 50%;
-  border: 2px solid ${({ theme }) => theme.colors.surface};
+  border: 2px solid #ffffff;
   margin-left: -5px;
   object-fit: cover;
 
@@ -128,10 +128,10 @@ export const AvatarFallback = styled.div`
   width: 24px;
   height: 24px;
   border-radius: 50%;
-  border: 2px solid ${({ theme }) => theme.colors.surface};
+  border: 2px solid #ffffff;
   margin-left: -5px;
-  background: ${({ theme }) => theme.colors.primaryLight};
-  color: ${({ theme }) => theme.colors.primaryDark};
+  background: #f1f5f9;
+  color: #334155;
   font-size: 10px;
   font-weight: 700;
   display: flex;

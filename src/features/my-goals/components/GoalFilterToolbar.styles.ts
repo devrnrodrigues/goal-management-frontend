@@ -5,10 +5,9 @@ export const ToolbarContainer = styled.div`
   flex-direction: column;
   gap: 16px;
   background-color: ${({ theme }) => theme.colors.surface};
-  border: 1px solid ${({ theme }) => theme.colors.borderLight};
+  border: 1px solid rgba(0, 0, 0, 0.05);
   border-radius: ${({ theme }) => theme.radii.lg};
   padding: 16px 20px;
-  box-shadow: ${({ theme }) => theme.shadows.card};
 `;
 
 export const ToolbarTopRow = styled.div`

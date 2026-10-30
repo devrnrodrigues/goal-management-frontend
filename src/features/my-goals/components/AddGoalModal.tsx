@@ -110,6 +110,22 @@ const getDefaultOwner = (isMock: boolean): MemberAvatar[] => {
     return [];
 };
 
+const SafeAddGoalMemberAvatar: React.FC<{ name: string; avatarUrl?: string }> = ({ name, avatarUrl }) => {
+    const [hasError, setHasError] = useState(false);
+
+    if (avatarUrl && !hasError) {
+        return (
+            <MemberAvatarImg
+                src={avatarUrl}
+                alt={name}
+                onError={() => setHasError(true)}
+            />
+        );
+    }
+
+    return <MemberAvatarInitials>{getInitials(name)}</MemberAvatarInitials>;
+};
+
 export const AddGoalModal: React.FC<AddGoalModalProps> = ({ isOpen, onClose, onAddGoal }) => {
     const { isMock } = useDevMode();
     const [activeTab, setActiveTab] = useState<'details' | 'members'>('details');
@@ -506,11 +522,10 @@ export const AddGoalModal: React.FC<AddGoalModalProps> = ({ isOpen, onClose, onA
                                                                 >
                                                                     <MemberCard>
                                                                         <MemberInfo>
-                                                                            {member.avatarUrl ? (
-                                                                                <MemberAvatarImg src={member.avatarUrl} alt={member.name} />
-                                                                            ) : (
-                                                                                <MemberAvatarInitials>{getInitials(member.name)}</MemberAvatarInitials>
-                                                                            )}
+                                                                        <SafeAddGoalMemberAvatar
+                                                                            name={member.name}
+                                                                            avatarUrl={member.avatarUrl}
+                                                                        />
                                                                             <MemberName>
                                                                                 {member.name}{isSelf ? ' (Você)' : ''}
                                                                             </MemberName>
@@ -574,11 +589,10 @@ export const AddGoalModal: React.FC<AddGoalModalProps> = ({ isOpen, onClose, onA
                                                             {filteredMembers.map((dirMember) => (
                                                                 <SearchResultCard key={dirMember.id}>
                                                                     <MemberInfo>
-                                                                        {dirMember.avatarUrl ? (
-                                                                            <MemberAvatarImg src={dirMember.avatarUrl} alt={dirMember.name} />
-                                                                        ) : (
-                                                                            <MemberAvatarInitials>{getInitials(dirMember.name)}</MemberAvatarInitials>
-                                                                        )}
+                                                                        <SafeAddGoalMemberAvatar
+                                                                            name={dirMember.name}
+                                                                            avatarUrl={dirMember.avatarUrl}
+                                                                        />
                                                                         <MemberName>{dirMember.name}</MemberName>
                                                                     </MemberInfo>
                                                                     <AddMemberBtn

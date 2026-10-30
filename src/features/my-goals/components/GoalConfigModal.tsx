@@ -120,6 +120,22 @@ const tabVariants = {
     })
 };
 
+const SafeGoalConfigMemberAvatar: React.FC<{ name: string; avatarUrl?: string }> = ({ name, avatarUrl }) => {
+    const [hasError, setHasError] = useState(false);
+
+    if (avatarUrl && !hasError) {
+        return (
+            <MemberAvatarImg
+                src={avatarUrl}
+                alt={name}
+                onError={() => setHasError(true)}
+            />
+        );
+    }
+
+    return <MemberAvatarInitials>{getInitials(name)}</MemberAvatarInitials>;
+};
+
 export const GoalConfigModal: React.FC<GoalConfigModalProps> = ({
     isOpen,
     initialTab = 'details',
@@ -590,11 +606,10 @@ export const GoalConfigModal: React.FC<GoalConfigModalProps> = ({
                                                         >
                                                             <MemberCard $isHighlighted={isHighlighted}>
                                                                 <MemberInfo>
-                                                                    {member.avatarUrl ? (
-                                                                        <MemberAvatarImg src={member.avatarUrl} alt={member.name} />
-                                                                    ) : (
-                                                                        <MemberAvatarInitials>{getInitials(member.name)}</MemberAvatarInitials>
-                                                                    )}
+                                                                    <SafeGoalConfigMemberAvatar
+                                                                        name={member.name}
+                                                                        avatarUrl={member.avatarUrl}
+                                                                    />
                                                                     <MemberName>
                                                                         {member.name}{isSelf ? ' (Você)' : ''}
                                                                     </MemberName>
@@ -692,11 +707,10 @@ export const GoalConfigModal: React.FC<GoalConfigModalProps> = ({
                                                     {filteredMembers.map((dirMember) => (
                                                         <SearchResultCard key={dirMember.id}>
                                                             <MemberInfo>
-                                                                {dirMember.avatarUrl ? (
-                                                                    <MemberAvatarImg src={dirMember.avatarUrl} alt={dirMember.name} />
-                                                                ) : (
-                                                                    <MemberAvatarInitials>{getInitials(dirMember.name)}</MemberAvatarInitials>
-                                                                )}
+                                                                <SafeGoalConfigMemberAvatar
+                                                                    name={dirMember.name}
+                                                                    avatarUrl={dirMember.avatarUrl}
+                                                                />
                                                                 <MemberName>{dirMember.name}</MemberName>
                                                             </MemberInfo>
                                                             <AddMemberBtn

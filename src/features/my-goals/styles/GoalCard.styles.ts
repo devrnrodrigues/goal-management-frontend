@@ -223,7 +223,7 @@ export const AvatarImage = styled.img`
     width: 32px;
     height: 32px;
     border-radius: 50%;
-    border: 2px solid ${({ theme }) => theme.colors.surface};
+    border: 2px solid #ffffff;
     margin-left: -10px;
     object-fit: cover;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
@@ -244,10 +244,10 @@ export const AvatarInitialsBadge = styled.div`
     width: 32px;
     height: 32px;
     border-radius: 50%;
-    border: 2px solid ${({ theme }) => theme.colors.surface};
+    border: 2px solid #ffffff;
     margin-left: -10px;
-    background-color: rgba(0, 0, 0, 0.06);
-    color: ${({ theme }) => theme.colors.textPrimary};
+    background-color: #f1f5f9;
+    color: #334155;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -271,7 +271,7 @@ export const AvatarMoreBadge = styled.div`
     width: 32px;
     height: 32px;
     border-radius: 50%;
-    border: 2px solid ${({ theme }) => theme.colors.surface};
+    border: 2px solid #ffffff;
     background-color: ${({ theme }) => theme.colors.primaryLight};
     color: ${({ theme }) => theme.colors.primary};
     margin-left: -10px;

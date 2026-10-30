@@ -2,10 +2,9 @@ import styled from 'styled-components';
 
 export const InspectorContainer = styled.aside`
   background: ${({ theme }) => theme.colors.surface};
-  border: none;
+  border: 1px solid rgba(0, 0, 0, 0.05);
   border-radius: 20px;
   padding: 22px 24px;
-  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.04);
   display: flex;
   flex-direction: column;
   gap: 18px;
@@ -95,7 +94,9 @@ export const FormInput = styled.input`
   transition: all 0.2s ease;
 
   &:focus {
-    box-shadow: 0 0 0 2px ${({ theme }) => theme.colors.primary};
+    outline: none;
+    border-color: ${({ theme }) => theme.colors.primary};
+    box-shadow: none;
   }
 
   &::placeholder {
@@ -117,7 +118,9 @@ export const FormTextArea = styled.textarea`
   transition: all 0.2s ease;
 
   &:focus {
-    box-shadow: 0 0 0 2px ${({ theme }) => theme.colors.primary};
+    outline: none;
+    border-color: ${({ theme }) => theme.colors.primary};
+    box-shadow: none;
   }
 
   &::placeholder {

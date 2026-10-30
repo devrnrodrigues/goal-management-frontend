@@ -81,6 +81,31 @@ function resolvePriority(title: string, customPriority?: string): string {
 
 
 
+const SafeGoalCardAvatar: React.FC<{
+    member: MemberAvatar;
+    onClick?: (e: React.MouseEvent) => void;
+}> = ({ member, onClick }) => {
+    const [hasError, setHasError] = useState(false);
+
+    if (member.avatarUrl && !hasError) {
+        return (
+            <AvatarImage
+                src={member.avatarUrl}
+                alt={member.name}
+                title={member.name}
+                onClick={onClick}
+                onError={() => setHasError(true)}
+            />
+        );
+    }
+
+    return (
+        <AvatarInitialsBadge title={member.name} onClick={onClick}>
+            {getInitials(member.name)}
+        </AvatarInitialsBadge>
+    );
+};
+
 export const GoalCard: React.FC<GoalCardProps> = ({
     category,
     title,
@@ -263,29 +288,14 @@ export const GoalCard: React.FC<GoalCardProps> = ({
                                     onMouseLeave={() => setIsAvatarHovered(false)}
                                 >
                                     {visibleMembers.map((member) => (
-                                        member.avatarUrl ? (
-                                            <AvatarImage
-                                                key={member.id}
-                                                src={member.avatarUrl}
-                                                alt={member.name}
-                                                title={member.name}
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    onOpenSettings?.('members', member.id);
-                                                }}
-                                            />
-                                        ) : (
-                                            <AvatarInitialsBadge
-                                                key={member.id}
-                                                title={member.name}
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    onOpenSettings?.('members', member.id);
-                                                }}
-                                            >
-                                                {getInitials(member.name)}
-                                            </AvatarInitialsBadge>
-                                        )
+                                        <SafeGoalCardAvatar
+                                            key={member.id}
+                                            member={member}
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                onOpenSettings?.('members', member.id);
+                                            }}
+                                        />
                                     ))}
                                     {extraMembersCount > 0 && (
                                         <AvatarMoreBadge

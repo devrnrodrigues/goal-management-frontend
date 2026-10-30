@@ -62,7 +62,7 @@ export const ModalTitleGroup = styled.div`
 
 export const ModalTitle = styled.h2`
     font-size: clamp(16px, 0.3vw + 15px, 18px);
-    color: ${({ theme }) => theme.colors.textPrimary};
+    color: #334155;
     font-weight: 600;
     margin: 0;
     letter-spacing: -0.01em;
@@ -98,7 +98,8 @@ export const ModalTabs = styled.div`
     gap: 6px;
     margin-bottom: 18px;
     background-color: rgba(15, 23, 42, 0.03);
-    border: 1px solid ${({ theme }) => theme.colors.borderLight};
+    border: 2px solid #ffffff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
     padding: 3px;
     border-radius: ${({ theme }) => theme.radii.sm};
 `;
@@ -210,8 +211,8 @@ export const Input = styled.input`
 
     &:focus {
         outline: none;
-        border-color: #64748b;
-        box-shadow: 0 0 0 2px rgba(100, 116, 139, 0.12);
+        border-color: ${({ theme }) => theme.colors.primary};
+        box-shadow: none;
     }
 `;
 
@@ -228,8 +229,8 @@ export const Select = styled.select`
 
     &:focus {
         outline: none;
-        border-color: #64748b;
-        box-shadow: 0 0 0 2px rgba(100, 116, 139, 0.12);
+        border-color: ${({ theme }) => theme.colors.primary};
+        box-shadow: none;
     }
 `;
 
@@ -248,8 +249,8 @@ export const TextArea = styled.textarea`
 
     &:focus {
         outline: none;
-        border-color: #64748b;
-        box-shadow: 0 0 0 2px rgba(100, 116, 139, 0.12);
+        border-color: ${({ theme }) => theme.colors.primary};
+        box-shadow: none;
     }
 `;
 
@@ -271,10 +272,10 @@ export const DatePickerWrapper = styled.div`
         transition: all 0.15s ease;
 
         &:focus {
-            outline: none;
-            border-color: #64748b;
-            box-shadow: 0 0 0 2px rgba(100, 116, 139, 0.12);
-        }
+        outline: none;
+        border-color: ${({ theme }) => theme.colors.primary};
+        box-shadow: none;
+    }
     }
 `;
 
@@ -343,7 +344,7 @@ export const MemberAvatarInitials = styled.div`
     width: 30px;
     height: 30px;
     border-radius: 50%;
-    background-color: rgba(0, 0, 0, 0.06);
+    background-color: #f1f5f9;
     color: ${({ theme }) => theme.colors.textPrimary};
     border: 1px solid ${({ theme }) => theme.colors.borderLight};
     display: flex;
@@ -426,8 +427,8 @@ export const SearchInput = styled.input`
 
     &:focus {
         outline: none;
-        border-color: #64748b;
-        box-shadow: 0 0 0 2px rgba(100, 116, 139, 0.12);
+        border-color: ${({ theme }) => theme.colors.primary};
+        box-shadow: none;
     }
 `;
 

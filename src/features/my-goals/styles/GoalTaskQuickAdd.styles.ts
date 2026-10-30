@@ -2,12 +2,10 @@ import styled from 'styled-components';
 
 export const QuickAddWrapper = styled.div<{ $isExpanded: boolean }>`
   background: ${({ theme }) => theme.colors.surface};
-  border: none;
+  border: 1px solid rgba(0, 0, 0, 0.05);
   border-radius: 14px;
   padding: ${({ $isExpanded }) => ($isExpanded ? '14px 16px' : '10px 14px')};
   transition: all 0.2s ease;
-  box-shadow: ${({ $isExpanded }) =>
-    $isExpanded ? '0 4px 16px rgba(0, 0, 0, 0.06)' : '0 2px 8px rgba(0, 0, 0, 0.02)'};
 `;
 
 export const QuickAddHeader = styled.div`
@@ -60,7 +58,9 @@ export const QuickAddTextArea = styled.textarea`
   box-sizing: border-box;
 
   &:focus {
-    box-shadow: 0 0 0 2px ${({ theme }) => theme.colors.primary};
+    outline: none;
+    border-color: ${({ theme }) => theme.colors.primary};
+    box-shadow: none;
   }
 
   &::placeholder {

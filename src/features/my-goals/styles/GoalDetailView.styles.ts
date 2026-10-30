@@ -29,10 +29,9 @@ export const ControlsBar = styled.div`
   flex-wrap: wrap;
   gap: 12px;
   background: ${({ theme }) => theme.colors.surface};
-  border: none;
+  border: 1px solid rgba(0, 0, 0, 0.05);
   border-radius: 16px;
   padding: 10px 16px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
 `;
 
 export const FilterTabsGroup = styled.div`
@@ -116,7 +115,6 @@ export const ClearSearchButton = styled.button`
   }
 `;
 
-
 export const BulkActionButton = styled.button`
   display: inline-flex;
   align-items: center;
@@ -147,7 +145,7 @@ export const TasksListWrapper = styled.div`
 
 export const EmptyStateBox = styled.div`
   background: ${({ theme }) => theme.colors.surface};
-  border: none;
+  border: 1px dashed rgba(0, 0, 0, 0.08);
   border-radius: 16px;
   padding: 40px 20px;
   display: flex;
@@ -155,7 +153,6 @@ export const EmptyStateBox = styled.div`
   align-items: center;
   text-align: center;
   gap: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
 `;
 
 export const EmptyStateIcon = styled.div`

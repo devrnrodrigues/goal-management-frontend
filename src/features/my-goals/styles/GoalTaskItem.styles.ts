@@ -2,23 +2,13 @@ import styled from 'styled-components';
 
 export const TaskItemCard = styled.div<{ $isSelected: boolean; $isCompleted: boolean }>`
   background: ${({ theme }) => theme.colors.surface};
-  border: none;
+  border: 1px solid ${({ $isSelected }) => ($isSelected ? 'rgba(0, 168, 107, 0.35)' : 'rgba(0, 0, 0, 0.05)')};
   border-radius: 14px;
   padding: 14px 16px;
   display: flex;
   flex-direction: column;
   gap: 10px;
-  transition: all 0.2s ease;
-  box-shadow: ${({ $isSelected }) =>
-    $isSelected
-      ? '0 4px 14px rgba(0, 0, 0, 0.08)'
-      : '0 2px 6px rgba(0, 0, 0, 0.03)'};
   cursor: pointer;
-
-  &:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
-  }
 `;
 
 export const TaskItemMainRow = styled.div`

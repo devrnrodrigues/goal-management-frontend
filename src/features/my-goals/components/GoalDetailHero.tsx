@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { ArrowLeft, Calendar } from 'lucide-react';
 import type { Task } from '../types';
 import {
@@ -28,6 +28,27 @@ interface GoalDetailHeroProps {
   progressPercent: number;
 }
 
+const SafeHeroAvatar: React.FC<{ member: { id: string; name: string; avatarUrl?: string } }> = ({ member }) => {
+  const [hasError, setHasError] = useState(false);
+
+  if (member.avatarUrl && !hasError) {
+    return (
+      <MemberAvatarImage
+        src={member.avatarUrl}
+        alt={member.name}
+        title={member.name}
+        onError={() => setHasError(true)}
+      />
+    );
+  }
+
+  return (
+    <AvatarFallback title={member.name}>
+      {member.name.substring(0, 2).toUpperCase()}
+    </AvatarFallback>
+  );
+};
+
 export const GoalDetailHero: React.FC<GoalDetailHeroProps> = ({
   task,
   onClose,
@@ -54,20 +75,9 @@ export const GoalDetailHero: React.FC<GoalDetailHeroProps> = ({
 
             {task.members && task.members.length > 0 && (
               <AvatarGroup>
-                {task.members.map((member) =>
-                  member.avatarUrl ? (
-                    <MemberAvatarImage
-                      key={member.id}
-                      src={member.avatarUrl}
-                      alt={member.name}
-                      title={member.name}
-                    />
-                  ) : (
-                    <AvatarFallback key={member.id} title={member.name}>
-                      {member.name.substring(0, 2).toUpperCase()}
-                    </AvatarFallback>
-                  )
-                )}
+                {task.members.map((member) => (
+                  <SafeHeroAvatar key={member.id} member={member} />
+                ))}
               </AvatarGroup>
             )}
           </MetaFooterRow>

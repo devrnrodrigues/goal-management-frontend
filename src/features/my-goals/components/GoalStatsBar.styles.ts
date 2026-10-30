@@ -25,19 +25,12 @@ export const StatsContainer = styled.div`
 
 export const StatCard = styled.div`
   background-color: ${({ theme }) => theme.colors.surface};
-  border: 1px solid ${({ theme }) => theme.colors.borderLight};
+  border: 1px solid rgba(0, 0, 0, 0.05);
   border-radius: ${({ theme }) => theme.radii.lg};
   padding: 18px 20px;
   display: flex;
   align-items: center;
   gap: 16px;
-  box-shadow: ${({ theme }) => theme.shadows.card};
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
-  }
 `;
 
 export const StatIconWrapper = styled.div<{ $variant: 'primary' | 'info' | 'urgent' | 'warning' }>`
