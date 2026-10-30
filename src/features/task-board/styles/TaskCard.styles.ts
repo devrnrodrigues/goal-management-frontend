@@ -137,7 +137,7 @@ export const MemberInitialsBadge = styled.div`
   border-radius: 50%;
   border: 2px solid #ffffff;
   margin-left: -7px;
-  background-color: rgba(0, 0, 0, 0.06);
+  background-color: #f1f5f9;
   color: #334155;
   display: flex;
   align-items: center;

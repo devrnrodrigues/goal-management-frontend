@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Clock,
   Pencil,
@@ -42,6 +42,27 @@ interface TaskCardProps {
   onDragEnd?: () => void;
   onDropOnTask?: (targetTaskId: string, targetColId: string) => void;
 }
+
+const SafeTaskMemberAvatar: React.FC<{ member: TaskMember }> = ({ member }) => {
+  const [hasError, setHasError] = useState(false);
+
+  if (member.avatarUrl && !hasError) {
+    return (
+      <MemberImg
+        src={member.avatarUrl}
+        alt={member.name}
+        title={member.name}
+        onError={() => setHasError(true)}
+      />
+    );
+  }
+
+  return (
+    <MemberInitialsBadge title={member.name}>
+      {getInitials(member.name)}
+    </MemberInitialsBadge>
+  );
+};
 
 export const TaskCard: React.FC<TaskCardProps> = ({
   task,
@@ -124,15 +145,9 @@ export const TaskCard: React.FC<TaskCardProps> = ({
 
       <CardFooter onClick={(e) => e.stopPropagation()}>
         <AvatarsGroup>
-          {cardMembers.map((m) =>
-            m.avatarUrl ? (
-              <MemberImg key={m.id} src={m.avatarUrl} alt={m.name} title={m.name} />
-            ) : (
-              <MemberInitialsBadge key={m.id} title={m.name}>
-                {getInitials(m.name)}
-              </MemberInitialsBadge>
-            )
-          )}
+          {cardMembers.map((m, index) => (
+            <SafeTaskMemberAvatar key={m.id ? `${m.id}-${index}` : index} member={m} />
+          ))}
           <AddMemberCircle title="Atribuir">
             <Plus size={11} />
           </AddMemberCircle>

@@ -110,8 +110,9 @@ export const FormInput = styled.input`
   background-color: ${({ theme }) => theme.colors.surface};
 
   &:focus {
+    outline: none;
     border-color: ${({ theme }) => theme.colors.primary};
-    box-shadow: 0 0 0 2px rgba(0, 168, 107, 0.15);
+    box-shadow: none;
   }
 `;
 
@@ -128,8 +129,9 @@ export const FormTextArea = styled.textarea`
   background-color: ${({ theme }) => theme.colors.surface};
 
   &:focus {
+    outline: none;
     border-color: ${({ theme }) => theme.colors.primary};
-    box-shadow: 0 0 0 2px rgba(0, 168, 107, 0.15);
+    box-shadow: none;
   }
 `;
 
@@ -150,8 +152,9 @@ export const FormSelect = styled.select`
   cursor: pointer;
 
   &:focus {
+    outline: none;
     border-color: ${({ theme }) => theme.colors.primary};
-    box-shadow: 0 0 0 2px rgba(0, 168, 107, 0.15);
+    box-shadow: none;
   }
 `;
 
