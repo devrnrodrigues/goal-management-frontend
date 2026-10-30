@@ -6,11 +6,14 @@ export const EmptyContainer = styled.div`
   align-items: center;
   justify-content: center;
   padding: 56px 24px;
-  background-color: transparent;
+  background-color: ${({ theme }) => theme.colors.surface};
   border: none;
+  border-radius: ${({ theme }) => theme.radii.lg};
+  box-shadow: ${({ theme }) => theme.shadows.card};
   text-align: center;
   gap: 14px;
   width: 100%;
+  box-sizing: border-box;
 `;
 
 export const EmptyIconCircle = styled.div`

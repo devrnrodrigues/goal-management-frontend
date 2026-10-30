@@ -4,31 +4,28 @@ export const ItemCard = styled.div`
   display: flex;
   align-items: flex-start;
   gap: 16px;
-  padding: 18px 14px;
+  padding: 18px 20px;
   width: 100%;
   max-width: 100%;
   min-width: 0;
   box-sizing: border-box;
-  background-color: transparent;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.04);
-  border-radius: ${({ theme }) => theme.radii.md};
-  transition: background-color 0.15s ease;
+  background-color: ${({ theme }) => theme.colors.surface};
+  border: none;
+  border-radius: ${({ theme }) => theme.radii.lg};
+  box-shadow: ${({ theme }) => theme.shadows.card};
+  transition: box-shadow 0.15s ease;
 
   &:hover {
-    background-color: rgba(255, 255, 255, 0.7);
-  }
-
-  &:last-child {
-    border-bottom: none;
+    box-shadow: ${({ theme }) => theme.shadows.dropdown};
   }
 
   @media (max-width: 640px) {
-    padding: 14px 4px;
+    padding: 14px 16px;
     gap: 12px;
   }
 
   @media (max-width: 480px) {
-    padding: 12px 0;
+    padding: 12px 14px;
     gap: 10px;
   }
 `;

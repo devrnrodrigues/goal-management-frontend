@@ -33,13 +33,11 @@ export const GroupCountBadge = styled.span`
 `;
 
 export const GroupDivider = styled.div`
-  flex: 1;
-  height: 1px;
-  background-color: rgba(0, 0, 0, 0.05);
+  display: none;
 `;
 
 export const GroupItemsList = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 10px;
 `;
