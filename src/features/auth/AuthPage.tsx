@@ -22,6 +22,7 @@ export const AuthPage: React.FC<AuthPageProps> = ({
 }) => {
   const {
     authMode,
+    googleError,
     handleSwitchToLogin,
     handleSwitchToRegister,
     handleGoogleAuth,
@@ -53,6 +54,7 @@ export const AuthPage: React.FC<AuthPageProps> = ({
                   onLoginSuccess={onLoginSuccess}
                   onGoogleLogin={handleGoogleAuth}
                   onSwitchToRegister={handleSwitchToRegister}
+                  externalError={googleError}
                 />
               </MotionFormContainer>
             ) : (
@@ -67,6 +69,7 @@ export const AuthPage: React.FC<AuthPageProps> = ({
                   onRegisterSuccess={onLoginSuccess}
                   onGoogleRegister={handleGoogleAuth}
                   onSwitchToLogin={handleSwitchToLogin}
+                  externalError={googleError}
                 />
               </MotionFormContainer>
             )}

@@ -31,6 +31,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
   onLoginSuccess,
   onGoogleLogin,
   onSwitchToRegister,
+  externalError,
 }) => {
   const {
     email,
@@ -46,6 +47,8 @@ export const LoginForm: React.FC<LoginFormProps> = ({
     handleSubmit,
   } = useLoginForm({ onLoginSuccess });
 
+  const activeError = errorMessage || externalError;
+
   return (
     <FormContainer onSubmit={handleSubmit}>
       <FormHeader>
@@ -53,7 +56,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
         <FormSubtitle>Entre com seus dados para continuar</FormSubtitle>
       </FormHeader>
 
-      {errorMessage && <ErrorMessageBox>{errorMessage}</ErrorMessageBox>}
+      {activeError && <ErrorMessageBox>{activeError}</ErrorMessageBox>}
 
       <InputGroup>
         <InputLabel htmlFor="login-email">E-mail</InputLabel>

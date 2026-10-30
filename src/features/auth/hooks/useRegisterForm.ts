@@ -75,7 +75,7 @@ export const useRegisterForm = ({ onRegisterSuccess }: UseRegisterFormProps) => 
 
     try {
       const response = await authApi.register({ name, email, password });
-      setAuthSession(response.token, response.user);
+      setAuthSession(response.token, response.user, response.refreshToken);
       onRegisterSuccess();
     } catch (error) {
       const apiError = error as ApiError;

@@ -14,12 +14,14 @@ export interface LoginFormProps {
   onLoginSuccess: () => void;
   onGoogleLogin: () => void;
   onSwitchToRegister: () => void;
+  externalError?: string | null;
 }
 
 export interface RegisterFormProps {
   onRegisterSuccess: () => void;
   onGoogleRegister: () => void;
   onSwitchToLogin: () => void;
+  externalError?: string | null;
 }
 
 export interface LoginCredentials {
@@ -43,6 +45,35 @@ export interface AuthUser {
 
 export interface AuthApiResponse {
   token: string;
+  refreshToken: string;
   tokenType: string;
   user: AuthUser;
+}
+
+export interface GoogleTokenResponse {
+  access_token?: string;
+  error?: string;
+}
+
+export interface GoogleTokenClientConfig {
+  client_id: string;
+  scope: string;
+  callback: (response: GoogleTokenResponse) => void;
+  error_callback?: () => void;
+}
+
+export interface GoogleTokenClient {
+  requestAccessToken: () => void;
+}
+
+declare global {
+  interface Window {
+    google?: {
+      accounts?: {
+        oauth2?: {
+          initTokenClient: (config: GoogleTokenClientConfig) => GoogleTokenClient;
+        };
+      };
+    };
+  }
 }

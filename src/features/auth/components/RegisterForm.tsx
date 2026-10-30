@@ -30,6 +30,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
   onRegisterSuccess,
   onGoogleRegister,
   onSwitchToLogin,
+  externalError,
 }) => {
   const {
     name,
@@ -49,6 +50,8 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
     handleSubmit,
   } = useRegisterForm({ onRegisterSuccess });
 
+  const activeError = errorMessage || externalError;
+
   return (
     <FormContainer onSubmit={handleSubmit}>
       <FormHeader>
@@ -56,7 +59,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
         <FormSubtitle>Preencha os campos para começar</FormSubtitle>
       </FormHeader>
 
-      {errorMessage && <ErrorMessageBox>{errorMessage}</ErrorMessageBox>}
+      {activeError && <ErrorMessageBox>{activeError}</ErrorMessageBox>}
 
       <InputGroup>
         <InputLabel htmlFor="register-name">Nome completo</InputLabel>

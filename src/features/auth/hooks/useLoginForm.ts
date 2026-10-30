@@ -45,7 +45,7 @@ export const useLoginForm = ({ onLoginSuccess }: UseLoginFormProps) => {
 
     try {
       const response = await authApi.login({ email, password });
-      setAuthSession(response.token, response.user);
+      setAuthSession(response.token, response.user, response.refreshToken);
       onLoginSuccess();
     } catch (error) {
       const apiError = error as ApiError;
