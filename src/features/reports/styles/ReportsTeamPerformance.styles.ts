@@ -71,11 +71,15 @@ export const MemberAvatar = styled.div`
   border-radius: ${({ theme }) => theme.radii.full};
   overflow: hidden;
   flex-shrink: 0;
-  background-color: rgba(0, 0, 0, 0.05);
+  background-color: #f1f5f9;
+  border: 2px solid #ffffff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 12px;
+  font-weight: 700;
+  color: #334155;
   font-weight: 700;
   color: ${({ theme }) => theme.colors.textSecondary};
 `;

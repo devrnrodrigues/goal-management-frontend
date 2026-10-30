@@ -12,6 +12,7 @@ import {
   ReportsContainer,
   ReportsContentLayout,
   TwoColumnsGrid,
+  ReportsBottomGrid,
 } from './ReportsPage.styles';
 
 export const ReportsPage: React.FC = () => {
@@ -47,10 +48,10 @@ export const ReportsPage: React.FC = () => {
           <ReportsCategoryDistribution categories={categoryDistribution} />
         </TwoColumnsGrid>
 
-        <TwoColumnsGrid>
+        <ReportsBottomGrid>
           <ReportsPriorityEfficiency items={priorityEfficiencies} />
           <ReportsGoalsHealthTable goals={goalsHealth} />
-        </TwoColumnsGrid>
+        </ReportsBottomGrid>
       </ReportsContentLayout>
     </ReportsContainer>
   );

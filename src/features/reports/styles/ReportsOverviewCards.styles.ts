@@ -2,16 +2,17 @@ import styled from 'styled-components';
 
 export const CardsGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 16px;
   width: 100%;
+  min-width: 0;
   box-sizing: border-box;
 
-  @media (max-width: 1024px) {
-    grid-template-columns: repeat(2, 1fr);
+  @media (max-width: 1280px) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  @media (max-width: 576px) {
+  @media (max-width: 580px) {
     grid-template-columns: 1fr;
     gap: 12px;
   }
@@ -21,17 +22,13 @@ export const MetricCard = styled.div`
   background-color: ${({ theme }) => theme.colors.surface};
   border: 1px solid rgba(0, 0, 0, 0.05);
   border-radius: ${({ theme }) => theme.radii.lg};
-  padding: 18px 20px;
+  padding: clamp(14px, 1.2vw, 18px) clamp(14px, 1.4vw, 20px);
   display: flex;
   flex-direction: column;
   gap: 12px;
-  transition: all 0.2s ease;
   box-sizing: border-box;
-
-  &:hover {
-    border-color: rgba(0, 0, 0, 0.1);
-    transform: translateY(-1px);
-  }
+  min-width: 0;
+  overflow: hidden;
 `;
 
 export const CardHeaderRow = styled.div`
@@ -39,12 +36,17 @@ export const CardHeaderRow = styled.div`
   align-items: center;
   justify-content: space-between;
   gap: 8px;
+  min-width: 0;
 `;
 
 export const CardLabel = styled.span`
   font-size: 13px;
   font-weight: 500;
   color: ${({ theme }) => theme.colors.textSecondary};
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
 `;
 
 export const CardIconBox = styled.div`
@@ -60,11 +62,12 @@ export const CardIconBox = styled.div`
 `;
 
 export const CardValue = styled.span`
-  font-size: 26px;
+  font-size: clamp(22px, 1vw + 16px, 26px);
   font-weight: 700;
   color: ${({ theme }) => theme.colors.textPrimary};
   letter-spacing: -0.5px;
   line-height: 1.1;
+  white-space: nowrap;
 `;
 
 export const CardFooterRow = styled.div`
@@ -72,7 +75,9 @@ export const CardFooterRow = styled.div`
   align-items: center;
   gap: 8px;
   font-size: 12px;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
+  min-width: 0;
+  overflow: hidden;
 `;
 
 export const ChangeTag = styled.span<{ $isPositive: boolean }>`
@@ -84,6 +89,8 @@ export const ChangeTag = styled.span<{ $isPositive: boolean }>`
   padding: 1px 6px;
   border-radius: 4px;
   background-color: rgba(0, 0, 0, 0.04);
+  flex-shrink: 0;
+  white-space: nowrap;
   color: ${({ theme, $isPositive }) =>
     $isPositive ? theme.colors.statusSuccess : theme.colors.statusDanger};
 `;
@@ -91,4 +98,8 @@ export const ChangeTag = styled.span<{ $isPositive: boolean }>`
 export const SubtitleText = styled.span`
   color: ${({ theme }) => theme.colors.textMuted};
   font-size: 11px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
 `;

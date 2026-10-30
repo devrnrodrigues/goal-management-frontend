@@ -9,6 +9,7 @@ export const ChartCard = styled.div`
   flex-direction: column;
   gap: 16px;
   width: 100%;
+  min-width: 0;
   box-sizing: border-box;
 
   @media (max-width: 600px) {
@@ -73,6 +74,8 @@ export const BarsContainer = styled.div`
   height: 180px;
   padding-top: 20px;
   border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  min-width: 0;
+  overflow: hidden;
 `;
 
 export const BarColumn = styled.div`
@@ -83,6 +86,7 @@ export const BarColumn = styled.div`
   flex: 1;
   height: 100%;
   justify-content: flex-end;
+  min-width: 0;
 `;
 
 export const BarsPair = styled.div`
@@ -95,7 +99,7 @@ export const BarsPair = styled.div`
 `;
 
 export const BarFill = styled.div<{ $heightPercent: number; $variant: 'completed' | 'created' }>`
-  width: clamp(10px, 2.5vw, 24px);
+  width: clamp(8px, 2vw, 24px);
   height: ${({ $heightPercent }) => `${$heightPercent}%`};
   border-radius: 4px 4px 0 0;
   background-color: ${({ theme, $variant }) =>
@@ -113,4 +117,5 @@ export const MonthAxisLabel = styled.span`
   font-weight: 600;
   color: ${({ theme }) => theme.colors.textSecondary};
   text-align: center;
+  white-space: nowrap;
 `;

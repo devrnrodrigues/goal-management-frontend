@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import type { TeamMemberReport } from '../types';
 import {
   TeamCard,
@@ -19,6 +19,23 @@ interface ReportsTeamPerformanceProps {
   members: TeamMemberReport[];
 }
 
+const SafeReportMemberAvatar: React.FC<{ member: TeamMemberReport }> = ({ member }) => {
+  const [hasError, setHasError] = useState(false);
+
+  if (member.avatarUrl && !hasError) {
+    return (
+      <MemberAvatarImg
+        src={member.avatarUrl}
+        alt={member.name}
+        loading="lazy"
+        onError={() => setHasError(true)}
+      />
+    );
+  }
+
+  return <>{member.initials}</>;
+};
+
 export const ReportsTeamPerformance: React.FC<ReportsTeamPerformanceProps> = ({
   members,
 }) => {
@@ -33,15 +50,7 @@ export const ReportsTeamPerformance: React.FC<ReportsTeamPerformanceProps> = ({
           <MemberRow key={member.id}>
             <MemberInfo>
               <MemberAvatar title={member.name}>
-                {member.avatarUrl ? (
-                  <MemberAvatarImg
-                    src={member.avatarUrl}
-                    alt={member.name}
-                    loading="lazy"
-                  />
-                ) : (
-                  member.initials
-                )}
+                <SafeReportMemberAvatar member={member} />
               </MemberAvatar>
 
               <MemberTextCol>

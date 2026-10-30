@@ -9,6 +9,7 @@ export const CategoryCard = styled.div`
   flex-direction: column;
   gap: 16px;
   width: 100%;
+  min-width: 0;
   box-sizing: border-box;
 
   @media (max-width: 600px) {

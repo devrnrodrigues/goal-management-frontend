@@ -75,13 +75,31 @@ export const ReportsContentLayout = styled.div`
 
 export const TwoColumnsGrid = styled.div`
   display: grid;
-  grid-template-columns: 1.5fr 1fr;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
   gap: 20px;
   width: 100%;
   min-width: 0;
   box-sizing: border-box;
 
-  @media (max-width: 1024px) {
+  @media (max-width: 1200px) {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+`;
+
+export const ReportsBottomGrid = styled.div`
+  display: grid;
+  grid-template-columns: minmax(0, 360px) minmax(0, 1fr);
+  gap: 20px;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+
+  @media (min-width: 1600px) {
+    grid-template-columns: minmax(0, 400px) minmax(0, 1fr);
+  }
+
+  @media (max-width: 1200px) {
     grid-template-columns: 1fr;
     gap: 16px;
   }

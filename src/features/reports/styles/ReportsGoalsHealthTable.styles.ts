@@ -9,7 +9,9 @@ export const HealthCard = styled.div`
   flex-direction: column;
   gap: 16px;
   width: 100%;
+  min-width: 0;
   box-sizing: border-box;
+  overflow: hidden;
 
   @media (max-width: 600px) {
     padding: 16px 14px;
@@ -32,12 +34,15 @@ export const HealthTitle = styled.h3`
 
 export const TableWrapper = styled.div`
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
 `;
 
 export const GoalsTable = styled.table`
   width: 100%;
+  min-width: 580px;
   border-collapse: collapse;
   text-align: left;
   font-size: 13px;
@@ -88,9 +93,10 @@ export const GoalNamePill = styled.span`
   border-radius: ${({ theme }) => theme.radii.full};
   font-size: 12px;
   font-weight: 600;
-  max-width: 260px;
+  max-width: 220px;
   overflow: hidden;
   text-overflow: ellipsis;
+  white-space: nowrap;
 `;
 
 export const ProgressWrapper = styled.div`
