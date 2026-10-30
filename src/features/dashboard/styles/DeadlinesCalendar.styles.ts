@@ -2,43 +2,38 @@ import styled from 'styled-components';
 
 export const CalendarCardContainer = styled.section`
   background-color: ${({ theme }) => theme.colors.surface};
-  border-radius: ${({ theme }) => theme.radii.xl};
-  padding: 24px;
-  box-shadow: ${({ theme }) => theme.shadows.card};
-  border: 1px solid ${({ theme }) => theme.colors.borderLight};
+  border-radius: ${({ theme }) => theme.radii.lg};
+  padding: 22px 24px;
+  border: 1px solid rgba(0, 0, 0, 0.05);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  height: 100%;
-
-  @media (min-width: 1720px) and (min-height: 900px) {
-    padding: clamp(24px, 2.8vh, 36px);
-  }
+  min-width: 0;
+  box-sizing: border-box;
 `;
 
 export const CalendarTopSection = styled.div`
   display: flex;
   flex-direction: column;
-  flex: 1;
-  justify-content: space-between;
 `;
 
 export const CalendarHeader = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: clamp(16px, 1.8vh, 22px);
+  margin-bottom: 12px;
 `;
 
 export const MonthTitle = styled.h3`
-  font-size: clamp(14px, 0.2vw + 13px, 17px);
+  font-size: 15px;
   font-weight: 700;
   color: ${({ theme }) => theme.colors.primary};
+  margin: 0;
 `;
 
 export const CalendarNavArrow = styled.button`
-  width: 30px;
-  height: 30px;
+  width: 28px;
+  height: 28px;
   border-radius: ${({ theme }) => theme.radii.full};
   background-color: transparent;
   display: flex;
@@ -46,6 +41,7 @@ export const CalendarNavArrow = styled.button`
   justify-content: center;
   color: ${({ theme }) => theme.colors.textMuted};
   transition: all 0.2s ease;
+  cursor: pointer;
 
   &:hover {
     color: ${({ theme }) => theme.colors.primary};
@@ -57,11 +53,11 @@ export const WeekDaysRow = styled.div`
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   text-align: center;
-  margin-bottom: clamp(8px, 1.2vh, 14px);
+  margin-bottom: 8px;
 `;
 
 export const WeekDayLabel = styled.span`
-  font-size: clamp(10px, 0.15vw + 9px, 12px);
+  font-size: 11px;
   font-weight: 600;
   color: ${({ theme }) => theme.colors.textMuted};
 `;
@@ -69,11 +65,7 @@ export const WeekDayLabel = styled.span`
 export const DaysGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  row-gap: 8px;
-
-  @media (min-width: 1720px) {
-    row-gap: clamp(8px, 1.3vh, 14px);
-  }
+  row-gap: 6px;
 `;
 
 export const DayCell = styled.button<{
@@ -81,14 +73,14 @@ export const DayCell = styled.button<{
   $isCurrentMonth?: boolean;
   $hasDeadline?: boolean;
 }>`
-  width: 32px;
-  height: 32px;
+  width: 30px;
+  height: 30px;
   margin: 0 auto;
   border-radius: ${({ theme }) => theme.radii.full};
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: clamp(11px, 0.15vw + 10px, 13px);
+  font-size: 12px;
   font-weight: ${({ $isSelected }) => ($isSelected ? '700' : '500')};
   background-color: ${({ $isSelected, theme }) =>
     $isSelected ? theme.colors.primary : 'transparent'};
@@ -99,16 +91,7 @@ export const DayCell = styled.button<{
   }};
   position: relative;
   transition: all 0.2s ease;
-
-  @media (min-width: 1720px) {
-    width: 38px;
-    height: 38px;
-  }
-
-  @media (min-width: 2100px) {
-    width: 44px;
-    height: 44px;
-  }
+  cursor: pointer;
 
   &:hover {
     background-color: ${({ $isSelected, theme }) =>
@@ -134,28 +117,26 @@ export const DayCell = styled.button<{
 `;
 
 export const UpcomingSection = styled.div`
-  margin-top: clamp(14px, 2vh, 22px);
+  margin-top: 16px;
   border-top: 1px solid ${({ theme }) => theme.colors.borderLight};
-  padding-top: clamp(12px, 1.8vh, 18px);
+  padding-top: 12px;
 `;
 
 export const UpcomingHeader = styled.div`
-  font-size: clamp(11px, 0.15vw + 10px, 13px);
+  font-size: 12px;
   font-weight: 700;
   color: ${({ theme }) => theme.colors.textSecondary};
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 `;
 
 export const DeadlineItem = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 8px 0;
-  font-size: clamp(11px, 0.15vw + 10px, 13px);
-
-  @media (min-width: 1720px) {
-    padding: clamp(8px, 1.1vh, 12px) 0;
-  }
+  gap: 8px;
+  padding: 6px 0;
+  font-size: 12px;
+  min-width: 0;
 `;
 
 export const DeadlineTitle = styled.span`
@@ -164,22 +145,17 @@ export const DeadlineTitle = styled.span`
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 230px;
-
-  @media (min-width: 1720px) {
-    max-width: 300px;
-  }
-
-  @media (min-width: 2100px) {
-    max-width: 380px;
-  }
+  flex: 1;
+  min-width: 0;
+  font-size: 12px;
 `;
 
 export const DeadlineBadge = styled.span`
-  font-size: clamp(10px, 0.1vw + 9px, 12px);
+  font-size: 11px;
   font-weight: 600;
   color: ${({ theme }) => theme.colors.primary};
   background-color: ${({ theme }) => theme.colors.primaryLight};
-  padding: 3px 10px;
+  padding: 2px 8px;
   border-radius: ${({ theme }) => theme.radii.full};
+  flex-shrink: 0;
 `;

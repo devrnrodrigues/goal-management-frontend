@@ -2,52 +2,51 @@ import styled from 'styled-components';
 
 export const CardContainer = styled.div`
   background-color: ${({ theme }) => theme.colors.surface};
-  border-radius: ${({ theme }) => theme.radii.xl};
-  padding: 32px 26px;
-  min-height: 140px;
-  box-shadow: ${({ theme }) => theme.shadows.card};
-  border: 1px solid ${({ theme }) => theme.colors.borderLight};
+  border-radius: ${({ theme }) => theme.radii.lg};
+  padding: 38px 28px;
+  min-height: 175px;
+  border: 1px solid rgba(0, 0, 0, 0.05);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: ${({ theme }) => theme.spacing.md};
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-
-  @media (min-width: 1720px) {
-    padding: 36px 30px;
-    min-height: 154px;
-  }
-
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
-  }
+  gap: 16px;
+  min-width: 0;
+  box-sizing: border-box;
 `;
 
 export const MetricInfo = styled.div`
   display: flex;
   flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
 `;
 
 export const MetricValue = styled.span`
-  font-size: clamp(28px, 1.2vw + 18px, 38px);
+  font-size: 26px;
   font-weight: 700;
   color: ${({ theme }) => theme.colors.textPrimary};
   letter-spacing: -0.5px;
   line-height: 1.1;
+  white-space: nowrap;
 `;
 
 export const MetricTitle = styled.span`
-  font-size: clamp(13px, 0.2vw + 11px, 16px);
+  font-size: 13px;
   font-weight: 600;
   color: ${({ theme }) => theme.colors.textSecondary};
   margin-top: 6px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 `;
 
 export const MetricSubtitle = styled.span`
-  font-size: clamp(11px, 0.15vw + 10px, 13px);
+  font-size: 11px;
   color: ${({ theme }) => theme.colors.textMuted};
-  margin-top: 6px;
+  margin-top: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 `;
 
 export const IconCircle = styled.div<{ $variant?: string }>`
@@ -69,5 +68,4 @@ export const IconCircle = styled.div<{ $variant?: string }>`
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  box-shadow: 0 4px 10px rgba(0, 168, 107, 0.25);
 `;
