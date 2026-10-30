@@ -3,184 +3,253 @@ import { motion } from 'framer-motion';
 
 export const ModalOverlay = styled(motion.div)`
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background: rgba(15, 23, 42, 0.6);
+    inset: 0;
+    background: rgba(15, 23, 42, 0.45);
     backdrop-filter: blur(4px);
     display: flex;
     justify-content: center;
     align-items: center;
     z-index: 1000;
     padding: 20px;
+    overscroll-behavior: contain;
 `;
 
 export const ModalContainer = styled(motion.div)`
-    background: 
-        linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.9));
-    background-size: cover;
-    background-position: center;
-    padding: 28px;
+    background: ${({ theme }) => theme.colors.surface};
+    padding: 24px;
     border-radius: 16px;
     width: 100%;
-    max-width: 400px;
+    max-width: 560px;
     max-height: 90vh;
     display: flex;
     flex-direction: column;
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-    border: none;
-
-    form {
-        display: flex;
-        flex-direction: column;
-        flex: 1;
-        overflow: hidden;
-    }
-
-    .modal-body {
-        overflow-y: auto;
-        max-height: 55vh;
-        padding-right: 4px;
-        margin-right: -4px;
-        
-        &::-webkit-scrollbar {
-            width: 6px;
-        }
-        &::-webkit-scrollbar-track {
-            background: transparent;
-        }
-        &::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 3px;
-        }
-    }
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
+    border: 1px solid ${({ theme }) => theme.colors.border};
+    overflow: hidden;
 `;
 
 export const ModalHeader = styled.div`
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    margin-bottom: 20px;
-    border-bottom: 1px solid rgba(226, 232, 240, 0.6);
+    margin-bottom: 16px;
+    border-bottom: 1px solid ${({ theme }) => theme.colors.borderLight};
     padding-bottom: 14px;
+`;
 
-    div {
-        p {
-            font-size: 13px;
-            color: #64748b;
-            margin-top: 4px;
-        }
-    }
+export const ModalHeaderLeft = styled.div`
+    display: flex;
+    align-items: center;
+    gap: 12px;
+`;
+
+export const ModalHeaderIconWrapper = styled.div`
+    width: 36px;
+    height: 36px;
+    border-radius: ${({ theme }) => theme.radii.sm};
+    background-color: ${({ theme }) => theme.colors.primaryLight};
+    color: ${({ theme }) => theme.colors.primary};
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+`;
+
+export const ModalTitleGroup = styled.div`
+    display: flex;
+    flex-direction: column;
 `;
 
 export const ModalTitle = styled.h2`
-    font-size: px;
-    color: #0f172a;
+    font-size: clamp(16px, 0.3vw + 15px, 18px);
+    color: ${({ theme }) => theme.colors.textPrimary};
     font-weight: 600;
+    margin: 0;
     letter-spacing: -0.01em;
+`;
+
+export const ModalSubtitle = styled.p`
+    font-size: clamp(12px, 0.1vw + 11px, 13px);
+    color: ${({ theme }) => theme.colors.textSecondary};
+    margin: 2px 0 0 0;
 `;
 
 export const CloseButton = styled.button`
     background: transparent;
     border: none;
     border-radius: 50%;
-    width: 32px;
-    height: 32px;
+    width: 30px;
+    height: 30px;
     cursor: pointer;
-    color: #64748b;
+    color: ${({ theme }) => theme.colors.textSecondary};
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.2s;
+    transition: all 0.15s ease;
 
     &:hover {
         background: rgba(0, 0, 0, 0.05);
-        color: #0f172a;
+        color: ${({ theme }) => theme.colors.textPrimary};
+    }
+`;
+
+export const ModalTabs = styled.div`
+    display: flex;
+    gap: 6px;
+    margin-bottom: 18px;
+    background-color: rgba(15, 23, 42, 0.03);
+    border: 1px solid ${({ theme }) => theme.colors.borderLight};
+    padding: 3px;
+    border-radius: ${({ theme }) => theme.radii.sm};
+`;
+
+export const ModalTabButton = styled.button<{ $active?: boolean }>`
+    flex: 1;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 7px 12px;
+    border-radius: 6px;
+    border: none;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: color 0.15s ease;
+    background-color: transparent;
+    color: ${({ $active, theme }) => ($active ? theme.colors.textPrimary : theme.colors.textSecondary)};
+
+    &:hover {
+        color: ${({ theme }) => theme.colors.textPrimary};
+    }
+`;
+
+export const ActiveTabIndicator = styled(motion.div)`
+    position: absolute;
+    inset: 0;
+    background-color: ${({ theme }) => theme.colors.surface};
+    border-radius: 6px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    z-index: 1;
+`;
+
+export const TabButtonText = styled.span`
+    position: relative;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+`;
+
+export const TabBadge = styled.span<{ $active?: boolean }>`
+    background-color: ${({ $active }) => ($active ? '#0f172a' : 'rgba(100, 116, 139, 0.12)')};
+    color: ${({ $active }) => ($active ? '#ffffff' : '#64748b')};
+    font-size: 11px;
+    font-weight: 600;
+    padding: 1px 6px;
+    border-radius: ${({ theme }) => theme.radii.full};
+`;
+
+export const ModalBody = styled(motion.div)<{ $isAnimating?: boolean }>`
+    overflow-y: ${({ $isAnimating }) => ($isAnimating ? 'hidden' : 'auto')};
+    overflow-x: hidden;
+    max-height: 52vh;
+    padding-right: 4px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    scrollbar-width: thin;
+    overscroll-behavior: contain;
+`;
+
+export const TabContentPane = styled(motion.div)`
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    width: 100%;
+`;
+
+export const FormRow = styled.div`
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+
+    @media (max-width: 500px) {
+        grid-template-columns: 1fr;
     }
 `;
 
 export const FormGroup = styled.div`
-    margin-bottom: 16px;
     display: flex;
     flex-direction: column;
     gap: 6px;
-
-    .tasks-container {
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-    }
 `;
 
 export const Label = styled.label`
-    font-size: 13px;
-    color: #334155;
-    font-weight: 600;
+    font-size: clamp(12px, 0.1vw + 11px, 13px);
+    font-weight: 500;
+    color: ${({ theme }) => theme.colors.textPrimary};
     display: flex;
     align-items: center;
     gap: 6px;
 
     svg {
-        color: ${({ theme }) => theme.colors.primary};
+        color: ${({ theme }) => theme.colors.textSecondary};
     }
 `;
 
 export const Input = styled.input`
-    padding: 9px 12px;
-    border: none;
-    border: 1px solid white;
-    border-radius: 8px;
-    font-size: 12px;
-    color: #0f172a;
-    outline: none;
-    transition: all 0.2s ease;
-    background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.95) 0%,
-    rgba(255, 255, 255, 0.10) 100%
-    );
+    width: 100%;
+    padding: 8px 12px;
+    border-radius: ${({ theme }) => theme.radii.sm};
+    border: 1px solid ${({ theme }) => theme.colors.border};
+    font-size: 13px;
+    color: ${({ theme }) => theme.colors.textPrimary};
+    background-color: ${({ theme }) => theme.colors.surface};
+    transition: all 0.15s ease;
 
-    &::placeholder {
-    color: #94a3b8;
-    opacity: 0;
-    transition: opacity 0.2s ease;
-    }
-    &:focus::placeholder {
-    opacity: 1;
-    }
     &:focus {
-        border: 1px solid ${({ theme }) => theme.colors.primary};
+        outline: none;
+        border-color: #64748b;
+        box-shadow: 0 0 0 2px rgba(100, 116, 139, 0.12);
+    }
+`;
+
+export const Select = styled.select`
+    width: 100%;
+    padding: 8px 12px;
+    border-radius: ${({ theme }) => theme.radii.sm};
+    border: 1px solid ${({ theme }) => theme.colors.border};
+    font-size: 13px;
+    color: ${({ theme }) => theme.colors.textPrimary};
+    background-color: ${({ theme }) => theme.colors.surface};
+    cursor: pointer;
+    transition: all 0.15s ease;
+
+    &:focus {
+        outline: none;
+        border-color: #64748b;
+        box-shadow: 0 0 0 2px rgba(100, 116, 139, 0.12);
     }
 `;
 
 export const TextArea = styled.textarea`
-    padding: 9px 12px;
-    border: 1px solid white;
-    border-radius: 8px;
-    font-size: 12px;
-    color: #0f172a;
-    outline: none;
+    width: 100%;
+    padding: 8px 12px;
+    border-radius: ${({ theme }) => theme.radii.sm};
+    border: 1px solid ${({ theme }) => theme.colors.border};
+    font-size: 13px;
+    color: ${({ theme }) => theme.colors.textPrimary};
+    background-color: ${({ theme }) => theme.colors.surface};
     resize: vertical;
     min-height: 70px;
-    transition: all 0.2s ease;
-    background: linear-gradient(
-        135deg,
-        rgba(255, 255, 255, 0.95) 0%,
-        rgba(245, 248, 246, 0.85) 100%
-    );
-
-     &::placeholder {
-    color: #94a3b8;
-    opacity: 0;
-    transition: opacity 0.2s ease;
-    }
-    &:focus::placeholder {
-    opacity: 1;
-    }
+    font-family: inherit;
+    transition: all 0.15s ease;
 
     &:focus {
-        border-color: ${({ theme }) => theme.colors.primary};
+        outline: none;
+        border-color: #64748b;
+        box-shadow: 0 0 0 2px rgba(100, 116, 139, 0.12);
     }
 `;
 
@@ -189,122 +258,294 @@ export const DatePickerWrapper = styled.div`
 
     .react-datepicker-wrapper {
         width: 100%;
-        display: block;
     }
 
-    .react-datepicker__input-container {
+    .react-datepicker__input-container input {
         width: 100%;
-        display: block;
-    }
-
-    input {
-        padding: 9px 12px;
-        border: 1px solid white;
-        border-radius: 8px;
-        font-size: 14px;
-        color: #0f172a;
-        outline: none;
-        background: rgba(255, 255, 255, 0.85);
-        width: 100%;
-        box-sizing: border-box;
-        transition: all 0.2s ease;
+        padding: 8px 12px;
+        border-radius: ${({ theme }) => theme.radii.sm};
+        border: 1px solid ${({ theme }) => theme.colors.border};
+        font-size: 13px;
+        color: ${({ theme }) => theme.colors.textPrimary};
+        background-color: ${({ theme }) => theme.colors.surface};
+        transition: all 0.15s ease;
 
         &:focus {
-            border-color: ${({ theme }) => theme.colors.primary};
-        }
-        &::placeholder {
-            color: #94a3b8;
-        }
-    }
-`;
-
-export const TaskRow = styled.div`
-    display: flex;
-    gap: 8px;
-    align-items: center;
-
-    input {
-        flex: 1;
-    }
-
-    button {
-        background: #fef2f2;
-        border: 1px solid #fecaca;
-        color: #dc2626;
-        cursor: pointer;
-        padding: 9px;
-        border-radius: 8px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        transition: all 0.2s;
-
-        &:hover {
-            background: #fee2e2;
+            outline: none;
+            border-color: #64748b;
+            box-shadow: 0 0 0 2px rgba(100, 116, 139, 0.12);
         }
     }
 `;
 
-export const AddTaskButton = styled.button`
-    background: ${({ theme }) => theme.colors.primaryLight};
-    border: 1px dashed ${({ theme }) => theme.colors.primary};
-    color: ${({ theme }) => theme.colors.primary};
-    padding: 9px 12px;
-    border-radius: 8px;
+export const SectionSubtitle = styled.h3`
     font-size: 13px;
-    font-weight: 500;
-    cursor: pointer;
+    font-weight: 600;
+    color: ${({ theme }) => theme.colors.textPrimary};
+    margin: 0 0 10px 0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+
+    svg {
+        color: ${({ theme }) => theme.colors.textSecondary};
+    }
+`;
+
+export const MembersSection = styled.div`
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+`;
+
+export const MemberList = styled.div`
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+`;
+
+export const MemberItemWrapper = styled(motion.div)`
+    display: flex;
+    flex-direction: column;
+`;
+
+export const MemberCard = styled.div`
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 7px 10px;
+    border-radius: ${({ theme }) => theme.radii.sm};
+    background-color: ${({ theme }) => theme.colors.surface};
+    border: 1px solid ${({ theme }) => theme.colors.borderLight};
+    transition: all 0.15s ease;
+
+    &:hover {
+        border-color: ${({ theme }) => theme.colors.border};
+        background-color: rgba(15, 23, 42, 0.02);
+    }
+`;
+
+export const MemberInfo = styled.div`
+    display: flex;
+    align-items: center;
+    gap: 10px;
+`;
+
+export const MemberAvatarImg = styled.img`
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid ${({ theme }) => theme.colors.borderLight};
+`;
+
+export const MemberAvatarInitials = styled.div`
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background-color: rgba(0, 0, 0, 0.06);
+    color: ${({ theme }) => theme.colors.textPrimary};
+    border: 1px solid ${({ theme }) => theme.colors.borderLight};
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 6px;
-    margin-top: 4px;
-    transition: all 0.2s;
+    font-size: 11px;
+    font-weight: 700;
+    flex-shrink: 0;
+`;
+
+export const MemberName = styled.span`
+    font-size: 13px;
+    font-weight: 500;
+    color: ${({ theme }) => theme.colors.textPrimary};
+`;
+
+export const MemberControls = styled.div`
+    display: flex;
+    align-items: center;
+    gap: 8px;
+`;
+
+export const RemoveMemberBtn = styled.button`
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 8px;
+    border-radius: ${({ theme }) => theme.radii.sm};
+    border: 1px solid transparent;
+    background-color: transparent;
+    color: ${({ theme }) => theme.colors.statusDanger};
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s ease;
 
     &:hover {
-        background: #e2ecea;
+        background-color: #fee2e2;
     }
+`;
+
+export const OwnerBadge = styled.span`
+    font-size: 11px;
+    font-weight: 500;
+    color: ${({ theme }) => theme.colors.textSecondary};
+    padding: 3px 6px;
+    border-radius: ${({ theme }) => theme.radii.sm};
+    background-color: rgba(100, 116, 139, 0.08);
+`;
+
+export const SearchContainer = styled.div`
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+`;
+
+export const SearchInputWrapper = styled.div`
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+
+    svg.search-icon {
+        position: absolute;
+        left: 11px;
+        color: ${({ theme }) => theme.colors.textSecondary};
+        pointer-events: none;
+    }
+`;
+
+export const SearchInput = styled.input`
+    width: 100%;
+    padding: 8px 30px 8px 34px;
+    border-radius: ${({ theme }) => theme.radii.sm};
+    border: 1px solid ${({ theme }) => theme.colors.border};
+    font-size: 13px;
+    color: ${({ theme }) => theme.colors.textPrimary};
+    background-color: ${({ theme }) => theme.colors.surface};
+    transition: all 0.15s ease;
+
+    &:focus {
+        outline: none;
+        border-color: #64748b;
+        box-shadow: 0 0 0 2px rgba(100, 116, 139, 0.12);
+    }
+`;
+
+export const ClearSearchBtn = styled.button`
+    position: absolute;
+    right: 8px;
+    background: transparent;
+    border: none;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: ${({ theme }) => theme.colors.textSecondary};
+    cursor: pointer;
+    transition: all 0.15s ease;
+
+    &:hover {
+        color: ${({ theme }) => theme.colors.textPrimary};
+        background: rgba(0, 0, 0, 0.05);
+    }
+`;
+
+export const SearchResultsList = styled.div`
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    max-height: 180px;
+    overflow-y: auto;
+    padding-right: 2px;
+`;
+
+export const SearchResultCard = styled.div`
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 10px;
+    border-radius: ${({ theme }) => theme.radii.sm};
+    border: 1px solid ${({ theme }) => theme.colors.borderLight};
+    background-color: ${({ theme }) => theme.colors.surface};
+    transition: all 0.15s ease;
+
+    &:hover {
+        border-color: ${({ theme }) => theme.colors.border};
+        background-color: rgba(15, 23, 42, 0.02);
+    }
+`;
+
+export const AddMemberBtn = styled.button`
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    padding: 3px 8px;
+    border-radius: ${({ theme }) => theme.radii.sm};
+    border: 1px solid ${({ theme }) => theme.colors.border};
+    background-color: ${({ theme }) => theme.colors.surface};
+    color: ${({ theme }) => theme.colors.textPrimary};
+    font-size: 11px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s ease;
+
+    &:hover {
+        background-color: #0f172a;
+        color: #ffffff;
+        border-color: #0f172a;
+    }
+`;
+
+export const EmptyNotice = styled.p`
+    font-size: 12px;
+    color: ${({ theme }) => theme.colors.textSecondary};
+    margin: 4px 0;
+    font-style: italic;
 `;
 
 export const ModalFooter = styled.div`
     display: flex;
+    align-items: center;
     justify-content: flex-end;
-    gap: 10px;
-    margin-top: 20px;
+    margin-top: 18px;
     padding-top: 14px;
-    border-top: 1px solid rgba(226, 232, 240, 0.6);
+    border-top: 1px solid ${({ theme }) => theme.colors.borderLight};
+    gap: 8px;
+    min-height: 48px;
 `;
 
 export const CancelButton = styled.button`
-    background: rgba(255, 255, 255, 0.9);
-    border: none;
-    color: #475569;
-    padding: 9px 16px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 14px;
+    padding: 7px 12px;
+    border-radius: ${({ theme }) => theme.radii.sm};
+    border: 1px solid ${({ theme }) => theme.colors.border};
+    background: transparent;
+    color: ${({ theme }) => theme.colors.textSecondary};
+    font-size: 12px;
     font-weight: 500;
-    transition: all 0.2s;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: all 0.15s ease;
 
     &:hover {
-        background: #f8fafc;
-        color: #0f172a;
+        background: rgba(0, 0, 0, 0.04);
+        color: ${({ theme }) => theme.colors.textPrimary};
     }
 `;
 
 export const SubmitButton = styled.button`
-    background: ${({ theme }) => theme.colors.primary};
+    padding: 7px 18px;
+    border-radius: ${({ theme }) => theme.radii.sm};
     border: none;
-    color: white;
-    padding: 9px 20px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 14px;
+    background-color: ${({ theme }) => theme.colors.primary};
+    color: #ffffff;
+    font-size: 13px;
     font-weight: 500;
-    transition: all 0.2s;
-    box-shadow: 0 4px 6px -1px rgba(0, 168, 107, 0.25);
+    cursor: pointer;
+    transition: all 0.15s ease;
 
     &:hover {
-        background: ${({ theme }) => theme.colors.primaryHover};
+        background-color: ${({ theme }) => theme.colors.primaryHover};
     }
 `;

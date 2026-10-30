@@ -138,11 +138,29 @@ export const useMyGoals = () => {
         title: newTask.title,
         description: newTask.description,
         category: newTask.category,
-        priority: 'MEDIUM',
+        priority: mapPriorityToApi(newTask.priority),
         deadline: formatDateToApi(newTask.deadline),
       });
+
+      if (newTask.members && newTask.members.length > 0) {
+        const extraMembers = newTask.members.filter((m) => m.role !== 'owner');
+        for (const m of extraMembers) {
+          try {
+            await goalsApi.addMember(createdGoal.id, m.id, m.role || 'viewer');
+          } catch {
+          }
+        }
+      }
+
       const createdTask = mapDetailToTask(createdGoal);
-      setTasks((prev) => [createdTask, ...prev]);
+      setTasks((prev) => [
+        {
+          ...createdTask,
+          status: newTask.status || createdTask.status,
+          members: newTask.members || createdTask.members,
+        },
+        ...prev,
+      ]);
       setCurrentPage(1);
     } catch {
       setErrorMessage('Erro ao criar a meta no servidor.');
