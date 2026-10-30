@@ -24,16 +24,18 @@ export const StatCard = styled.div`
   flex-direction: column;
   padding: 18px 20px;
   background-color: ${({ theme }) => theme.colors.surface};
-  border: 1px solid ${({ theme }) => theme.colors.borderLight};
+  border: 1px solid rgba(0, 0, 0, 0.05);
   border-radius: 12px;
   box-sizing: border-box;
   min-width: 0;
   gap: 8px;
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  box-shadow: none;
+  transition: border-color 0.15s ease;
 
   &:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+    border-color: rgba(0, 0, 0, 0.14);
+    box-shadow: none;
+    transform: none;
   }
 `;
 

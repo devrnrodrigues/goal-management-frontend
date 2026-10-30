@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Target, CheckCircle2, Award, ChevronRight } from 'lucide-react';
 import type { CompletedGoalItem } from '../types';
 import {
@@ -25,6 +25,30 @@ interface CompletedGoalCardProps {
   goal: CompletedGoalItem;
   onViewDetails: (goal: CompletedGoalItem) => void;
 }
+
+const SafeCompletedMemberAvatar: React.FC<{
+  member: { id: string; name: string; avatarUrl?: string };
+}> = ({ member }) => {
+  const [hasError, setHasError] = useState(false);
+
+  if (member.avatarUrl && !hasError) {
+    return (
+      <AvatarImg
+        src={member.avatarUrl}
+        alt={member.name}
+        title={member.name}
+        loading="lazy"
+        onError={() => setHasError(true)}
+      />
+    );
+  }
+
+  return (
+    <AvatarFallback title={member.name}>
+      {member.name.slice(0, 2).toUpperCase()}
+    </AvatarFallback>
+  );
+};
 
 export const CompletedGoalCard: React.FC<CompletedGoalCardProps> = ({
   goal,
@@ -80,21 +104,9 @@ export const CompletedGoalCard: React.FC<CompletedGoalCardProps> = ({
 
       <CardFooterRow>
         <MembersAvatarsRow>
-          {goal.members.map((member) =>
-            member.avatarUrl ? (
-              <AvatarImg
-                key={member.id}
-                src={member.avatarUrl}
-                alt={member.name}
-                title={member.name}
-                loading="lazy"
-              />
-            ) : (
-              <AvatarFallback key={member.id} title={member.name}>
-                {member.name.slice(0, 2).toUpperCase()}
-              </AvatarFallback>
-            )
-          )}
+          {goal.members.map((member) => (
+            <SafeCompletedMemberAvatar key={member.id} member={member} />
+          ))}
         </MembersAvatarsRow>
 
         <ViewDetailsButton type="button" onClick={() => onViewDetails(goal)}>

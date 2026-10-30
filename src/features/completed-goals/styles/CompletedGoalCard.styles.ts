@@ -5,16 +5,18 @@ export const Card = styled.div`
   flex-direction: column;
   padding: 22px 24px;
   background-color: ${({ theme }) => theme.colors.surface};
-  border: 1px solid ${({ theme }) => theme.colors.borderLight};
+  border: 1px solid rgba(0, 0, 0, 0.05);
   border-radius: 14px;
   gap: 16px;
   width: 100%;
   min-width: 0;
   box-sizing: border-box;
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  box-shadow: none;
+  transition: border-color 0.15s ease;
 
   &:hover {
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+    border-color: rgba(0, 0, 0, 0.14);
+    box-shadow: none;
   }
 
   @media (max-width: 600px) {
@@ -78,7 +80,7 @@ export const StatusBadge = styled.div`
   gap: 6px;
   padding: 5px 10px;
   border-radius: 6px;
-  background-color: ${({ theme }) => theme.colors.background};
+  background-color: #f1f5f9;
   color: ${({ theme }) => theme.colors.textPrimary};
   border: 1px solid ${({ theme }) => theme.colors.borderLight};
   font-size: 12px;
@@ -93,7 +95,8 @@ export const StatusBadge = styled.div`
 
 export const DescriptionText = styled.p`
   font-size: 13.5px;
-  color: ${({ theme }) => theme.colors.textSecondary};
+  color: #334155;
+  font-weight: 700;
   line-height: 1.5;
   margin: 0;
   word-break: break-word;
@@ -182,7 +185,8 @@ export const AvatarImg = styled.img`
   width: 28px;
   height: 28px;
   border-radius: 50%;
-  border: 2px solid ${({ theme }) => theme.colors.surface};
+  border: 2px solid #ffffff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
   margin-left: -6px;
   object-fit: cover;
 
@@ -195,7 +199,8 @@ export const AvatarFallback = styled.div`
   width: 28px;
   height: 28px;
   border-radius: 50%;
-  border: 2px solid ${({ theme }) => theme.colors.surface};
+  border: 2px solid #ffffff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
   margin-left: -6px;
   background-color: ${({ theme }) => theme.colors.background};
   color: ${({ theme }) => theme.colors.textSecondary};
