@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ThemeProvider } from 'styled-components';
 import {
   theme,
@@ -6,6 +6,7 @@ import {
   PlaceholderPage,
   useScrollbarVisibility,
   getAuthToken,
+  getRefreshToken,
   isMockSession,
   clearAuthSession,
 } from './features/shared';
@@ -18,6 +19,7 @@ import { CalendarPage } from './features/calendar';
 import { ReportsPage } from './features/reports';
 import { CompletedGoalsPage } from './features/completed-goals';
 import { AuthPage } from './features/auth';
+import { authApi } from './features/auth/api/authApi';
 import './App.css';
 
 const pageNamesMap: Record<string, string> = {
@@ -35,12 +37,27 @@ export function App() {
   });
   const [activeTab, setActiveTab] = useState<string>('dashboard');
 
+  useEffect(() => {
+    const handleSessionExpired = () => {
+      setIsAuthenticated(false);
+    };
+
+    window.addEventListener('auth-session-expired', handleSessionExpired);
+    return () => {
+      window.removeEventListener('auth-session-expired', handleSessionExpired);
+    };
+  }, []);
+
   const handleLoginSuccess = () => {
     setIsAuthenticated(true);
     setActiveTab('dashboard');
   };
 
   const handleLogout = () => {
+    const refreshToken = getRefreshToken();
+    if (refreshToken) {
+      authApi.logout(refreshToken).catch(() => undefined);
+    }
     clearAuthSession();
     setIsAuthenticated(false);
   };
