@@ -8,3 +8,6 @@ export { useDevMode } from './hooks/useDevMode';
 export * from './api/httpClient';
 export * from './api/usersApi';
 export * from './utils/avatarUtils';
+export * from './utils/goalPermissions';
+export * from './toast/toast.types';
+export { ToastProvider, useToast, appToast } from './toast/ToastContext';

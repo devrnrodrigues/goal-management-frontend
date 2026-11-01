@@ -9,6 +9,7 @@ import {
   getRefreshToken,
   isMockSession,
   clearAuthSession,
+  ToastProvider,
 } from './features/shared';
 import { MainLayout } from './features/layout';
 import { MyGoals } from './features/my-goals';
@@ -98,18 +99,20 @@ export function App() {
   return (
     <ThemeProvider theme={theme}>
       <GlobalStyles />
-      {!isAuthenticated ? (
-        <AuthPage onLoginSuccess={handleLoginSuccess} />
-      ) : (
-        <MainLayout
-          activeNavItemId={activeTab}
-          onSelectNavItem={(id) => setActiveTab(id)}
-          onLogout={handleLogout}
-          onOpenAddGoal={handleOpenAddGoal}
-        >
-          {renderActivePage()}
-        </MainLayout>
-      )}
+      <ToastProvider>
+        {!isAuthenticated ? (
+          <AuthPage onLoginSuccess={handleLoginSuccess} />
+        ) : (
+          <MainLayout
+            activeNavItemId={activeTab}
+            onSelectNavItem={(id) => setActiveTab(id)}
+            onLogout={handleLogout}
+            onOpenAddGoal={handleOpenAddGoal}
+          >
+            {renderActivePage()}
+          </MainLayout>
+        )}
+      </ToastProvider>
     </ThemeProvider>
   );
 }
