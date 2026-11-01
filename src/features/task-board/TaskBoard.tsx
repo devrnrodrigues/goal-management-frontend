@@ -9,11 +9,10 @@ import {
   ColumnModal,
   TaskModal,
 } from './components';
-import { ConfirmDeleteModal } from '../shared';
+import { ConfirmDeleteModal, getGoalPermissions } from '../shared';
 import {
   BoardContainer,
   BoardColumnsRow,
-  ErrorMessageBanner,
   EmptyBoardNotice,
 } from './TaskBoard.styles';
 
@@ -23,7 +22,6 @@ export const TaskBoard: React.FC = () => {
     activeGoal,
     columns,
     isLoading,
-    errorMessage,
     tasksByColumn,
     priorityFilter,
     setPriorityFilter,
@@ -44,6 +42,8 @@ export const TaskBoard: React.FC = () => {
     handleTaskDropOnTask,
     handleTaskDropOnColumn,
   } = useTaskBoard();
+
+  const permissions = getGoalPermissions(activeGoal?.userRole);
 
   const [isColumnModalOpen, setIsColumnModalOpen] = useState(false);
   const [columnToEdit, setColumnToEdit] = useState<BoardColumn | null>(null);
@@ -115,8 +115,6 @@ export const TaskBoard: React.FC = () => {
 
   return (
     <BoardContainer>
-      {errorMessage && <ErrorMessageBanner>{errorMessage}</ErrorMessageBanner>}
-
       <TaskBoardHeader
         availableGoals={availableGoals}
         activeGoal={activeGoal}
@@ -124,6 +122,7 @@ export const TaskBoard: React.FC = () => {
         onPriorityFilterChange={setPriorityFilter}
         onSelectGoal={handleSelectGoal}
         onOpenAddColumnModal={handleOpenAddColumn}
+        canManage={permissions.canManageTasks}
       />
 
       {!isLoading && !activeGoal ? (
@@ -144,6 +143,7 @@ export const TaskBoard: React.FC = () => {
               column={column}
               tasks={tasksByColumn[column.id] || []}
               allColumns={columns}
+              canManage={permissions.canManageTasks}
               draggedTaskId={draggedTaskId}
               onColumnDragEnd={handleColumnDragEnd}
               onAddTaskToColumn={handleOpenAddTask}
@@ -182,6 +182,7 @@ export const TaskBoard: React.FC = () => {
             columns={columns}
             defaultColumnId={targetColumnForNewTask}
             activeGoal={activeGoal}
+            canManage={permissions.canManageTasks}
             onClose={() => {
               setIsTaskModalOpen(false);
               setTaskToEdit(null);

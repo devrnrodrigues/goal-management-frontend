@@ -36,6 +36,7 @@ interface TaskBoardColumnProps {
   onDragEndTask: () => void;
   onDropTaskOnTask: (targetTaskId: string, targetColId: string) => void;
   onDropTaskOnColumn: (targetColId: string) => void;
+  canManage?: boolean;
 }
 
 export const TaskBoardColumn: React.FC<TaskBoardColumnProps> = ({
@@ -55,6 +56,7 @@ export const TaskBoardColumn: React.FC<TaskBoardColumnProps> = ({
   onDragEndTask,
   onDropTaskOnTask,
   onDropTaskOnColumn,
+  canManage = true,
 }) => {
   const dragControls = useDragControls();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -120,63 +122,65 @@ export const TaskBoardColumn: React.FC<TaskBoardColumnProps> = ({
           <TaskCountNumber>{tasks.length}</TaskCountNumber>
         </ColumnTitleArea>
 
-        <ColumnActions ref={menuRef}>
-          <DragHandleBtn
-            type="button"
-            onPointerDown={(e) => {
-              e.preventDefault();
-              dragControls.start(e);
-            }}
-            title="Arrastar coluna"
-          >
-            <GripVertical size={15} />
-          </DragHandleBtn>
+        {canManage && (
+          <ColumnActions ref={menuRef}>
+            <DragHandleBtn
+              type="button"
+              onPointerDown={(e) => {
+                e.preventDefault();
+                dragControls.start(e);
+              }}
+              title="Arrastar coluna"
+            >
+              <GripVertical size={15} />
+            </DragHandleBtn>
 
-          <IconBtn
-            type="button"
-            draggable={false}
-            onDragStart={(e) => e.stopPropagation()}
-            onClick={() => onAddTaskToColumn(column.id)}
-            title="Adicionar tarefa"
-          >
-            <Plus size={15} />
-          </IconBtn>
-          <IconBtn
-            type="button"
-            draggable={false}
-            onDragStart={(e) => e.stopPropagation()}
-            onClick={() => setIsMenuOpen((prev) => !prev)}
-            title="Opções"
-          >
-            <MoreVertical size={15} />
-          </IconBtn>
+            <IconBtn
+              type="button"
+              draggable={false}
+              onDragStart={(e) => e.stopPropagation()}
+              onClick={() => onAddTaskToColumn(column.id)}
+              title="Adicionar tarefa"
+            >
+              <Plus size={15} />
+            </IconBtn>
+            <IconBtn
+              type="button"
+              draggable={false}
+              onDragStart={(e) => e.stopPropagation()}
+              onClick={() => setIsMenuOpen((prev) => !prev)}
+              title="Opções"
+            >
+              <MoreVertical size={15} />
+            </IconBtn>
 
-          {isMenuOpen && (
-            <ColumnMenuDropdown>
-              <ColumnMenuItem
-                type="button"
-                onClick={() => {
-                  setIsMenuOpen(false);
-                  onEditColumn(column);
-                }}
-              >
-                <Pencil size={13} /> Editar coluna
-              </ColumnMenuItem>
-              {allColumns.length > 1 && (
+            {isMenuOpen && (
+              <ColumnMenuDropdown>
                 <ColumnMenuItem
                   type="button"
-                  $danger
                   onClick={() => {
                     setIsMenuOpen(false);
-                    onDeleteColumn(column.id);
+                    onEditColumn(column);
                   }}
                 >
-                  <Trash2 size={13} /> Excluir coluna
+                  <Pencil size={13} /> Editar coluna
                 </ColumnMenuItem>
-              )}
-            </ColumnMenuDropdown>
-          )}
-        </ColumnActions>
+                {allColumns.length > 1 && (
+                  <ColumnMenuItem
+                    type="button"
+                    $danger
+                    onClick={() => {
+                      setIsMenuOpen(false);
+                      onDeleteColumn(column.id);
+                    }}
+                  >
+                    <Trash2 size={13} /> Excluir coluna
+                  </ColumnMenuItem>
+                )}
+              </ColumnMenuDropdown>
+            )}
+          </ColumnActions>
+        )}
       </ColumnHeader>
 
       <CardsList>
@@ -188,6 +192,7 @@ export const TaskBoardColumn: React.FC<TaskBoardColumnProps> = ({
               key={task.id}
               task={task}
               columns={allColumns}
+              canManage={canManage}
               isDragging={draggedTaskId === task.id}
               isDraggingTask={isDraggingAnyTask}
               onToggleComplete={onToggleComplete}

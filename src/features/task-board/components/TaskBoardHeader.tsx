@@ -23,6 +23,7 @@ interface TaskBoardHeaderProps {
   onPriorityFilterChange: (val: string) => void;
   onSelectGoal: (goal: string | Task) => void;
   onOpenAddColumnModal: () => void;
+  canManage?: boolean;
 }
 
 export const TaskBoardHeader: React.FC<TaskBoardHeaderProps> = ({
@@ -32,6 +33,7 @@ export const TaskBoardHeader: React.FC<TaskBoardHeaderProps> = ({
   onPriorityFilterChange,
   onSelectGoal,
   onOpenAddColumnModal,
+  canManage = true,
 }) => {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const filterRef = useRef<HTMLDivElement>(null);
@@ -57,9 +59,11 @@ export const TaskBoardHeader: React.FC<TaskBoardHeaderProps> = ({
       </BrandAndGoalGroup>
 
       <ToolbarActions>
-        <OutlineBtn type="button" onClick={onOpenAddColumnModal}>
-          <Plus size={14} /> Novo quadro
-        </OutlineBtn>
+        {canManage && (
+          <OutlineBtn type="button" onClick={onOpenAddColumnModal}>
+            <Plus size={14} /> Novo quadro
+          </OutlineBtn>
+        )}
 
         <div style={{ position: 'relative' }} ref={filterRef}>
           <OutlineBtn

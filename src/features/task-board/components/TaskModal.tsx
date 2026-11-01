@@ -34,6 +34,7 @@ interface TaskModalProps {
     priority?: TaskPriority,
     columnId?: string
   ) => void;
+  canManage?: boolean;
 }
 
 export const TaskModal: React.FC<TaskModalProps> = ({
@@ -44,6 +45,7 @@ export const TaskModal: React.FC<TaskModalProps> = ({
   activeGoal,
   onClose,
   onSave,
+  canManage = true,
 }) => {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -90,7 +92,9 @@ export const TaskModal: React.FC<TaskModalProps> = ({
         onClick={(e) => e.stopPropagation()}
       >
         <ModalHeader>
-          <ModalTitle>{task ? 'Editar tarefa' : 'Adicionar nova tarefa'}</ModalTitle>
+          <ModalTitle>
+            {task ? (canManage ? 'Editar tarefa' : 'Detalhes da tarefa') : 'Adicionar nova tarefa'}
+          </ModalTitle>
           <CloseBtn type="button" onClick={onClose}>
             <X size={18} />
           </CloseBtn>
@@ -115,7 +119,8 @@ export const TaskModal: React.FC<TaskModalProps> = ({
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="Título da tarefa"
                 required
-                autoFocus
+                autoFocus={canManage}
+                disabled={!canManage}
               />
             </FormGroup>
 
@@ -126,6 +131,7 @@ export const TaskModal: React.FC<TaskModalProps> = ({
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="Descrição da tarefa"
                 rows={3}
+                disabled={!canManage}
               />
             </FormGroup>
 
@@ -135,6 +141,7 @@ export const TaskModal: React.FC<TaskModalProps> = ({
                 <FormSelect
                   value={priority}
                   onChange={(e) => setPriority(e.target.value as TaskPriority)}
+                  disabled={!canManage}
                 >
                   <option value="Baixa">Baixa</option>
                   <option value="Média">Média</option>
@@ -147,6 +154,7 @@ export const TaskModal: React.FC<TaskModalProps> = ({
                 <FormSelect
                   value={columnId}
                   onChange={(e) => setColumnId(e.target.value)}
+                  disabled={!canManage}
                 >
                   {columns.map((col) => (
                     <option key={col.id} value={col.id}>
@@ -160,9 +168,9 @@ export const TaskModal: React.FC<TaskModalProps> = ({
 
           <ModalFooter>
             <CancelButton type="button" onClick={onClose}>
-              Cancelar
+              {canManage ? 'Cancelar' : 'Fechar'}
             </CancelButton>
-            <SubmitButton type="submit">Salvar</SubmitButton>
+            {canManage && <SubmitButton type="submit">Salvar</SubmitButton>}
           </ModalFooter>
         </form>
       </ModalContainer>

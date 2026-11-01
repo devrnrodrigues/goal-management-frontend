@@ -32,6 +32,7 @@ export interface ActiveGoalInfo {
   category: string;
   deadline?: string;
   progress: number;
+  userRole?: string;
 }
 
 export type TaskPriorityApi = 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT';

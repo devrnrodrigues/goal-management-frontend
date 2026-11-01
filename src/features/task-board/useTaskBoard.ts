@@ -3,7 +3,7 @@ import type { Task } from '../my-goals/types';
 import { initialTasks } from '../my-goals/constants/initialGoals';
 import { membersByTitle, defaultMembers } from '../my-goals/constants/members';
 import type { BoardColumn, BoardTask, ActiveGoalInfo, TaskPriority } from './types';
-import { useDevMode } from '../shared';
+import { useDevMode, appToast } from '../shared';
 import { goalsApi } from '../my-goals/api/goalsApi';
 import { mapSummaryToTask } from '../my-goals/api/goalMappers';
 import { taskBoardApi } from './api/taskBoardApi';
@@ -89,7 +89,7 @@ export const useTaskBoard = () => {
       lastSavedColumnsOrderRef.current = finalColumns.map((c) => c.id).join(',');
       setTasks(taskRes.map(mapTaskToDisplay));
     } catch {
-      setErrorMessage('Não foi possível carregar as colunas e tarefas do quadro.');
+      appToast.error('Não foi possível carregar as colunas e tarefas do quadro.');
       setColumns([]);
       setTasks([]);
     }
@@ -152,6 +152,7 @@ export const useTaskBoard = () => {
           category: first.category,
           deadline: first.deadline,
           progress: first.progress,
+          userRole: first.userRole,
         };
         setActiveGoal(newActive);
         if (first.id) {
@@ -163,7 +164,7 @@ export const useTaskBoard = () => {
         setTasks([]);
       }
     } catch {
-      setErrorMessage('Não foi possível carregar as metas.');
+      appToast.error('Não foi possível carregar as metas.');
       setAvailableGoals([]);
       setActiveGoal(null);
       setColumns([]);
@@ -210,6 +211,7 @@ export const useTaskBoard = () => {
       category: goal.category,
       deadline: goal.deadline,
       progress: goal.progress,
+      userRole: goal.userRole,
     };
     setActiveGoal(selected);
 
@@ -256,6 +258,7 @@ export const useTaskBoard = () => {
         color,
       };
       setColumns((prev) => [...prev, newCol]);
+      appToast.success('Coluna adicionada com sucesso!');
       return;
     }
 
@@ -264,8 +267,9 @@ export const useTaskBoard = () => {
     try {
       const res = await taskBoardApi.createColumn(activeGoal.id, { title: trimmed, color });
       setColumns((prev) => [...prev, mapColumnToDisplay(res)]);
+      appToast.success('Coluna adicionada com sucesso!');
     } catch {
-      setErrorMessage('Erro ao adicionar coluna.');
+      appToast.error('Erro ao adicionar coluna.');
     }
   };
 
@@ -277,6 +281,7 @@ export const useTaskBoard = () => {
       setColumns((prev) =>
         prev.map((col) => (col.id === columnId ? { ...col, title: trimmed, color } : col))
       );
+      appToast.success('Coluna atualizada com sucesso!');
       return;
     }
 
@@ -285,8 +290,9 @@ export const useTaskBoard = () => {
       setColumns((prev) =>
         prev.map((col) => (col.id === columnId ? mapColumnToDisplay(res) : col))
       );
+      appToast.success('Coluna atualizada com sucesso!');
     } catch {
-      setErrorMessage('Erro ao atualizar coluna.');
+      appToast.error('Erro ao atualizar coluna.');
     }
   };
 
@@ -294,6 +300,7 @@ export const useTaskBoard = () => {
     if (isMock) {
       setColumns((prev) => prev.filter((col) => col.id !== columnId));
       setTasks((prev) => prev.filter((t) => t.columnId !== columnId));
+      appToast.success('Coluna excluída com sucesso!');
       return;
     }
 
@@ -301,8 +308,9 @@ export const useTaskBoard = () => {
       await taskBoardApi.deleteColumn(columnId);
       setColumns((prev) => prev.filter((col) => col.id !== columnId));
       setTasks((prev) => prev.filter((t) => t.columnId !== columnId));
+      appToast.success('Coluna excluída com sucesso!');
     } catch {
-      setErrorMessage('Erro ao excluir coluna.');
+      appToast.error('Erro ao excluir coluna.');
     }
   };
 
@@ -331,6 +339,7 @@ export const useTaskBoard = () => {
         members: goalMembers.slice(0, 1),
       };
       setTasks((prev) => [...prev, newTask]);
+      appToast.success('Tarefa criada com sucesso!');
       return;
     }
 
@@ -344,8 +353,9 @@ export const useTaskBoard = () => {
         priority: mapPriorityToApi(priority),
       });
       setTasks((prev) => [...prev, mapTaskToDisplay(created)]);
+      appToast.success('Tarefa criada com sucesso!');
     } catch {
-      setErrorMessage('Erro ao criar tarefa.');
+      appToast.error('Erro ao criar tarefa.');
     }
   };
 
@@ -373,6 +383,7 @@ export const useTaskBoard = () => {
             : t
         )
       );
+      appToast.success('Tarefa atualizada com sucesso!');
       return;
     }
 
@@ -386,22 +397,25 @@ export const useTaskBoard = () => {
       setTasks((prev) =>
         prev.map((t) => (t.id === taskId ? mapTaskToDisplay(updated) : t))
       );
+      appToast.success('Tarefa atualizada com sucesso!');
     } catch {
-      setErrorMessage('Erro ao atualizar tarefa.');
+      appToast.error('Erro ao atualizar tarefa.');
     }
   };
 
   const handleDeleteTask = async (taskId: string) => {
     if (isMock) {
       setTasks((prev) => prev.filter((t) => t.id !== taskId));
+      appToast.success('Tarefa excluída com sucesso!');
       return;
     }
 
     try {
       await taskBoardApi.deleteTask(taskId);
       setTasks((prev) => prev.filter((t) => t.id !== taskId));
+      appToast.success('Tarefa excluída com sucesso!');
     } catch {
-      setErrorMessage('Erro ao excluir tarefa.');
+      appToast.error('Erro ao excluir tarefa.');
     }
   };
 
@@ -409,9 +423,12 @@ export const useTaskBoard = () => {
     const currentTask = tasks.find((t) => t.id === taskId);
     if (!currentTask || currentTask.columnId === targetColumnId) return;
 
+    const targetColumn = columns.find((c) => c.id === targetColumnId);
+    const targetTitle = targetColumn ? targetColumn.title : 'outra coluna';
+
     const isDoneCol =
       targetColumnId === 'col-done' ||
-      columns.find((c) => c.id === targetColumnId)?.title.toLowerCase().includes('conclu');
+      targetColumn?.title.toLowerCase().includes('conclu');
 
     setTasks((prev) => {
       const task = prev.find((t) => t.id === taskId);
@@ -425,16 +442,21 @@ export const useTaskBoard = () => {
       return [...without, updated];
     });
 
+    appToast.success(`Tarefa movida para "${targetTitle}"`);
+
     if (!isMock) {
       try {
         await taskBoardApi.moveTask(taskId, { targetColumnId });
       } catch {
-        setErrorMessage('Erro ao mover tarefa no servidor.');
+        appToast.error('Erro ao mover tarefa no servidor.');
       }
     }
   };
 
   const handleToggleTaskComplete = async (taskId: string) => {
+    const currentTask = tasks.find((t) => t.id === taskId);
+    const willComplete = currentTask ? !currentTask.completed : true;
+
     setTasks((prev) =>
       prev.map((t) => {
         if (t.id !== taskId) return t;
@@ -457,11 +479,13 @@ export const useTaskBoard = () => {
       })
     );
 
+    appToast.success(willComplete ? 'Tarefa concluída!' : 'Tarefa reaberta!');
+
     if (!isMock) {
       try {
         await taskBoardApi.toggleComplete(taskId);
       } catch {
-        setErrorMessage('Erro ao alternar conclusão da tarefa.');
+        appToast.error('Erro ao alternar conclusão da tarefa.');
       }
     }
   };
@@ -529,12 +553,18 @@ export const useTaskBoard = () => {
     if (!isMock && activeGoal) {
       const currentCols = columnsRef.current;
       const currentOrder = currentCols.map((c) => c.id).join(',');
-      if (currentOrder && currentOrder !== lastSavedColumnsOrderRef.current) {
+      const hasMockIds = currentCols.some((c) => c.id.startsWith('col-'));
+      if (!hasMockIds && currentOrder && currentOrder !== lastSavedColumnsOrderRef.current) {
         lastSavedColumnsOrderRef.current = currentOrder;
         const orderedIds = currentCols.map((c) => c.id);
-        taskBoardApi.reorderColumns(activeGoal.id, orderedIds).catch(() => {
-          setErrorMessage('Erro ao salvar a ordem das colunas.');
-        });
+        taskBoardApi
+          .reorderColumns(activeGoal.id, orderedIds)
+          .then(() => {
+            appToast.success('Ordem das colunas salva com sucesso!');
+          })
+          .catch(() => {
+            appToast.error('Erro ao salvar a ordem das colunas.');
+          });
       }
     }
   };

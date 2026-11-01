@@ -41,6 +41,7 @@ interface TaskCardProps {
   onDragStart: (taskId: string) => void;
   onDragEnd?: () => void;
   onDropOnTask?: (targetTaskId: string, targetColId: string) => void;
+  canManage?: boolean;
 }
 
 const SafeTaskMemberAvatar: React.FC<{ member: TaskMember }> = ({ member }) => {
@@ -76,6 +77,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
   onDragStart,
   onDragEnd,
   onDropOnTask,
+  canManage = true,
 }) => {
   const currentColumnIndex = columns.findIndex((c) => c.id === task.columnId);
   const prevColumn = currentColumnIndex > 0 ? columns[currentColumnIndex - 1] : null;
@@ -90,18 +92,17 @@ export const TaskCard: React.FC<TaskCardProps> = ({
   const fallbackOwner: TaskMember = {
     id: isMock ? 'usr-renan' : (storedUser?.id || 'owner'),
     name: isMock ? 'Renan Rodrigues' : (storedUser?.name || 'Você'),
-    avatarUrl: isMock
-      ? 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=80&q=80'
-      : (storedUser?.avatarUrl || ''),
+    avatarUrl: storedUser?.avatarUrl || '',
   };
 
   const cardMembers = task.members && task.members.length > 0 ? task.members : [fallbackOwner];
 
   return (
     <CardContainer
-      draggable
+      draggable={canManage}
       $isDragging={isDragging}
       onDragStart={(e) => {
+        if (!canManage) return;
         e.stopPropagation();
         e.dataTransfer.setData('text/plain', task.id);
         e.dataTransfer.effectAllowed = 'move';
@@ -148,49 +149,53 @@ export const TaskCard: React.FC<TaskCardProps> = ({
           {cardMembers.map((m, index) => (
             <SafeTaskMemberAvatar key={m.id ? `${m.id}-${index}` : index} member={m} />
           ))}
-          <AddMemberCircle title="Atribuir">
-            <Plus size={11} />
-          </AddMemberCircle>
+          {canManage && (
+            <AddMemberCircle title="Atribuir">
+              <Plus size={11} />
+            </AddMemberCircle>
+          )}
         </AvatarsGroup>
 
-        <HoverActions>
-          <ActionBtn
-            type="button"
-            onClick={() => onEdit(task)}
-            title="Editar"
-          >
-            <Pencil size={13} />
-          </ActionBtn>
-
-          <ActionBtn
-            type="button"
-            className="delete-btn"
-            onClick={() => onDelete(task.id)}
-            title="Excluir"
-          >
-            <Trash2 size={13} />
-          </ActionBtn>
-
-          {prevColumn && (
+        {canManage && (
+          <HoverActions>
             <ActionBtn
               type="button"
-              onClick={() => onMove(task.id, prevColumn.id)}
-              title={`Mover para ${prevColumn.title}`}
+              onClick={() => onEdit(task)}
+              title="Editar"
             >
-              <ChevronLeft size={14} />
+              <Pencil size={13} />
             </ActionBtn>
-          )}
 
-          {nextColumn && (
             <ActionBtn
               type="button"
-              onClick={() => onMove(task.id, nextColumn.id)}
-              title={`Mover para ${nextColumn.title}`}
+              className="delete-btn"
+              onClick={() => onDelete(task.id)}
+              title="Excluir"
             >
-              <ChevronRight size={14} />
+              <Trash2 size={13} />
             </ActionBtn>
-          )}
-        </HoverActions>
+
+            {prevColumn && (
+              <ActionBtn
+                type="button"
+                onClick={() => onMove(task.id, prevColumn.id)}
+                title={`Mover para ${prevColumn.title}`}
+              >
+                <ChevronLeft size={14} />
+              </ActionBtn>
+            )}
+
+            {nextColumn && (
+              <ActionBtn
+                type="button"
+                onClick={() => onMove(task.id, nextColumn.id)}
+                title={`Mover para ${nextColumn.title}`}
+              >
+                <ChevronRight size={14} />
+              </ActionBtn>
+            )}
+          </HoverActions>
+        )}
       </CardFooter>
     </CardContainer>
   );
