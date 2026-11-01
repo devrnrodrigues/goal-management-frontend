@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { X, Plus, Trash2, CheckSquare } from 'lucide-react';
+import { appToast } from '../../shared';
 import {
     ModalOverlay,
     ModalContainer,
@@ -83,7 +84,10 @@ export const AddTaskModal: React.FC<AddTaskModalProps> = ({ isOpen, onClose, onA
                 completed: false,
             }));
 
-        if (formattedTasks.length === 0) return;
+        if (formattedTasks.length === 0) {
+            appToast.warning('Informe ao menos uma tarefa com título.');
+            return;
+        }
 
         onAddTask(formattedTasks);
         setNewTasks([{ title: '', description: '' }]);
