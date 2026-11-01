@@ -13,6 +13,7 @@ interface RoleSelectDropdownProps {
     value: MemberRole;
     onChange: (role: MemberRole) => void;
     ariaLabel?: string;
+    disabled?: boolean;
 }
 
 const ROLE_OPTIONS: { id: MemberRole; label: string }[] = [
@@ -24,7 +25,8 @@ const ROLE_OPTIONS: { id: MemberRole; label: string }[] = [
 export const RoleSelectDropdown: React.FC<RoleSelectDropdownProps> = ({
     value,
     onChange,
-    ariaLabel
+    ariaLabel,
+    disabled = false,
 }) => {
     const [isOpen, setIsOpen] = useState(false);
     const containerRef = useRef<HTMLDivElement>(null);
@@ -48,12 +50,13 @@ export const RoleSelectDropdown: React.FC<RoleSelectDropdownProps> = ({
     const currentLabel = ROLE_OPTIONS.find((r) => r.id === value)?.label || value;
 
     return (
-        <RoleDropdownContainer ref={containerRef} $isOpen={isOpen}>
+        <RoleDropdownContainer ref={containerRef} $isOpen={isOpen} style={disabled ? { opacity: 0.7, pointerEvents: 'none' } : undefined}>
             <RoleTriggerBtn
                 type="button"
-                onClick={() => setIsOpen((prev) => !prev)}
+                onClick={() => !disabled && setIsOpen((prev) => !prev)}
                 aria-label={ariaLabel}
                 aria-expanded={isOpen}
+                disabled={disabled}
             >
                 <span>{currentLabel}</span>
                 <ChevronDown size={12} className={isOpen ? 'open' : ''} />

@@ -16,7 +16,6 @@ import {
   CardGrid,
   GoalCardWrapper,
   ViewSelector,
-  ErrorMessageBanner,
   EmptyStateContainer,
 } from './MyGoals.styles';
 
@@ -26,7 +25,6 @@ export const MyGoals: React.FC = () => {
   const {
     tasks,
     isLoading,
-    errorMessage,
     currentPage,
     totalGoals,
     inProgressGoals,
@@ -80,8 +78,6 @@ export const MyGoals: React.FC = () => {
         />
       ) : (
         <>
-          {errorMessage && <ErrorMessageBanner>{errorMessage}</ErrorMessageBanner>}
-
           <GoalStatsBar
             totalGoals={totalGoals}
             inProgressGoals={inProgressGoals}
@@ -179,6 +175,7 @@ export const MyGoals: React.FC = () => {
               status: goalForConfig.status,
               priority: goalForConfig.priority,
               members: goalForConfig.members,
+              userRole: goalForConfig.userRole,
             }}
             onSaveGoal={handleSaveGoalConfig}
             onDeleteGoal={handleDeleteGoalFromConfig}

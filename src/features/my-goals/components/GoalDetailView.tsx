@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import { Search, X, Layers, CheckSquare } from 'lucide-react';
 import { AddTaskModal, UpdateTaskModal } from '../../task-board';
-import { ConfirmDeleteModal } from '../../shared';
+import { ConfirmDeleteModal, getGoalPermissions } from '../../shared';
 import type { Task, SubTask, SubTaskPriority } from '../types';
 import { useGoalDetail } from '../hooks';
 import { GoalDetailHero } from './GoalDetailHero';
@@ -51,6 +51,7 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
   onDeleteSubtask,
   onEditGoal: _onEditGoal,
 }) => {
+  const permissions = getGoalPermissions(task.userRole);
   const {
     filterStatus,
     setFilterStatus,
@@ -161,12 +162,14 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
               </FilterTabsGroup>
 
               <ControlsRightGroup>
-                <BulkActionButton
-                  type="button"
-                  onClick={() => setIsUpdateTaskModalOpen(true)}
-                >
-                  <Layers size={14} /> Editar
-                </BulkActionButton>
+                {permissions.canManageTasks && (
+                  <BulkActionButton
+                    type="button"
+                    onClick={() => setIsUpdateTaskModalOpen(true)}
+                  >
+                    <Layers size={14} /> Editar
+                  </BulkActionButton>
+                )}
 
                 <SearchBox>
                   <Search size={14} />
@@ -188,16 +191,18 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
               </ControlsRightGroup>
             </ControlsBar>
 
-            <GoalTaskQuickAdd
-              isOpen={isQuickAddOpen}
-              onOpen={() => setIsQuickAddOpen(true)}
-              onClose={() => setIsQuickAddOpen(false)}
-              title={quickTitle}
-              onChangeTitle={setQuickTitle}
-              description={quickDescription}
-              onChangeDescription={setQuickDescription}
-              onSubmit={handleQuickAddSubmit}
-            />
+            {permissions.canManageTasks && (
+              <GoalTaskQuickAdd
+                isOpen={isQuickAddOpen}
+                onOpen={() => setIsQuickAddOpen(true)}
+                onClose={() => setIsQuickAddOpen(false)}
+                title={quickTitle}
+                onChangeTitle={setQuickTitle}
+                description={quickDescription}
+                onChangeDescription={setQuickDescription}
+                onSubmit={handleQuickAddSubmit}
+              />
+            )}
 
             {filteredSubtasks.length > 0 ? (
               <TasksListWrapper>
@@ -230,6 +235,7 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
                     <GoalTaskItem
                       key={subtask.id}
                       subtask={displaySubtask}
+                      canManage={permissions.canManageTasks}
                       onToggle={() => handleToggleSubtaskClick(subtask.id)}
                       onDelete={() => handleOpenDeleteModal(subtask.id)}
                       onEdit={handleOpenEditSubtask}
@@ -247,7 +253,9 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
                 <EmptyStateText>
                   {searchQuery
                     ? 'Nenhuma tarefa corresponde à busca informada.'
-                    : 'Adicione sua primeira tarefa para esta meta utilizando o campo acima.'}
+                    : permissions.canManageTasks
+                    ? 'Adicione sua primeira tarefa para esta meta utilizando o campo acima.'
+                    : 'Nenhuma tarefa cadastrada nesta meta.'}
                 </EmptyStateText>
               </EmptyStateBox>
             )}

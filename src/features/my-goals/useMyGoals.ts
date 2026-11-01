@@ -4,7 +4,7 @@ import type { GoalConfigData } from './components';
 import { initialTasks } from './constants/initialGoals';
 import { membersByTitle, defaultMembers } from './constants/members';
 import { useCardsPerPage } from './hooks';
-import { useDevMode } from '../shared';
+import { useDevMode, appToast } from '../shared';
 import { goalsApi } from './api/goalsApi';
 import {
   mapSummaryToTask,
@@ -31,7 +31,7 @@ const mapTaskApiToSubTask = (t: TaskApiResponse): SubTask => ({
   members: (t.members || []).map((m) => ({
     id: m.userId,
     name: m.name,
-    avatarUrl: m.avatarUrl || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=80&q=80',
+    avatarUrl: m.avatarUrl || '',
   })),
 });
 
@@ -65,7 +65,7 @@ export const useMyGoals = () => {
       const mappedTasks = pageResponse.content.map(mapSummaryToTask);
       setTasks(mappedTasks);
     } catch {
-      setErrorMessage('Não foi possível carregar as metas do servidor.');
+      appToast.error('Não foi possível carregar as metas do servidor.');
       setTasks([]);
     } finally {
       setIsLoading(false);
@@ -130,6 +130,7 @@ export const useMyGoals = () => {
       };
       setTasks([created, ...tasks]);
       setCurrentPage(1);
+      appToast.success('Meta criada com sucesso!');
       return;
     }
 
@@ -147,7 +148,9 @@ export const useMyGoals = () => {
         for (const m of extraMembers) {
           try {
             await goalsApi.addMember(createdGoal.id, m.id, m.role || 'viewer');
-          } catch {
+          } catch (err: unknown) {
+            const apiError = err as { message?: string };
+            appToast.error(apiError.message || 'Erro ao adicionar membro à nova meta.');
           }
         }
       }
@@ -162,8 +165,9 @@ export const useMyGoals = () => {
         ...prev,
       ]);
       setCurrentPage(1);
+      appToast.success('Meta criada com sucesso!');
     } catch {
-      setErrorMessage('Erro ao criar a meta no servidor.');
+      appToast.error('Erro ao criar a meta no servidor.');
     }
   };
 
@@ -182,6 +186,7 @@ export const useMyGoals = () => {
       }
       setIsDeleteModalOpen(false);
       setGoalToDeleteId(null);
+      appToast.success('Meta excluída com sucesso!');
       return;
     }
 
@@ -191,8 +196,9 @@ export const useMyGoals = () => {
       if (selectedTaskId === goalToDeleteId) {
         setSelectedTaskId(null);
       }
+      appToast.success('Meta excluída com sucesso!');
     } catch {
-      setErrorMessage('Erro ao excluir a meta no servidor.');
+      appToast.error('Erro ao excluir a meta no servidor.');
     } finally {
       setIsDeleteModalOpen(false);
       setGoalToDeleteId(null);
@@ -232,6 +238,7 @@ export const useMyGoals = () => {
     setGoalForConfig({
       ...task,
       members: existingMembers,
+      userRole: task.userRole,
     });
     setIsConfigModalOpen(true);
   };
@@ -275,11 +282,15 @@ export const useMyGoals = () => {
       const originalMembers = goalForConfig.members || [];
       const newMembers = updatedData.members || [];
 
+      let memberError: string | null = null;
+
       const added = newMembers.filter((m) => !originalMembers.some((om) => om.id === m.id));
       for (const m of added) {
         try {
           await goalsApi.addMember(goalForConfig.id, m.id, m.role || 'viewer');
-        } catch {
+        } catch (err: unknown) {
+          const apiError = err as { message?: string };
+          memberError = apiError.message || 'Erro ao adicionar membro à meta.';
         }
       }
 
@@ -287,8 +298,48 @@ export const useMyGoals = () => {
       for (const m of removed) {
         try {
           await goalsApi.removeMember(goalForConfig.id, m.id);
-        } catch {
+        } catch (err: unknown) {
+          const apiError = err as { message?: string };
+          memberError = apiError.message || 'Erro ao remover membro da meta.';
         }
+      }
+
+      const roleChanged = newMembers.filter((m) => {
+        const orig = originalMembers.find((om) => om.id === m.id);
+        return orig && m.role && orig.role && orig.role.toLowerCase() !== m.role.toLowerCase();
+      });
+
+      const newOwner = roleChanged.find((m) => m.role === 'owner');
+      const otherChanges = roleChanged.filter((m) => m.role !== 'owner');
+
+      if (newOwner) {
+        try {
+          await goalsApi.updateMemberRole(goalForConfig.id, newOwner.id, 'owner');
+          appToast.success('Posse da meta transferida com sucesso!');
+        } catch (err: unknown) {
+          const apiError = err as { message?: string };
+          memberError = apiError.message || 'Erro ao transferir a posse da meta.';
+        }
+      }
+
+      if (otherChanges.length > 0) {
+        for (const m of otherChanges) {
+          try {
+            await goalsApi.updateMemberRole(goalForConfig.id, m.id, m.role || 'viewer');
+          } catch (err: unknown) {
+            const apiError = err as { message?: string };
+            memberError = apiError.message || 'Erro ao atualizar papel do membro.';
+          }
+        }
+        if (!memberError && !newOwner) {
+          appToast.success('Permissões dos membros atualizadas com sucesso!');
+        }
+      }
+
+      if (memberError) {
+        appToast.error(memberError);
+      } else if (!newOwner && otherChanges.length === 0) {
+        appToast.success('Configurações da meta salvas com sucesso!');
       }
 
       const updatedTask = mapDetailToTask(response);
@@ -306,7 +357,7 @@ export const useMyGoals = () => {
         })
       );
     } catch {
-      setErrorMessage('Erro ao atualizar a meta no servidor.');
+      appToast.error('Erro ao atualizar a meta no servidor.');
     } finally {
       setIsConfigModalOpen(false);
       setGoalForConfig(null);
@@ -325,6 +376,7 @@ export const useMyGoals = () => {
       }
       setIsConfigModalOpen(false);
       setGoalForConfig(null);
+      appToast.success('Meta excluída com sucesso!');
       return;
     }
 
@@ -334,8 +386,9 @@ export const useMyGoals = () => {
       if (selectedTaskId === targetId) {
         setSelectedTaskId(null);
       }
+      appToast.success('Meta excluída com sucesso!');
     } catch {
-      setErrorMessage('Erro ao excluir a meta no servidor.');
+      appToast.error('Erro ao excluir a meta no servidor.');
     } finally {
       setIsConfigModalOpen(false);
       setGoalForConfig(null);
@@ -365,9 +418,12 @@ export const useMyGoals = () => {
             description: updatedSubtask.description,
             priority: mapTaskPriorityToApi(updatedSubtask.priority),
           });
+          appToast.success('Tarefa atualizada com sucesso!');
         } catch {
-          setErrorMessage('Erro ao atualizar tarefa.');
+          appToast.error('Erro ao atualizar tarefa.');
         }
+      } else {
+        appToast.success('Tarefa atualizada com sucesso!');
       }
     }
   };
@@ -399,6 +455,7 @@ export const useMyGoals = () => {
             return { ...t, subtasks: combined, progress: newProgress };
           })
         );
+        appToast.success('Tarefas adicionadas com sucesso!');
         return;
       }
 
@@ -424,18 +481,24 @@ export const useMyGoals = () => {
             return { ...t, subtasks: combined, progress: newProgress };
           })
         );
+        appToast.success('Tarefas adicionadas com sucesso!');
       } catch {
-        setErrorMessage('Erro ao adicionar tarefas.');
+        appToast.error('Erro ao adicionar tarefas.');
       }
     }
   };
 
   const handleToggleSubtask = async (subtaskId: string) => {
     if (selectedTaskId !== null) {
+      let willComplete = true;
       setTasks((prev) =>
         prev.map((t) => {
           if (t.id !== selectedTaskId) return t;
           const subtasksList = t.subtasks || [];
+          const target = subtasksList.find((st) => st.id === subtaskId);
+          if (target) {
+            willComplete = !target.completed;
+          }
           const updated = subtasksList.map((st) =>
             st.id === subtaskId ? { ...st, completed: !st.completed } : st
           );
@@ -446,11 +509,13 @@ export const useMyGoals = () => {
         })
       );
 
+      appToast.success(willComplete ? 'Tarefa concluída!' : 'Tarefa reaberta!');
+
       if (!isMock) {
         try {
           await taskBoardApi.toggleComplete(subtaskId);
         } catch {
-          setErrorMessage('Erro ao alternar conclusão da tarefa.');
+          appToast.error('Erro ao alternar conclusão da tarefa.');
         }
       }
     }
@@ -470,11 +535,13 @@ export const useMyGoals = () => {
         })
       );
 
+      appToast.success('Tarefa excluída com sucesso!');
+
       if (!isMock) {
         try {
           await taskBoardApi.deleteTask(subtaskId);
         } catch {
-          setErrorMessage('Erro ao excluir tarefa.');
+          appToast.error('Erro ao excluir tarefa.');
         }
       }
     }

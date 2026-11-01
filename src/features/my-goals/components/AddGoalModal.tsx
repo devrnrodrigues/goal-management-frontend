@@ -251,7 +251,10 @@ export const AddGoalModal: React.FC<AddGoalModalProps> = ({ isOpen, onClose, onA
     };
 
     const handleAddMember = (newMember: MemberAvatar) => {
-        if (!members.some((m) => m.id === newMember.id || m.name === newMember.name)) {
+        const isAlreadyMember = members.some(
+            (m) => m.id === newMember.id || (Boolean(m.email) && Boolean(newMember.email) && m.email?.toLowerCase() === newMember.email?.toLowerCase())
+        );
+        if (!isAlreadyMember) {
             setMembers((prev) => [...prev, { ...newMember, role: newMember.role || 'viewer' }]);
         }
     };

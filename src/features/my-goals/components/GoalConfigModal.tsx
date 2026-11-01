@@ -81,6 +81,7 @@ import { useDevMode } from '../../shared/hooks/useDevMode';
 import { getStoredUser } from '../../shared/api/httpClient';
 import { usersApi } from '../../shared/api/usersApi';
 import { getInitials } from '../../shared/utils/avatarUtils';
+import { getGoalPermissions, appToast } from '../../shared';
 import { type MemberAvatar, type MemberRole, systemUsers, currentUser } from '../constants/members';
 
 export type { MemberAvatar, MemberRole };
@@ -93,6 +94,7 @@ export interface GoalConfigData {
     status?: string;
     priority?: string;
     members?: MemberAvatar[];
+    userRole?: string;
 }
 
 interface GoalConfigModalProps {
@@ -136,6 +138,18 @@ const SafeGoalConfigMemberAvatar: React.FC<{ name: string; avatarUrl?: string }>
     return <MemberAvatarInitials>{getInitials(name)}</MemberAvatarInitials>;
 };
 
+const getRoleLabel = (role?: MemberRole) => {
+    switch (role) {
+        case 'owner':
+            return 'Proprietário';
+        case 'admin':
+            return 'Administrador';
+        case 'viewer':
+        default:
+            return 'Visualizador';
+    }
+};
+
 export const GoalConfigModal: React.FC<GoalConfigModalProps> = ({
     isOpen,
     initialTab = 'details',
@@ -155,6 +169,14 @@ export const GoalConfigModal: React.FC<GoalConfigModalProps> = ({
     const [selectedDate, setSelectedDate] = useState<Date | null>(null);
     const { isMock } = useDevMode();
     const [members, setMembers] = useState<MemberAvatar[]>([]);
+
+    const storedUser = getStoredUser();
+    const currentUserId = isMock ? currentUser.id : (storedUser?.id || '');
+    const myMember = members.find(
+        (m) => m.id === currentUserId || (Boolean(storedUser?.email) && m.email === storedUser?.email)
+    );
+    const effectiveRole = myMember?.role || goal.userRole || (isMock ? 'owner' : 'viewer');
+    const permissions = getGoalPermissions(effectiveRole);
     const [searchQuery, setSearchQuery] = useState('');
     const [searchedUsers, setSearchedUsers] = useState<MemberAvatar[]>([]);
     const [isSearching, setIsSearching] = useState<boolean>(false);
@@ -241,7 +263,7 @@ export const GoalConfigModal: React.FC<GoalConfigModalProps> = ({
             initialMembers = [{
                 id: storedUser.id,
                 name: storedUser.name || 'Você',
-                avatarUrl: storedUser.avatarUrl || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=80&q=80',
+                avatarUrl: storedUser.avatarUrl || '',
                 role: 'owner',
                 email: storedUser.email,
             }];
@@ -280,12 +302,23 @@ export const GoalConfigModal: React.FC<GoalConfigModalProps> = ({
     if (!isOpen) return null;
 
     const handleRemoveMember = (id: string) => {
+        const target = members.find((m) => m.id === id);
         setMembers((prev) => prev.filter((m) => m.id !== id));
+        if (target) {
+            appToast.info(`Membro "${target.name}" removido da meta.`);
+        }
     };
 
     const handleRoleChange = (memberId: string, newRole: MemberRole) => {
-        setMembers((prev) =>
-            prev.map((m) => {
+        setMembers((prev) => {
+            const target = prev.find((m) => m.id === memberId);
+            if (target?.role === 'owner' && newRole !== 'owner') {
+                return prev;
+            }
+            if (target) {
+                appToast.info(`Papel de "${target.name}" alterado para ${getRoleLabel(newRole)}.`);
+            }
+            return prev.map((m) => {
                 if (m.id === memberId) {
                     return { ...m, role: newRole };
                 }
@@ -293,13 +326,17 @@ export const GoalConfigModal: React.FC<GoalConfigModalProps> = ({
                     return { ...m, role: 'admin' };
                 }
                 return m;
-            })
-        );
+            });
+        });
     };
 
     const handleAddMember = (newMember: MemberAvatar) => {
-        if (!members.some((m) => m.id === newMember.id || m.name === newMember.name)) {
+        const isAlreadyMember = members.some(
+            (m) => m.id === newMember.id || (Boolean(m.email) && Boolean(newMember.email) && m.email?.toLowerCase() === newMember.email?.toLowerCase())
+        );
+        if (!isAlreadyMember) {
             setMembers((prev) => [...prev, { ...newMember, role: newMember.role || 'viewer' }]);
+            appToast.success(`Membro "${newMember.name}" adicionado à meta!`);
         }
     };
 
@@ -329,7 +366,7 @@ export const GoalConfigModal: React.FC<GoalConfigModalProps> = ({
                             id: u.id,
                             name: u.name,
                             email: u.email,
-                            avatarUrl: u.avatarUrl || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=80&q=80',
+                            avatarUrl: u.avatarUrl || '',
                             role: 'viewer' as MemberRole,
                         }));
                     setSearchedUsers(mapped);
@@ -416,8 +453,8 @@ export const GoalConfigModal: React.FC<GoalConfigModalProps> = ({
                             <Settings size={22} />
                         </ModalHeaderIconWrapper>
                         <ModalTitleGroup>
-                            <ModalTitle>Configurações da meta</ModalTitle>
-                            <ModalSubtitle>{title || 'Gerenciar informações e membros'}</ModalSubtitle>
+                            <ModalTitle>{permissions.canEditDetails ? 'Configurações da meta' : 'Detalhes da meta'}</ModalTitle>
+                            <ModalSubtitle>{title || (permissions.canEditDetails ? 'Gerenciar informações e membros' : 'Visualizar informações e membros')}</ModalSubtitle>
                         </ModalTitleGroup>
                     </ModalHeaderLeft>
 
@@ -440,7 +477,7 @@ export const GoalConfigModal: React.FC<GoalConfigModalProps> = ({
                         )}
                         <TabButtonText>
                             <FileText size={16} />
-                            Editar dados
+                            {permissions.canEditDetails ? 'Editar dados' : 'Visualizar dados'}
                         </TabButtonText>
                     </ModalTabButton>
 
@@ -457,7 +494,7 @@ export const GoalConfigModal: React.FC<GoalConfigModalProps> = ({
                         )}
                         <TabButtonText>
                             <Users size={16} />
-                            Gerenciar usuários
+                            {permissions.canAddMembers ? 'Gerenciar usuários' : 'Membros da meta'}
                             <TabBadge $active={activeTab === 'members'}>{members.length}</TabBadge>
                         </TabButtonText>
                     </ModalTabButton>
@@ -494,6 +531,7 @@ export const GoalConfigModal: React.FC<GoalConfigModalProps> = ({
                                             onChange={(e) => setCategory(e.target.value)}
                                             placeholder="Categoria"
                                             required
+                                            disabled={!permissions.canEditDetails}
                                         />
                                     </FormGroup>
 
@@ -501,13 +539,14 @@ export const GoalConfigModal: React.FC<GoalConfigModalProps> = ({
                                         <Label>
                                             <Calendar size={15} /> Prazo final
                                         </Label>
-                                        <DatePickerWrapper>
+                                        <DatePickerWrapper style={!permissions.canEditDetails ? { pointerEvents: 'none', opacity: 0.7 } : undefined}>
                                             <DatePicker
                                                 selected={selectedDate}
                                                 onChange={(date: Date | null) => setSelectedDate(date)}
                                                 dateFormat="dd/MM/yyyy"
                                                 locale={ptBR}
                                                 placeholderText="dd/mm/aaaa"
+                                                disabled={!permissions.canEditDetails}
                                             />
                                         </DatePickerWrapper>
                                     </FormGroup>
@@ -523,6 +562,7 @@ export const GoalConfigModal: React.FC<GoalConfigModalProps> = ({
                                         onChange={(e) => setTitle(e.target.value)}
                                         placeholder="Título"
                                         required
+                                        disabled={!permissions.canEditDetails}
                                     />
                                 </FormGroup>
 
@@ -534,6 +574,7 @@ export const GoalConfigModal: React.FC<GoalConfigModalProps> = ({
                                         <Select
                                             value={priority}
                                             onChange={(e) => setPriority(e.target.value)}
+                                            disabled={!permissions.canEditDetails}
                                         >
                                             <option value="Alta prioridade">Alta prioridade</option>
                                             <option value="Média prioridade">Média prioridade</option>
@@ -548,6 +589,7 @@ export const GoalConfigModal: React.FC<GoalConfigModalProps> = ({
                                         <Select
                                             value={status}
                                             onChange={(e) => setStatus(e.target.value)}
+                                            disabled={!permissions.canEditDetails}
                                         >
                                             <option value="Planejamento">Planejamento</option>
                                             <option value="Em desenvolvimento">Em desenvolvimento</option>
@@ -567,6 +609,7 @@ export const GoalConfigModal: React.FC<GoalConfigModalProps> = ({
                                         onChange={(e) => setDescription(e.target.value)}
                                         placeholder="Descrição"
                                         rows={3}
+                                        disabled={!permissions.canEditDetails}
                                     />
                                 </FormGroup>
                             </TabContentPane>
@@ -595,7 +638,7 @@ export const GoalConfigModal: React.FC<GoalConfigModalProps> = ({
                                                     const storedUser = getStoredUser();
                                                     const currentUserId = isMock ? currentUser.id : (storedUser?.id || '');
                                                     const isSelf = member.id === currentUserId || (Boolean(storedUser?.email) && member.email === storedUser?.email);
-                                                    const isOwnerSelf = isSelf && member.role === 'owner';
+                                                    const isOwner = member.role === 'owner';
                                                     const isHighlighted = member.id === highlightedMemberId || member.name === highlightedMemberId;
                                                     return (
                                                         <MemberItemWrapper
@@ -615,14 +658,17 @@ export const GoalConfigModal: React.FC<GoalConfigModalProps> = ({
                                                                     </MemberName>
                                                                 </MemberInfo>
                                                                 <MemberControls>
-                                                                    <RoleSelectDropdown
-                                                                        value={member.role || 'viewer'}
-                                                                        onChange={(newRole) => handleRoleChange(member.id, newRole)}
-                                                                        ariaLabel={`Permissão de ${member.name}`}
-                                                                    />
-                                                                    {isOwnerSelf ? (
-                                                                        <OwnerBadge>Proprietário</OwnerBadge>
+                                                                    {permissions.canChangeRoles ? (
+                                                                        <RoleSelectDropdown
+                                                                            value={member.role || 'viewer'}
+                                                                            onChange={(newRole) => handleRoleChange(member.id, newRole)}
+                                                                            ariaLabel={`Permissão de ${member.name}`}
+                                                                        />
                                                                     ) : (
+                                                                        <OwnerBadge>{getRoleLabel(member.role)}</OwnerBadge>
+                                                                    )}
+
+                                                                    {!isOwner && permissions.canRemoveMembers && (
                                                                         <RemoveMemberBtn
                                                                             type="button"
                                                                             onClick={() => setMemberToRemove(member)}
@@ -674,63 +720,65 @@ export const GoalConfigModal: React.FC<GoalConfigModalProps> = ({
                                     )}
                                 </div>
 
-                                <div>
-                                    <SectionSubtitle>
-                                        <Plus size={16} /> Adicionar membros
-                                    </SectionSubtitle>
+                                {permissions.canAddMembers && (
+                                    <div>
+                                        <SectionSubtitle>
+                                            <Plus size={16} /> Adicionar membros
+                                        </SectionSubtitle>
 
-                                    <SearchContainer>
-                                        <SearchInputWrapper>
-                                            <Search size={14} className="search-icon" />
-                                            <SearchInput
-                                                type="text"
-                                                value={searchQuery}
-                                                onChange={(e) => setSearchQuery(e.target.value)}
-                                                placeholder="Buscar"
-                                            />
-                                            {searchQuery && (
-                                                <ClearSearchBtn
-                                                    type="button"
-                                                    onClick={() => setSearchQuery('')}
-                                                    aria-label="Limpar busca"
-                                                >
-                                                    <X size={12} />
-                                                </ClearSearchBtn>
+                                        <SearchContainer>
+                                            <SearchInputWrapper>
+                                                <Search size={14} className="search-icon" />
+                                                <SearchInput
+                                                    type="text"
+                                                    value={searchQuery}
+                                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                                    placeholder="Buscar"
+                                                />
+                                                {searchQuery && (
+                                                    <ClearSearchBtn
+                                                        type="button"
+                                                        onClick={() => setSearchQuery('')}
+                                                        aria-label="Limpar busca"
+                                                    >
+                                                        <X size={12} />
+                                                    </ClearSearchBtn>
+                                                )}
+                                            </SearchInputWrapper>
+
+                                            {searchQuery.trim().length > 0 && (
+                                                isSearching ? (
+                                                    <EmptyNotice>Buscando usuários...</EmptyNotice>
+                                                ) : filteredMembers.length > 0 ? (
+                                                    <SearchResultsList>
+                                                        {filteredMembers.map((dirMember) => (
+                                                            <SearchResultCard key={dirMember.id}>
+                                                                <MemberInfo>
+                                                                    <SafeGoalConfigMemberAvatar
+                                                                        name={dirMember.name}
+                                                                        avatarUrl={dirMember.avatarUrl}
+                                                                    />
+                                                                    <MemberName>{dirMember.name}</MemberName>
+                                                                </MemberInfo>
+                                                                <AddMemberBtn
+                                                                    type="button"
+                                                                    onClick={() => {
+                                                                        handleAddMember(dirMember);
+                                                                        setSearchQuery('');
+                                                                    }}
+                                                                >
+                                                                    <Plus size={12} /> Adicionar
+                                                                </AddMemberBtn>
+                                                            </SearchResultCard>
+                                                        ))}
+                                                    </SearchResultsList>
+                                                ) : (
+                                                    <EmptyNotice>Nenhuma pessoa encontrada com esse nome.</EmptyNotice>
+                                                )
                                             )}
-                                        </SearchInputWrapper>
-
-                                        {searchQuery.trim().length > 0 && (
-                                            isSearching ? (
-                                                <EmptyNotice>Buscando usuários...</EmptyNotice>
-                                            ) : filteredMembers.length > 0 ? (
-                                                <SearchResultsList>
-                                                    {filteredMembers.map((dirMember) => (
-                                                        <SearchResultCard key={dirMember.id}>
-                                                            <MemberInfo>
-                                                                <SafeGoalConfigMemberAvatar
-                                                                    name={dirMember.name}
-                                                                    avatarUrl={dirMember.avatarUrl}
-                                                                />
-                                                                <MemberName>{dirMember.name}</MemberName>
-                                                            </MemberInfo>
-                                                            <AddMemberBtn
-                                                                type="button"
-                                                                onClick={() => {
-                                                                    handleAddMember(dirMember);
-                                                                    setSearchQuery('');
-                                                                }}
-                                                            >
-                                                                <Plus size={12} /> Adicionar
-                                                            </AddMemberBtn>
-                                                        </SearchResultCard>
-                                                    ))}
-                                                </SearchResultsList>
-                                            ) : (
-                                                <EmptyNotice>Nenhuma pessoa encontrada com esse nome.</EmptyNotice>
-                                            )
-                                        )}
-                                    </SearchContainer>
-                                </div>
+                                        </SearchContainer>
+                                    </div>
+                                )}
                             </MembersSection>
                         </TabContentPane>
                     )}
@@ -776,20 +824,24 @@ export const GoalConfigModal: React.FC<GoalConfigModalProps> = ({
                             exit={{ opacity: 0, y: 6 }}
                             transition={{ duration: 0.16, ease: 'easeOut' }}
                         >
-                            <DangerActionBtn
-                                type="button"
-                                onClick={() => setIsConfirmingDelete(true)}
-                            >
-                                <Trash2 size={13} /> Excluir meta
-                            </DangerActionBtn>
+                            {permissions.canDeleteGoal && (
+                                <DangerActionBtn
+                                    type="button"
+                                    onClick={() => setIsConfirmingDelete(true)}
+                                >
+                                    <Trash2 size={13} /> Excluir meta
+                                </DangerActionBtn>
+                            )}
 
-                            <FooterActions>
+                            <FooterActions style={!permissions.canDeleteGoal ? { marginLeft: 'auto' } : undefined}>
                                 <CancelBtn type="button" onClick={onClose}>
-                                    Cancelar
+                                    {permissions.canEditDetails ? 'Cancelar' : 'Fechar'}
                                 </CancelBtn>
-                                <SaveBtn type="submit">
-                                    Salvar alterações
-                                </SaveBtn>
+                                {permissions.canEditDetails && (
+                                    <SaveBtn type="submit">
+                                        Salvar alterações
+                                    </SaveBtn>
+                                )}
                             </FooterActions>
                         </FooterDefaultContent>
                     )}

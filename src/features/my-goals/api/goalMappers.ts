@@ -92,6 +92,7 @@ export const mapSummaryToTask = (summary: GoalSummaryApiResponse): Task => {
     deadline: summary.deadline ? formatDateToDisplay(summary.deadline) : undefined,
     members: (summary.members || []).map(mapMemberToAvatar),
     subtasks: [],
+    userRole: summary.userRole,
   };
 };
 
@@ -107,5 +108,6 @@ export const mapDetailToTask = (detail: GoalDetailApiResponse): Task => {
     deadline: detail.deadline ? formatDateToDisplay(detail.deadline) : undefined,
     members: (detail.members || []).map(mapMemberToAvatar),
     subtasks: [],
+    userRole: detail.userRole,
   };
 };

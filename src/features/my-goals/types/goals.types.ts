@@ -25,6 +25,7 @@ export interface Task {
   priority?: string;
   members?: MemberAvatar[];
   subtasks?: SubTask[];
+  userRole?: GoalRoleApi;
 }
 
 export type TaskFilterStatus = 'all' | 'pending' | 'completed';

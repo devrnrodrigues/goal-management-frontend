@@ -31,6 +31,7 @@ interface GoalTaskItemProps {
   onDelete: () => void;
   onEdit?: (subtask: SubTask) => void;
   onUpdate?: (updatedSubtask: SubTask) => void;
+  canManage?: boolean;
 }
 
 const SafeMemberImg: React.FC<{ m: { id: string; name: string; avatarUrl?: string } }> = ({ m }) => {
@@ -66,11 +67,13 @@ export const GoalTaskItem: React.FC<GoalTaskItemProps> = ({
   onToggle,
   onDelete,
   onEdit,
+  canManage = true,
 }) => {
   const [showInlineDesc, setShowInlineDesc] = useState(false);
 
   const handleCheckboxClick = (e: React.MouseEvent) => {
     e.stopPropagation();
+    if (!canManage) return;
     onToggle();
   };
 
@@ -102,6 +105,7 @@ export const GoalTaskItem: React.FC<GoalTaskItemProps> = ({
             type="button"
             onClick={handleCheckboxClick}
             aria-label={subtask.completed ? 'Marcar como pendente' : 'Marcar como concluída'}
+            style={!canManage ? { pointerEvents: 'none', opacity: 0.6 } : undefined}
           >
             <CustomCheckbox $checked={subtask.completed} />
           </CheckboxWrapper>
@@ -152,30 +156,32 @@ export const GoalTaskItem: React.FC<GoalTaskItemProps> = ({
                 )}
               </TaskDescriptionMetaRow>
 
-              <TaskDescriptionActions>
-                <IconButton
-                  type="button"
-                  title="Editar tarefa"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onEdit?.(subtask);
-                  }}
-                >
-                  <Pencil size={15} />
-                </IconButton>
+              {canManage && (
+                <TaskDescriptionActions>
+                  <IconButton
+                    type="button"
+                    title="Editar tarefa"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onEdit?.(subtask);
+                    }}
+                  >
+                    <Pencil size={15} />
+                  </IconButton>
 
-                <IconButton
-                  type="button"
-                  $isDanger
-                  title="Excluir tarefa"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onDelete();
-                  }}
-                >
-                  <Trash2 size={15} />
-                </IconButton>
-              </TaskDescriptionActions>
+                  <IconButton
+                    type="button"
+                    $isDanger
+                    title="Excluir tarefa"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onDelete();
+                    }}
+                  >
+                    <Trash2 size={15} />
+                  </IconButton>
+                </TaskDescriptionActions>
+              )}
             </TaskDescriptionRightGroup>
           </TaskDescriptionMainRow>
         </TaskDescriptionContainer>

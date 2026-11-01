@@ -59,4 +59,11 @@ export const goalsApi = {
       method: 'DELETE',
     });
   },
+
+  updateMemberRole: async (goalId: string, userId: string, role: string): Promise<GoalMemberApiResponse> => {
+    return httpClient<GoalMemberApiResponse>(`/goals/${goalId}/members/${userId}`, {
+      method: 'PATCH',
+      body: JSON.stringify({ role: role.toUpperCase() }),
+    });
+  },
 };
