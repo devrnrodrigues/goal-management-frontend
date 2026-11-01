@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
+import { appToast } from '../../shared';
 import type { SubTask, SubTaskPriority } from '../types';
 import {
   ModalOverlay,
@@ -60,7 +61,10 @@ export const GoalTaskModal: React.FC<GoalTaskModalProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!title.trim()) return;
+    if (!title.trim()) {
+      appToast.warning('Informe o título da tarefa.');
+      return;
+    }
     onSave(
       title.trim(),
       description.trim() || undefined,

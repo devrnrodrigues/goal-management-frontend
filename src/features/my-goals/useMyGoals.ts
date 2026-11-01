@@ -397,6 +397,7 @@ export const useMyGoals = () => {
 
   const handleUpdateSingleTask = async (updatedSubtask: SubTask) => {
     if (selectedTaskId !== null) {
+      const prevTasks = tasks;
       setTasks((prev) =>
         prev.map((t) => {
           if (t.id !== selectedTaskId) return t;
@@ -419,8 +420,10 @@ export const useMyGoals = () => {
             priority: mapTaskPriorityToApi(updatedSubtask.priority),
           });
           appToast.success('Tarefa atualizada com sucesso!');
-        } catch {
-          appToast.error('Erro ao atualizar tarefa.');
+        } catch (err: unknown) {
+          setTasks(prevTasks);
+          const apiError = err as { message?: string };
+          appToast.error(apiError.message || 'Erro ao atualizar tarefa.');
         }
       } else {
         appToast.success('Tarefa atualizada com sucesso!');
@@ -428,8 +431,9 @@ export const useMyGoals = () => {
     }
   };
 
-  const handleUpdateGoalTasks = (updatedSubtasks: SubTask[]) => {
+  const handleUpdateGoalTasks = async (updatedSubtasks: SubTask[]) => {
     if (selectedTaskId !== null) {
+      const prevTasks = tasks;
       setTasks((prev) =>
         prev.map((t) => {
           if (t.id !== selectedTaskId) return t;
@@ -439,11 +443,33 @@ export const useMyGoals = () => {
           return { ...t, subtasks: updatedSubtasks, progress: newProgress };
         })
       );
+
+      if (!isMock) {
+        try {
+          await Promise.all(
+            updatedSubtasks.map((st) =>
+              taskBoardApi.updateTask(st.id, {
+                title: st.title.replace(/;$/, ''),
+                description: st.description,
+                priority: mapTaskPriorityToApi(st.priority),
+              })
+            )
+          );
+          appToast.success('Tarefas atualizadas com sucesso!');
+        } catch (err: unknown) {
+          setTasks(prevTasks);
+          const apiError = err as { message?: string };
+          appToast.error(apiError.message || 'Erro ao atualizar tarefas.');
+        }
+      } else {
+        appToast.success('Tarefas atualizadas com sucesso!');
+      }
     }
   };
 
   const handleAddSubtasks = async (newSubtasks: SubTask[]) => {
     if (selectedTaskId !== null) {
+      const isSingle = newSubtasks.length === 1;
       if (isMock) {
         setTasks((prev) =>
           prev.map((t) => {
@@ -455,10 +481,11 @@ export const useMyGoals = () => {
             return { ...t, subtasks: combined, progress: newProgress };
           })
         );
-        appToast.success('Tarefas adicionadas com sucesso!');
+        appToast.success(isSingle ? 'Tarefa criada com sucesso!' : 'Tarefas adicionadas com sucesso!');
         return;
       }
 
+      const prevTasks = tasks;
       try {
         const createdApiTasks = await Promise.all(
           newSubtasks.map((st) =>
@@ -481,9 +508,11 @@ export const useMyGoals = () => {
             return { ...t, subtasks: combined, progress: newProgress };
           })
         );
-        appToast.success('Tarefas adicionadas com sucesso!');
-      } catch {
-        appToast.error('Erro ao adicionar tarefas.');
+        appToast.success(isSingle ? 'Tarefa criada com sucesso!' : 'Tarefas adicionadas com sucesso!');
+      } catch (err: unknown) {
+        setTasks(prevTasks);
+        const apiError = err as { message?: string };
+        appToast.error(apiError.message || (isSingle ? 'Erro ao criar tarefa.' : 'Erro ao adicionar tarefas.'));
       }
     }
   };
@@ -491,6 +520,7 @@ export const useMyGoals = () => {
   const handleToggleSubtask = async (subtaskId: string) => {
     if (selectedTaskId !== null) {
       let willComplete = true;
+      const prevTasks = tasks;
       setTasks((prev) =>
         prev.map((t) => {
           if (t.id !== selectedTaskId) return t;
@@ -514,8 +544,10 @@ export const useMyGoals = () => {
       if (!isMock) {
         try {
           await taskBoardApi.toggleComplete(subtaskId);
-        } catch {
-          appToast.error('Erro ao alternar conclusão da tarefa.');
+        } catch (err: unknown) {
+          setTasks(prevTasks);
+          const apiError = err as { message?: string };
+          appToast.error(apiError.message || 'Erro ao alternar conclusão da tarefa.');
         }
       }
     }
@@ -523,6 +555,7 @@ export const useMyGoals = () => {
 
   const handleDeleteSubtask = async (subtaskId: string) => {
     if (selectedTaskId !== null) {
+      const prevTasks = tasks;
       setTasks((prev) =>
         prev.map((t) => {
           if (t.id !== selectedTaskId) return t;
@@ -535,14 +568,17 @@ export const useMyGoals = () => {
         })
       );
 
-      appToast.success('Tarefa excluída com sucesso!');
-
       if (!isMock) {
         try {
           await taskBoardApi.deleteTask(subtaskId);
-        } catch {
-          appToast.error('Erro ao excluir tarefa.');
+          appToast.success('Tarefa excluída com sucesso!');
+        } catch (err: unknown) {
+          setTasks(prevTasks);
+          const apiError = err as { message?: string };
+          appToast.error(apiError.message || 'Erro ao excluir tarefa.');
         }
+      } else {
+        appToast.success('Tarefa excluída com sucesso!');
       }
     }
   };

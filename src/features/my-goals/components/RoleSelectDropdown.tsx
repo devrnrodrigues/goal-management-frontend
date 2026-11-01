@@ -14,6 +14,7 @@ interface RoleSelectDropdownProps {
     onChange: (role: MemberRole) => void;
     ariaLabel?: string;
     disabled?: boolean;
+    canAssignOwner?: boolean;
 }
 
 const ROLE_OPTIONS: { id: MemberRole; label: string }[] = [
@@ -27,6 +28,7 @@ export const RoleSelectDropdown: React.FC<RoleSelectDropdownProps> = ({
     onChange,
     ariaLabel,
     disabled = false,
+    canAssignOwner = true,
 }) => {
     const [isOpen, setIsOpen] = useState(false);
     const containerRef = useRef<HTMLDivElement>(null);
@@ -46,6 +48,10 @@ export const RoleSelectDropdown: React.FC<RoleSelectDropdownProps> = ({
             document.removeEventListener('mousedown', handleClickOutside);
         };
     }, [isOpen]);
+
+    const availableOptions = canAssignOwner
+        ? ROLE_OPTIONS
+        : ROLE_OPTIONS.filter((option) => option.id !== 'owner');
 
     const currentLabel = ROLE_OPTIONS.find((r) => r.id === value)?.label || value;
 
@@ -70,7 +76,7 @@ export const RoleSelectDropdown: React.FC<RoleSelectDropdownProps> = ({
                         exit={{ opacity: 0, scale: 0.95, y: -4 }}
                         transition={{ duration: 0.15, ease: 'easeOut' }}
                     >
-                        {ROLE_OPTIONS.map((option) => (
+                        {availableOptions.map((option) => (
                             <RoleDropdownItem
                                 key={option.id}
                                 type="button"

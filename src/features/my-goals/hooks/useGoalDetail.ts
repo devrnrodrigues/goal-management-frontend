@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
+import { appToast } from '../../shared';
 import type { Task, SubTask, TaskFilterStatus } from '../types';
 
 interface UseGoalDetailParams {
@@ -82,7 +83,10 @@ export const useGoalDetail = ({
 
   const handleQuickAddSubmit = () => {
     const trimmedTitle = quickTitle.trim();
-    if (!trimmedTitle) return;
+    if (!trimmedTitle) {
+      appToast.warning('Informe o título da tarefa.');
+      return;
+    }
 
     const newTask: SubTask = {
       id: `task-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
@@ -100,7 +104,10 @@ export const useGoalDetail = ({
   const handleSaveInspector = () => {
     if (!activeSubtask) return;
     const trimmedTitle = inspectorTitle.trim();
-    if (!trimmedTitle) return;
+    if (!trimmedTitle) {
+      appToast.warning('Informe o título da tarefa.');
+      return;
+    }
 
     onUpdateSingleTask?.({
       ...activeSubtask,

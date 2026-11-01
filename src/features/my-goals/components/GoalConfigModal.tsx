@@ -312,7 +312,10 @@ export const GoalConfigModal: React.FC<GoalConfigModalProps> = ({
     const handleRoleChange = (memberId: string, newRole: MemberRole) => {
         setMembers((prev) => {
             const target = prev.find((m) => m.id === memberId);
-            if (target?.role === 'owner' && newRole !== 'owner') {
+            if (target?.role === 'owner') {
+                return prev;
+            }
+            if (newRole === 'owner' && !permissions.isOwner) {
                 return prev;
             }
             if (target) {
@@ -658,11 +661,12 @@ export const GoalConfigModal: React.FC<GoalConfigModalProps> = ({
                                                                     </MemberName>
                                                                 </MemberInfo>
                                                                 <MemberControls>
-                                                                    {permissions.canChangeRoles ? (
+                                                                    {permissions.canChangeRoles && !isOwner ? (
                                                                         <RoleSelectDropdown
                                                                             value={member.role || 'viewer'}
                                                                             onChange={(newRole) => handleRoleChange(member.id, newRole)}
                                                                             ariaLabel={`Permissão de ${member.name}`}
+                                                                            canAssignOwner={permissions.isOwner}
                                                                         />
                                                                     ) : (
                                                                         <OwnerBadge>{getRoleLabel(member.role)}</OwnerBadge>
