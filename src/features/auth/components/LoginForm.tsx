@@ -1,5 +1,5 @@
 import React from 'react';
-import { Mail, Lock, Eye, EyeOff, ArrowRight } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, ArrowRight, AlertCircle } from 'lucide-react';
 import type { LoginFormProps } from '../types';
 import { useLoginForm } from '../hooks/useLoginForm';
 import { GoogleAuthButton } from './GoogleAuthButton';
@@ -9,6 +9,7 @@ import {
   FormTitle,
   FormSubtitle,
   ErrorMessageBox,
+  FieldError,
   InputGroup,
   InputLabel,
   InputFieldWrapper,
@@ -40,6 +41,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
     rememberMe,
     isLoading,
     errorMessage,
+    errors,
     handleEmailChange,
     handlePasswordChange,
     handleTogglePasswordVisibility,
@@ -50,13 +52,11 @@ export const LoginForm: React.FC<LoginFormProps> = ({
   const activeError = errorMessage || externalError;
 
   return (
-    <FormContainer onSubmit={handleSubmit}>
+    <FormContainer noValidate onSubmit={handleSubmit}>
       <FormHeader>
         <FormTitle>Acessar plataforma</FormTitle>
         <FormSubtitle>Entre com seus dados para continuar</FormSubtitle>
       </FormHeader>
-
-      {activeError && <ErrorMessageBox>{activeError}</ErrorMessageBox>}
 
       <InputGroup>
         <InputLabel htmlFor="login-email">E-mail</InputLabel>
@@ -70,9 +70,15 @@ export const LoginForm: React.FC<LoginFormProps> = ({
             placeholder="E-mail"
             value={email}
             onChange={handleEmailChange}
-            required
+            $hasError={Boolean(errors.email)}
           />
         </InputFieldWrapper>
+        {errors.email && (
+          <FieldError>
+            <AlertCircle size={13} />
+            <span>{errors.email}</span>
+          </FieldError>
+        )}
       </InputGroup>
 
       <InputGroup>
@@ -87,7 +93,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
             placeholder="Senha"
             value={password}
             onChange={handlePasswordChange}
-            required
+            $hasError={Boolean(errors.password)}
           />
           <PasswordVisibilityButton
             type="button"
@@ -97,6 +103,12 @@ export const LoginForm: React.FC<LoginFormProps> = ({
             {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
           </PasswordVisibilityButton>
         </InputFieldWrapper>
+        {errors.password && (
+          <FieldError>
+            <AlertCircle size={13} />
+            <span>{errors.password}</span>
+          </FieldError>
+        )}
       </InputGroup>
 
       <ActionsRow>
@@ -118,6 +130,13 @@ export const LoginForm: React.FC<LoginFormProps> = ({
         <span>{isLoading ? 'Entrando...' : 'Entrar'}</span>
         <ArrowRight size={18} />
       </SubmitButton>
+
+      {activeError && (
+        <ErrorMessageBox>
+          <AlertCircle size={16} />
+          <span>{activeError}</span>
+        </ErrorMessageBox>
+      )}
 
       <DividerRow>
         <DividerLine />

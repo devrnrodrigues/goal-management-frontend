@@ -8,6 +8,14 @@ interface UseRegisterFormProps {
   onRegisterSuccess: () => void;
 }
 
+export interface RegisterFormErrors {
+  name?: string;
+  email?: string;
+  password?: string;
+  confirmPassword?: string;
+  agreeTerms?: string;
+}
+
 export const useRegisterForm = ({ onRegisterSuccess }: UseRegisterFormProps) => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -17,11 +25,50 @@ export const useRegisterForm = ({ onRegisterSuccess }: UseRegisterFormProps) => 
   const [agreeTerms, setAgreeTerms] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [errors, setErrors] = useState<RegisterFormErrors>({});
+
+  const validate = (): boolean => {
+    const newErrors: RegisterFormErrors = {};
+    const trimmedName = name.trim();
+    const trimmedEmail = email.trim();
+
+    if (!trimmedName) {
+      newErrors.name = 'Informe seu nome completo';
+    }
+
+    if (!trimmedEmail) {
+      newErrors.email = 'Informe seu e-mail';
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)) {
+      newErrors.email = 'Informe um e-mail válido';
+    }
+
+    if (!password) {
+      newErrors.password = 'Informe sua senha';
+    } else if (password.length < 6) {
+      newErrors.password = 'A senha deve conter no mínimo 6 caracteres';
+    }
+
+    if (!confirmPassword) {
+      newErrors.confirmPassword = 'Confirme sua senha';
+    } else if (password !== confirmPassword) {
+      newErrors.confirmPassword = 'As senhas não coincidem';
+    }
+
+    if (!agreeTerms) {
+      newErrors.agreeTerms = 'Você deve aceitar os termos de uso para continuar';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const handleNameChange = (event: ChangeEvent<HTMLInputElement>) => {
     setName(event.target.value);
     if (errorMessage) {
       setErrorMessage(null);
+    }
+    if (errors.name) {
+      setErrors((prev) => ({ ...prev, name: undefined }));
     }
   };
 
@@ -30,6 +77,9 @@ export const useRegisterForm = ({ onRegisterSuccess }: UseRegisterFormProps) => 
     if (errorMessage) {
       setErrorMessage(null);
     }
+    if (errors.email) {
+      setErrors((prev) => ({ ...prev, email: undefined }));
+    }
   };
 
   const handlePasswordChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -37,12 +87,18 @@ export const useRegisterForm = ({ onRegisterSuccess }: UseRegisterFormProps) => 
     if (errorMessage) {
       setErrorMessage(null);
     }
+    if (errors.password) {
+      setErrors((prev) => ({ ...prev, password: undefined }));
+    }
   };
 
   const handleConfirmPasswordChange = (event: ChangeEvent<HTMLInputElement>) => {
     setConfirmPassword(event.target.value);
     if (errorMessage) {
       setErrorMessage(null);
+    }
+    if (errors.confirmPassword) {
+      setErrors((prev) => ({ ...prev, confirmPassword: undefined }));
     }
   };
 
@@ -55,26 +111,27 @@ export const useRegisterForm = ({ onRegisterSuccess }: UseRegisterFormProps) => 
     if (errorMessage) {
       setErrorMessage(null);
     }
+    if (errors.agreeTerms) {
+      setErrors((prev) => ({ ...prev, agreeTerms: undefined }));
+    }
   };
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-
-    if (password !== confirmPassword) {
-      setErrorMessage('As senhas não coincidem.');
-      return;
-    }
-
-    if (!agreeTerms) {
-      setErrorMessage('Você deve concordar com os termos de uso para continuar.');
-      return;
-    }
-
     setErrorMessage(null);
+
+    if (!validate()) {
+      return;
+    }
+
     setIsLoading(true);
 
     try {
-      const response = await authApi.register({ name, email, password });
+      const response = await authApi.register({
+        name: name.trim(),
+        email: email.trim(),
+        password,
+      });
       setAuthSession(response.token, response.user, response.refreshToken);
       onRegisterSuccess();
     } catch (error) {
@@ -94,6 +151,7 @@ export const useRegisterForm = ({ onRegisterSuccess }: UseRegisterFormProps) => 
     agreeTerms,
     isLoading,
     errorMessage,
+    errors,
     handleNameChange,
     handleEmailChange,
     handlePasswordChange,

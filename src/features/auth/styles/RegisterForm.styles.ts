@@ -63,11 +63,11 @@ export const InputIconWrapper = styled.div`
   pointer-events: none;
 `;
 
-export const StyledInput = styled.input`
+export const StyledInput = styled.input<{ $hasError?: boolean }>`
   width: 100%;
   padding: 12px 42px 12px 42px;
   font-size: 14px;
-  border: 1px solid ${({ theme }) => theme.colors.border};
+  border: 1px solid ${({ theme, $hasError }) => ($hasError ? theme.colors.statusDanger : theme.colors.border)};
   border-radius: ${({ theme }) => theme.radii.md};
   background-color: ${({ theme }) => theme.colors.surface};
   color: ${({ theme }) => theme.colors.textPrimary};
@@ -79,8 +79,19 @@ export const StyledInput = styled.input`
   }
 
   &:focus {
-    border-color: ${({ theme }) => theme.colors.primary};
+    border-color: ${({ theme, $hasError }) => ($hasError ? theme.colors.statusDanger : theme.colors.primary)};
+    box-shadow: ${({ $hasError }) => ($hasError ? '0 0 0 3px rgba(239, 68, 68, 0.15)' : 'none')};
   }
+`;
+
+export const FieldError = styled.span`
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: ${({ theme }) => theme.colors.statusDanger};
+  font-size: 12px;
+  margin-top: 5px;
+  line-height: 1.2;
 `;
 
 export const PasswordVisibilityButton = styled.button`
@@ -122,13 +133,17 @@ export const TermsText = styled.span`
 `;
 
 export const ErrorMessageBox = styled.div`
-  background-color: rgba(239, 68, 68, 0.1);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: rgba(239, 68, 68, 0.08);
   border: 1px solid ${({ theme }) => theme.colors.statusDanger};
   color: ${({ theme }) => theme.colors.statusDanger};
   padding: 10px 14px;
   border-radius: ${({ theme }) => theme.radii.sm};
   font-size: 13px;
   line-height: 1.4;
+  margin-top: 4px;
 `;
 
 export const SubmitButton = styled.button`
