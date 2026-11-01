@@ -7,20 +7,16 @@ import {
 import {
   ActivityPageContainer,
   ActivityFeedWrapper,
-  ErrorMessageBanner,
 } from './RecentActivity.styles';
 
 export const RecentActivity: React.FC = () => {
   const {
-    errorMessage,
     filteredActivitiesCount,
     groupedActivities,
   } = useRecentActivity();
 
   return (
     <ActivityPageContainer>
-      {errorMessage && <ErrorMessageBanner>{errorMessage}</ErrorMessageBanner>}
-
       <ActivityFeedWrapper>
         {filteredActivitiesCount === 0 ? (
           <ActivityEmptyState />

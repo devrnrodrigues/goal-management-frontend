@@ -17,7 +17,7 @@ import type {
   CalendarDayInfo,
   CalendarTaskAuthor,
 } from './types';
-import { useDevMode } from '../shared';
+import { useDevMode, appToast } from '../shared';
 import { calendarApi } from './api/calendarApi';
 
 const AUTHOR_RENAN: CalendarTaskAuthor = {
@@ -205,7 +205,7 @@ export const useCalendar = () => {
       const tasks = await calendarApi.getCalendarTasks(year, month);
       setRealTasks(tasks);
     } catch {
-      setErrorMessage('Não foi possível carregar as entregas no calendário.');
+      appToast.error('Não foi possível carregar as entregas no calendário.');
       setRealTasks([]);
     } finally {
       setIsLoading(false);

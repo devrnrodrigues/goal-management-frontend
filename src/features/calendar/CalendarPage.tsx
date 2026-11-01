@@ -9,14 +9,12 @@ import {
 import {
   CalendarPageContainer,
   CalendarContentLayout,
-  ErrorMessageBanner,
 } from './CalendarPage.styles';
 
 export const CalendarPage: React.FC = () => {
   const {
     currentMonthDate,
     calendarDays,
-    errorMessage,
     handlePrevMonth,
     handleNextMonth,
     handleToday,
@@ -41,8 +39,6 @@ export const CalendarPage: React.FC = () => {
 
   return (
     <CalendarPageContainer>
-      {errorMessage && <ErrorMessageBanner>{errorMessage}</ErrorMessageBanner>}
-
       <CalendarContentLayout>
         <CalendarHeader
           currentMonthDate={currentMonthDate}

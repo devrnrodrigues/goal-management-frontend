@@ -6,7 +6,7 @@ import type {
   DateGroupLabel,
   GoalFilterOption,
 } from './types';
-import { useDevMode } from '../shared';
+import { useDevMode, appToast } from '../shared';
 import { activityApi } from './api/activityApi';
 import { mapActivityToItem } from './api/activityMappers';
 import { goalsApi } from '../my-goals/api/goalsApi';
@@ -301,7 +301,7 @@ export const useRecentActivity = () => {
       }));
       setGoalOptions(options);
     } catch {
-      setErrorMessage('Não foi possível carregar as atividades recentes.');
+      appToast.error('Não foi possível carregar as atividades recentes.');
       setActivities([]);
       setGoalOptions([]);
     } finally {

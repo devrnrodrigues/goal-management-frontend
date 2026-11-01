@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { profileApi } from './api/profileApi';
 import type { ProfileThemePreference } from './types';
-import { getStoredUser, updateStoredUser, useDevMode } from '../shared';
+import { getStoredUser, updateStoredUser, useDevMode, appToast } from '../shared';
 
 export const useProfileSettings = (isOpen: boolean, onClose: () => void) => {
   const { isMock } = useDevMode();
@@ -128,15 +128,16 @@ export const useProfileSettings = (isOpen: boolean, onClose: () => void) => {
         });
 
         setSuccessMessage('Perfil e preferências atualizados com sucesso!');
+        appToast.success('Perfil e preferências atualizados com sucesso!');
         setTimeout(() => {
           onClose();
         }, 800);
       }
     } catch (err: unknown) {
       const errorObj = err as { message?: string };
-      setErrorMessage(
-        errorObj?.message || 'Erro ao salvar alterações no perfil. Tente novamente.'
-      );
+      const msg = errorObj?.message || 'Erro ao salvar alterações no perfil. Tente novamente.';
+      setErrorMessage(msg);
+      appToast.error(msg);
     } finally {
       setIsSaving(false);
     }

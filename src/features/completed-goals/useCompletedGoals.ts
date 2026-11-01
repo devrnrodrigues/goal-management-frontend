@@ -6,7 +6,7 @@ import type {
   CompletedGoalsOverviewStats,
   CompletedSubTask,
 } from './types';
-import { useDevMode } from '../shared';
+import { useDevMode, appToast } from '../shared';
 import { goalsApi } from '../my-goals/api/goalsApi';
 import { taskBoardApi } from '../task-board/api/taskBoardApi';
 import { formatDateToDisplay, mapMemberToAvatar } from '../my-goals/api/goalMappers';
@@ -282,7 +282,7 @@ export const useCompletedGoals = () => {
       const valid = resolved.filter((item): item is CompletedGoalItem => item !== null);
       setGoals(valid);
     } catch {
-      setErrorMessage('Não foi possível carregar as metas concluídas.');
+      appToast.error('Não foi possível carregar as metas concluídas.');
       setGoals([]);
     } finally {
       setIsLoading(false);

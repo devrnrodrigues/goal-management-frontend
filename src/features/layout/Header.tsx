@@ -65,10 +65,7 @@ export const Header: React.FC<HeaderProps> = ({
   }, []);
 
   const displayName = userName || localUser?.name || (isDevMode ? 'Renan Rodrigues' : 'Usuário');
-  const displayAvatar =
-    avatarUrl ||
-    localUser?.avatarUrl ||
-    (isDevMode ? 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80' : '');
+  const displayAvatar = avatarUrl || localUser?.avatarUrl || '';
 
   useEffect(() => {
     setAvatarError(false);

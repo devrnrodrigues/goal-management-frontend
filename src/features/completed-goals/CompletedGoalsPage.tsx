@@ -11,22 +11,18 @@ import {
   EmptyState,
   EmptyTitle,
   EmptySubtitle,
-  ErrorMessageBanner,
 } from './CompletedGoalsPage.styles';
 
 export const CompletedGoalsPage: React.FC = () => {
   const {
     goals,
     selectedGoal,
-    errorMessage,
     handleOpenDetail,
     handleCloseDetail,
   } = useCompletedGoals();
 
   return (
     <CompletedGoalsContainer>
-      {errorMessage && <ErrorMessageBanner>{errorMessage}</ErrorMessageBanner>}
-
       {goals.length === 0 ? (
         <EmptyState>
           <Award size={32} />
