@@ -4,6 +4,7 @@ export const CalendarCardContainer = styled.section`
   background-color: ${({ theme }) => theme.colors.surface};
   border-radius: ${({ theme }) => theme.radii.lg};
   padding: 22px 24px;
+  min-height: 425px;
   border: 1px solid rgba(0, 0, 0, 0.05);
   display: flex;
   flex-direction: column;
@@ -20,7 +21,7 @@ export const CalendarTopSection = styled.div`
 export const CalendarHeader = styled.div`
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
   margin-bottom: 12px;
 `;
 
@@ -122,11 +123,57 @@ export const UpcomingSection = styled.div`
   padding-top: 12px;
 `;
 
+export const UpcomingHeaderRow = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+`;
+
 export const UpcomingHeader = styled.div`
   font-size: 12px;
   font-weight: 700;
   color: ${({ theme }) => theme.colors.textSecondary};
-  margin-bottom: 6px;
+`;
+
+export const UpcomingPagination = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 4px;
+`;
+
+export const PaginationArrow = styled.button`
+  background: transparent;
+  border: none;
+  padding: 2px 4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: ${({ theme }) => theme.colors.textSecondary};
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+
+  &:hover:not(:disabled) {
+    opacity: 0.7;
+  }
+
+  &:disabled {
+    opacity: 0.25;
+    cursor: not-allowed;
+  }
+`;
+
+export const PaginationText = styled.span`
+  font-size: 11px;
+  font-weight: 600;
+  color: ${({ theme }) => theme.colors.textMuted};
+  user-select: none;
+`;
+
+export const DeadlinesList = styled.div`
+  display: flex;
+  flex-direction: column;
+  min-height: 96px;
 `;
 
 export const DeadlineItem = styled.div`

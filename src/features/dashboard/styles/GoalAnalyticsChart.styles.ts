@@ -4,6 +4,7 @@ export const ChartCardContainer = styled.section`
   background-color: ${({ theme }) => theme.colors.surface};
   border-radius: ${({ theme }) => theme.radii.lg};
   padding: 22px 24px;
+  min-height: 425px;
   border: 1px solid rgba(0, 0, 0, 0.05);
   display: flex;
   flex-direction: column;
@@ -25,11 +26,22 @@ export const ChartHeader = styled.div`
   }
 `;
 
+export const ChartTitleWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+`;
+
 export const ChartTitle = styled.h3`
   font-size: 15px;
   font-weight: 700;
   color: ${({ theme }) => theme.colors.textPrimary};
   margin: 0;
+`;
+
+export const ChartSubtitle = styled.span`
+  font-size: 12px;
+  color: ${({ theme }) => theme.colors.textMuted};
 `;
 
 export const LegendContainer = styled.div`

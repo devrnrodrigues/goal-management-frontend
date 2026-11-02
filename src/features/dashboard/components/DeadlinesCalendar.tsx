@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import type { DeadlinesCalendarProps } from './DeadlinesCalendar.types';
 import { CalendarDayItem } from './CalendarDayItem';
@@ -7,12 +7,16 @@ import {
   CalendarTopSection,
   CalendarHeader,
   MonthTitle,
-  CalendarNavArrow,
   WeekDaysRow,
   WeekDayLabel,
   DaysGrid,
   UpcomingSection,
+  UpcomingHeaderRow,
   UpcomingHeader,
+  UpcomingPagination,
+  PaginationArrow,
+  PaginationText,
+  DeadlinesList,
   DeadlineItem,
   DeadlineTitle,
   DeadlineBadge,
@@ -65,17 +69,26 @@ export const DeadlinesCalendar: React.FC<DeadlinesCalendarProps> = ({
 
   const deadlineDays = new Set(deadlines.map((d) => d.day));
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 3;
+  const totalPages = Math.ceil(deadlines.length / itemsPerPage) || 1;
+
+  useEffect(() => {
+    if (currentPage > totalPages) {
+      setCurrentPage(totalPages);
+    }
+  }, [totalPages, currentPage]);
+
+  const currentDeadlines = deadlines.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
   return (
     <CalendarCardContainer>
       <CalendarTopSection>
         <CalendarHeader>
-          <CalendarNavArrow type="button" aria-label="Mês anterior">
-            <ChevronLeft size={16} />
-          </CalendarNavArrow>
           <MonthTitle>Outubro 2026</MonthTitle>
-          <CalendarNavArrow type="button" aria-label="Próximo mês">
-            <ChevronRight size={16} />
-          </CalendarNavArrow>
         </CalendarHeader>
 
         <WeekDaysRow>
@@ -99,19 +112,45 @@ export const DeadlinesCalendar: React.FC<DeadlinesCalendarProps> = ({
       </CalendarTopSection>
 
       <UpcomingSection>
-        <UpcomingHeader>Prazos próximos</UpcomingHeader>
-        {deadlines.length === 0 ? (
-          <DeadlineItem>
-            <DeadlineTitle title="Nenhum prazo próximo">Nenhum prazo próximo</DeadlineTitle>
-          </DeadlineItem>
-        ) : (
-          deadlines.map((item) => (
-            <DeadlineItem key={item.id}>
-              <DeadlineTitle title={item.title}>{item.title}</DeadlineTitle>
-              <DeadlineBadge>{item.day}/{String(item.month).padStart(2, '0')}</DeadlineBadge>
+        <UpcomingHeaderRow>
+          <UpcomingHeader>Prazos próximos</UpcomingHeader>
+          {totalPages > 1 && (
+            <UpcomingPagination>
+              <PaginationArrow
+                type="button"
+                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                disabled={currentPage === 1}
+                aria-label="Página anterior"
+              >
+                <ChevronLeft size={13} />
+              </PaginationArrow>
+              <PaginationText>{currentPage}/{totalPages}</PaginationText>
+              <PaginationArrow
+                type="button"
+                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                disabled={currentPage === totalPages}
+                aria-label="Próxima página"
+              >
+                <ChevronRight size={13} />
+              </PaginationArrow>
+            </UpcomingPagination>
+          )}
+        </UpcomingHeaderRow>
+
+        <DeadlinesList>
+          {currentDeadlines.length === 0 ? (
+            <DeadlineItem>
+              <DeadlineTitle title="Nenhum prazo próximo">Nenhum prazo próximo</DeadlineTitle>
             </DeadlineItem>
-          ))
-        )}
+          ) : (
+            currentDeadlines.map((item) => (
+              <DeadlineItem key={item.id}>
+                <DeadlineTitle title={item.title}>{item.title}</DeadlineTitle>
+                <DeadlineBadge>{item.day}/{String(item.month).padStart(2, '0')}</DeadlineBadge>
+              </DeadlineItem>
+            ))
+          )}
+        </DeadlinesList>
       </UpcomingSection>
     </CalendarCardContainer>
   );

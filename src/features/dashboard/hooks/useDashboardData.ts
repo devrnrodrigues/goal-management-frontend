@@ -1,4 +1,5 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import {
   Target,
   TrendingUp,
@@ -147,123 +148,113 @@ const formatIsoDateToBr = (isoDate: string | null): string => {
   return `${parts[2]}/${parts[1]}/${parts[0]}`;
 };
 
+const mapApiResponseToOverviewData = (data: DashboardOverviewApiResponse) => {
+  const { metrics: m, focusGoals: fg, monthlyEvolution: me, upcomingDeadlines: ud } = data;
+
+  const mappedMetrics: DashboardMetric[] = [
+    {
+      id: 'm-1',
+      title: 'Metas ativas',
+      value: m.activeGoals.total,
+      subtitle: `+${m.activeGoals.addedThisMonth} adicionadas este mês`,
+      icon: Target,
+      variant: 'primary',
+    },
+    {
+      id: 'm-2',
+      title: 'Taxa de sucesso',
+      value: `${m.successRate.currentRate}%`,
+      subtitle: `${m.successRate.differenceFromLastMonth >= 0 ? '+' : ''}${m.successRate.differenceFromLastMonth}% vs. mês anterior`,
+      icon: TrendingUp,
+      variant: 'success',
+    },
+    {
+      id: 'm-3',
+      title: 'Ações de hoje',
+      value: `${m.todayActions.completed}/${m.todayActions.total}`,
+      subtitle: `${m.todayActions.total > 0 ? Math.round((m.todayActions.completed / m.todayActions.total) * 100) : 100}% concluídas hoje`,
+      icon: ListTodo,
+      variant: 'info',
+    },
+    {
+      id: 'm-4',
+      title: 'Metas em atenção',
+      value: m.attentionGoals.total,
+      subtitle: `${m.attentionGoals.dueNext7Days} prazos nos próximos 7 dias`,
+      icon: AlertTriangle,
+      variant: 'warning',
+    },
+    {
+      id: 'm-5',
+      title: 'Sequência (Streak)',
+      value: `${m.streak.currentStreak} dias`,
+      subtitle: `Recorde: ${m.streak.longestStreak} dias seguidos`,
+      icon: Flame,
+      variant: 'primary',
+    },
+    {
+      id: 'm-6',
+      title: 'Metas concluídas',
+      value: m.completedGoals.total,
+      subtitle: `+${m.completedGoals.completedThisQuarter} no último trimestre`,
+      icon: Trophy,
+      variant: 'success',
+    },
+  ];
+
+  const mappedFocusGoals: FocusGoal[] = fg.map((item) => ({
+    id: item.id,
+    title: item.title,
+    category: item.category,
+    progress: item.progress,
+    deadline: formatIsoDateToBr(item.deadline),
+    currentStep: item.currentStep,
+    priority: item.priority === 'URGENT' || item.priority === 'HIGH' ? 'Alta' : 'Média',
+  }));
+
+  const mappedDeadlines: CalendarDeadline[] = ud.map((item) => ({
+    id: item.id,
+    day: item.day,
+    month: item.month,
+    year: item.year,
+    title: item.title,
+    category: item.category,
+    priority: item.priority,
+  }));
+
+  return {
+    metrics: mappedMetrics,
+    focusGoals: mappedFocusGoals,
+    monthlyData: me,
+    upcomingDeadlines: mappedDeadlines,
+  };
+};
+
 export const useDashboardData = () => {
   const { isMock } = useDevMode();
   const [currentGoalIndex, setCurrentGoalIndex] = useState(0);
   const [selectedCalendarDay, setSelectedCalendarDay] = useState(() => new Date().getDate());
-  const [isLoading, setIsLoading] = useState(!isMock);
 
-  const [metrics, setMetrics] = useState<DashboardMetric[]>(isMock ? MOCK_METRICS : []);
-  const [focusGoals, setFocusGoals] = useState<FocusGoal[]>(isMock ? MOCK_FOCUS_GOALS : []);
-  const [monthlyData, setMonthlyData] = useState<MonthlyGoalData[]>(isMock ? MOCK_MONTHLY_DATA : []);
-  const [upcomingDeadlines, setUpcomingDeadlines] = useState<CalendarDeadline[]>(isMock ? MOCK_DEADLINES : []);
-
-  const mapApiResponseToState = (data: DashboardOverviewApiResponse) => {
-    const { metrics: m, focusGoals: fg, monthlyEvolution: me, upcomingDeadlines: ud } = data;
-
-    const mappedMetrics: DashboardMetric[] = [
-      {
-        id: 'm-1',
-        title: 'Metas ativas',
-        value: m.activeGoals.total,
-        subtitle: `+${m.activeGoals.addedThisMonth} adicionadas este mês`,
-        icon: Target,
-        variant: 'primary',
-      },
-      {
-        id: 'm-2',
-        title: 'Taxa de sucesso',
-        value: `${m.successRate.currentRate}%`,
-        subtitle: `${m.successRate.differenceFromLastMonth >= 0 ? '+' : ''}${m.successRate.differenceFromLastMonth}% vs. mês anterior`,
-        icon: TrendingUp,
-        variant: 'success',
-      },
-      {
-        id: 'm-3',
-        title: 'Ações de hoje',
-        value: `${m.todayActions.completed}/${m.todayActions.total}`,
-        subtitle: `${m.todayActions.total > 0 ? Math.round((m.todayActions.completed / m.todayActions.total) * 100) : 100}% concluídas hoje`,
-        icon: ListTodo,
-        variant: 'info',
-      },
-      {
-        id: 'm-4',
-        title: 'Metas em atenção',
-        value: m.attentionGoals.total,
-        subtitle: `${m.attentionGoals.dueNext7Days} prazos nos próximos 7 dias`,
-        icon: AlertTriangle,
-        variant: 'warning',
-      },
-      {
-        id: 'm-5',
-        title: 'Sequência (Streak)',
-        value: `${m.streak.currentStreak} dias`,
-        subtitle: `Recorde: ${m.streak.longestStreak} dias seguidos`,
-        icon: Flame,
-        variant: 'primary',
-      },
-      {
-        id: 'm-6',
-        title: 'Metas concluídas',
-        value: m.completedGoals.total,
-        subtitle: `+${m.completedGoals.completedThisQuarter} no último trimestre`,
-        icon: Trophy,
-        variant: 'success',
-      },
-    ];
-
-    const mappedFocusGoals: FocusGoal[] = fg.map((item) => ({
-      id: item.id,
-      title: item.title,
-      category: item.category,
-      progress: item.progress,
-      deadline: formatIsoDateToBr(item.deadline),
-      currentStep: item.currentStep,
-      priority: item.priority === 'URGENT' || item.priority === 'HIGH' ? 'Alta' : 'Média',
-    }));
-
-    const mappedDeadlines: CalendarDeadline[] = ud.map((item) => ({
-      id: item.id,
-      day: item.day,
-      month: item.month,
-      year: item.year,
-      title: item.title,
-      category: item.category,
-      priority: item.priority,
-    }));
-
-    setMetrics(mappedMetrics);
-    setFocusGoals(mappedFocusGoals);
-    setMonthlyData(me);
-    setUpcomingDeadlines(mappedDeadlines);
-  };
-
-  const loadData = useCallback(async () => {
-    if (isMock) {
-      setMetrics(MOCK_METRICS);
-      setFocusGoals(MOCK_FOCUS_GOALS);
-      setMonthlyData(MOCK_MONTHLY_DATA);
-      setUpcomingDeadlines(MOCK_DEADLINES);
-      return;
-    }
-
-    setIsLoading(true);
-    try {
+  const { data, isLoading, refetch } = useQuery({
+    queryKey: ['dashboard', 'overview', isMock],
+    queryFn: async () => {
+      if (isMock) {
+        return {
+          metrics: MOCK_METRICS,
+          focusGoals: MOCK_FOCUS_GOALS,
+          monthlyData: MOCK_MONTHLY_DATA,
+          upcomingDeadlines: MOCK_DEADLINES,
+        };
+      }
       const response = await dashboardApi.getOverview();
-      mapApiResponseToState(response);
-    } catch {
-      setMetrics([]);
-      setFocusGoals([]);
-      setMonthlyData([]);
-      setUpcomingDeadlines([]);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [isMock]);
+      return mapApiResponseToOverviewData(response);
+    },
+  });
 
-  useEffect(() => {
-    loadData();
-  }, [loadData]);
+  const metrics = data?.metrics ?? (isMock ? MOCK_METRICS : []);
+  const focusGoals = data?.focusGoals ?? (isMock ? MOCK_FOCUS_GOALS : []);
+  const monthlyData = data?.monthlyData ?? (isMock ? MOCK_MONTHLY_DATA : []);
+  const upcomingDeadlines = data?.upcomingDeadlines ?? (isMock ? MOCK_DEADLINES : []);
 
   const handlePrevGoal = () => {
     if (focusGoals.length <= 1) return;
@@ -294,7 +285,7 @@ export const useDashboardData = () => {
     upcomingDeadlines,
     selectedCalendarDay,
     isLoading,
-    refetch: loadData,
+    refetch,
     handlePrevGoal,
     handleNextGoal,
     handleSelectDay,
