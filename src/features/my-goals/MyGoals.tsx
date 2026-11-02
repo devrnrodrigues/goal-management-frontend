@@ -7,12 +7,14 @@ import {
   AddGoalModal,
   GoalConfigModal,
   GoalStatsBar,
+  MyGoalsSkeleton,
 } from './components';
 import { ConfirmDeleteModal } from '../shared';
 import { useMyGoals } from './useMyGoals';
 import type { SubTask, Task } from './types';
 import {
   GoalsPageArea,
+  MotionGoalsContentWrapper,
   CardGrid,
   GoalCardWrapper,
   ViewSelector,
@@ -21,10 +23,17 @@ import {
 
 export type { SubTask, Task };
 
+const fadeTransitionVariants = {
+  initial: { opacity: 0 },
+  animate: { opacity: 1 },
+  exit: { opacity: 0 },
+};
+
 export const MyGoals: React.FC = () => {
   const {
     tasks,
     isLoading,
+    isDetailLoading,
     currentPage,
     totalGoals,
     inProgressGoals,
@@ -67,6 +76,7 @@ export const MyGoals: React.FC = () => {
         <GoalDetailView
           key="task-view"
           task={selectedTask}
+          isLoading={isDetailLoading}
           onClose={() => setSelectedTaskId(null)}
           onAddTasks={handleAddSubtasks}
           onUpdateTasks={handleUpdateGoalTasks}
@@ -85,56 +95,80 @@ export const MyGoals: React.FC = () => {
             averageProgress={averageProgress}
           />
 
-          {!isLoading && tasks.length === 0 ? (
-            <EmptyStateContainer>
-              <Target size={42} />
-              <h3>Nenhuma meta cadastrada</h3>
-              <p>Comece adicionando uma meta para planejar e acompanhar seus objetivos.</p>
-            </EmptyStateContainer>
-          ) : (
-            <CardGrid id="cardGrid">
-              {currentTasks.map((task) => (
-                <GoalCardWrapper
-                  key={task.id || task.title}
-                  onClick={() => handleSelectGoal(task)}
-                >
-                  <GoalCard
-                    category={task.category}
-                    title={task.title}
-                    progress={task.progress}
-                    description={task.description}
-                    deadline={task.deadline}
-                    status={task.status}
-                    priority={task.priority}
-                    members={task.members}
-                    onOpenSettings={(tab, memberId) => handleOpenConfigModal(task, tab, memberId)}
-                  />
-                </GoalCardWrapper>
-              ))}
-            </CardGrid>
-          )}
+          <AnimatePresence mode="wait">
+            {isLoading ? (
+              <MotionGoalsContentWrapper
+                key="goals-skeleton-view"
+                variants={fadeTransitionVariants}
+                initial="initial"
+                animate="animate"
+                exit="exit"
+                transition={{ duration: 0.16, ease: 'easeOut' }}
+              >
+                <MyGoalsSkeleton />
+              </MotionGoalsContentWrapper>
+            ) : (
+              <MotionGoalsContentWrapper
+                key="goals-loaded-view"
+                variants={fadeTransitionVariants}
+                initial="initial"
+                animate="animate"
+                exit="exit"
+                transition={{ duration: 0.18, ease: 'easeOut' }}
+              >
+                {tasks.length === 0 ? (
+                  <EmptyStateContainer>
+                    <Target size={42} />
+                    <h3>Nenhuma meta cadastrada</h3>
+                    <p>Comece adicionando uma meta para planejar e acompanhar seus objetivos.</p>
+                  </EmptyStateContainer>
+                ) : (
+                  <CardGrid id="cardGrid">
+                    {currentTasks.map((task) => (
+                      <GoalCardWrapper
+                        key={task.id || task.title}
+                        onClick={() => handleSelectGoal(task)}
+                      >
+                        <GoalCard
+                          category={task.category}
+                          title={task.title}
+                          progress={task.progress}
+                          description={task.description}
+                          deadline={task.deadline}
+                          status={task.status}
+                          priority={task.priority}
+                          members={task.members}
+                          onOpenSettings={(tab, memberId) => handleOpenConfigModal(task, tab, memberId)}
+                        />
+                      </GoalCardWrapper>
+                    ))}
+                  </CardGrid>
+                )}
 
-          {totalPages > 1 && (
-            <ViewSelector>
-              <button
-                id="prevBtn"
-                type="button"
-                onClick={handlePrev}
-                disabled={currentPage === 1}
-              >
-                <ChevronLeft size={16} /> Voltar
-              </button>
-              <span id="pageIndicator">{currentPage} / {totalPages}</span>
-              <button
-                id="nextBtn"
-                type="button"
-                onClick={handleNext}
-                disabled={currentPage === totalPages}
-              >
-                Próximo <ChevronRight size={16} />
-              </button>
-            </ViewSelector>
-          )}
+                {totalPages > 1 && (
+                  <ViewSelector>
+                    <button
+                      id="prevBtn"
+                      type="button"
+                      onClick={handlePrev}
+                      disabled={currentPage === 1}
+                    >
+                      <ChevronLeft size={16} /> Voltar
+                    </button>
+                    <span id="pageIndicator">{currentPage} / {totalPages}</span>
+                    <button
+                      id="nextBtn"
+                      type="button"
+                      onClick={handleNext}
+                      disabled={currentPage === totalPages}
+                    >
+                      Próximo <ChevronRight size={16} />
+                    </button>
+                  </ViewSelector>
+                )}
+              </MotionGoalsContentWrapper>
+            )}
+          </AnimatePresence>
         </>
       )}
 

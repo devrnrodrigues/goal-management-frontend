@@ -12,3 +12,5 @@ export { GoalStatsBar } from './GoalStatsBar';
 export { GoalFilterToolbar } from './GoalFilterToolbar';
 export type { GoalStatusFilter } from './GoalFilterToolbar';
 export { GoalTaskModal } from './GoalTaskModal';
+export { MyGoalsSkeleton } from './MyGoalsSkeleton';
+export { GoalTasksSkeleton } from './GoalTasksSkeleton';

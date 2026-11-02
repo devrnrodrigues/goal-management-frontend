@@ -1,4 +1,5 @@
 import styled from 'styled-components';
+import { motion } from 'framer-motion';
 
 export const MainContentWrapper = styled.main`
   margin-left: 280px;
@@ -27,6 +28,13 @@ export const GoalsPageArea = styled.div`
   @media (max-width: 900px) {
     padding: 16px 0 24px 0;
   }
+`;
+
+export const MotionGoalsContentWrapper = styled(motion.div)`
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  width: 100%;
 `;
 
 export const GoalsHeader = styled.div`

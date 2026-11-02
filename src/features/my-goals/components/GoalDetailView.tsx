@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import { Search, X, Layers, CheckSquare } from 'lucide-react';
 import { AddTaskModal, UpdateTaskModal } from '../../task-board';
 import { ConfirmDeleteModal, getGoalPermissions } from '../../shared';
@@ -9,6 +9,7 @@ import { GoalDetailHero } from './GoalDetailHero';
 import { GoalTaskQuickAdd } from './GoalTaskQuickAdd';
 import { GoalTaskItem } from './GoalTaskItem';
 import { GoalTaskModal } from './GoalTaskModal';
+import { GoalTasksSkeleton } from './GoalTasksSkeleton';
 import {
   ViewContainer,
   WorkspaceGrid,
@@ -28,8 +29,15 @@ import {
   EmptyStateText,
 } from '../styles/GoalDetailView.styles';
 
+const fadeTransitionVariants = {
+  initial: { opacity: 0 },
+  animate: { opacity: 1 },
+  exit: { opacity: 0 },
+};
+
 export interface GoalDetailViewProps {
   task: Task;
+  isLoading?: boolean;
   onClose: () => void;
   onAddTasks?: (newTasks: SubTask[]) => void;
   onUpdateTasks?: (updatedTasks: SubTask[]) => void;
@@ -42,6 +50,7 @@ export interface GoalDetailViewProps {
 
 export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
   task,
+  isLoading = false,
   onClose,
   onAddTasks,
   onUpdateTasks,
@@ -204,61 +213,92 @@ export const GoalDetailView: React.FC<GoalDetailViewProps> = ({
               />
             )}
 
-            {filteredSubtasks.length > 0 ? (
-              <TasksListWrapper>
-                {filteredSubtasks.map((subtask, index) => {
-                  const effectivePriority: SubTaskPriority =
-                    subtask.priority || (index % 3 === 0 ? 'Alta' : index % 3 === 1 ? 'Média' : 'Baixa');
-                  const effectiveDeadline =
-                    subtask.deadline || `${(index + 2) * 5} dias`;
-                  const effectiveMembers =
-                    subtask.members || task.members?.slice(index % 2, (index % 2) + 2);
+            <AnimatePresence mode="wait">
+              {isLoading ? (
+                <motion.div
+                  key="tasks-skeleton"
+                  variants={fadeTransitionVariants}
+                  initial="initial"
+                  animate="animate"
+                  exit="exit"
+                  transition={{ duration: 0.16, ease: 'easeOut' }}
+                >
+                  <GoalTasksSkeleton />
+                </motion.div>
+              ) : filteredSubtasks.length > 0 ? (
+                <motion.div
+                  key="tasks-list"
+                  variants={fadeTransitionVariants}
+                  initial="initial"
+                  animate="animate"
+                  exit="exit"
+                  transition={{ duration: 0.18, ease: 'easeOut' }}
+                >
+                  <TasksListWrapper>
+                    {filteredSubtasks.map((subtask, index) => {
+                      const effectivePriority: SubTaskPriority =
+                        subtask.priority || (index % 3 === 0 ? 'Alta' : index % 3 === 1 ? 'Média' : 'Baixa');
+                      const effectiveDeadline =
+                        subtask.deadline || `${(index + 2) * 5} dias`;
+                      const effectiveMembers =
+                        subtask.members || task.members?.slice(index % 2, (index % 2) + 2);
 
-                  const effectiveColumnTitle =
-                    subtask.columnTitle ||
-                    subtask.status ||
-                    (subtask.completed
-                      ? 'Concluído'
-                      : index % 2 === 0
-                      ? 'A Fazer'
-                      : 'Em Andamento');
+                      const effectiveColumnTitle =
+                        subtask.columnTitle ||
+                        subtask.status ||
+                        (subtask.completed
+                          ? 'Concluído'
+                          : index % 2 === 0
+                          ? 'A Fazer'
+                          : 'Em Andamento');
 
-                  const displaySubtask: SubTask = {
-                    ...subtask,
-                    priority: effectivePriority,
-                    deadline: effectiveDeadline,
-                    members: effectiveMembers,
-                    columnTitle: effectiveColumnTitle,
-                  };
+                      const displaySubtask: SubTask = {
+                        ...subtask,
+                        priority: effectivePriority,
+                        deadline: effectiveDeadline,
+                        members: effectiveMembers,
+                        columnTitle: effectiveColumnTitle,
+                      };
 
-                  return (
-                    <GoalTaskItem
-                      key={subtask.id}
-                      subtask={displaySubtask}
-                      canManage={permissions.canManageTasks}
-                      onToggle={() => handleToggleSubtaskClick(subtask.id)}
-                      onDelete={() => handleOpenDeleteModal(subtask.id)}
-                      onEdit={handleOpenEditSubtask}
-                      onUpdate={onUpdateSingleTask}
-                    />
-                  );
-                })}
-              </TasksListWrapper>
-            ) : (
-              <EmptyStateBox>
-                <EmptyStateIcon>
-                  <CheckSquare size={24} />
-                </EmptyStateIcon>
-                <EmptyStateTitle>Nenhuma tarefa encontrada</EmptyStateTitle>
-                <EmptyStateText>
-                  {searchQuery
-                    ? 'Nenhuma tarefa corresponde à busca informada.'
-                    : permissions.canManageTasks
-                    ? 'Adicione sua primeira tarefa para esta meta utilizando o campo acima.'
-                    : 'Nenhuma tarefa cadastrada nesta meta.'}
-                </EmptyStateText>
-              </EmptyStateBox>
-            )}
+                      return (
+                        <GoalTaskItem
+                          key={subtask.id}
+                          subtask={displaySubtask}
+                          canManage={permissions.canManageTasks}
+                          onToggle={() => handleToggleSubtaskClick(subtask.id)}
+                          onDelete={() => handleOpenDeleteModal(subtask.id)}
+                          onEdit={handleOpenEditSubtask}
+                          onUpdate={onUpdateSingleTask}
+                        />
+                      );
+                    })}
+                  </TasksListWrapper>
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="tasks-empty"
+                  variants={fadeTransitionVariants}
+                  initial="initial"
+                  animate="animate"
+                  exit="exit"
+                  transition={{ duration: 0.18, ease: 'easeOut' }}
+                >
+                  <EmptyStateBox>
+                    <EmptyStateIcon>
+                      <CheckSquare size={24} />
+                    </EmptyStateIcon>
+                    <EmptyStateTitle>Nenhuma tarefa encontrada</EmptyStateTitle>
+                    <EmptyStateText>
+                      {searchQuery
+                        ? 'Nenhuma tarefa corresponde à busca informada.'
+                        : permissions.canManageTasks
+                        ? 'Adicione sua primeira tarefa para esta meta utilizando o campo acima.'
+                        : 'Nenhuma tarefa cadastrada nesta meta.'}
+                    </EmptyStateText>
+                  </EmptyStateBox>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </TaskListSection>
         </WorkspaceGrid>
       </ViewContainer>

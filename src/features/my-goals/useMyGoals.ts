@@ -1,10 +1,11 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import type { Task, SubTask } from './types';
 import type { GoalConfigData } from './components';
 import { initialTasks } from './constants/initialGoals';
 import { membersByTitle, defaultMembers } from './constants/members';
 import { useCardsPerPage } from './hooks';
-import { useDevMode, appToast } from '../shared';
+import { useDevMode, appToast, queryClient } from '../shared';
 import { goalsApi } from './api/goalsApi';
 import {
   mapSummaryToTask,
@@ -38,8 +39,8 @@ const mapTaskApiToSubTask = (t: TaskApiResponse): SubTask => ({
 export const useMyGoals = () => {
   const { isMock } = useDevMode();
   const [tasks, setTasks] = useState<Task[]>(isMock ? initialTasks : []);
-  const [isLoading, setIsLoading] = useState<boolean>(!isMock);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [isDetailLoading, setIsDetailLoading] = useState<boolean>(false);
+  const [errorMessage] = useState<string | null>(null);
 
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
@@ -51,30 +52,24 @@ export const useMyGoals = () => {
   const [highlightedMemberId, setHighlightedMemberId] = useState<string | null>(null);
   const [goalForConfig, setGoalForConfig] = useState<Task | null>(null);
 
-  const loadGoals = useCallback(async () => {
-    if (isMock) {
-      setTasks(initialTasks);
-      return;
-    }
-
-    setIsLoading(true);
-    setErrorMessage(null);
-
-    try {
+  const { data: serverGoals, isLoading: isQueryLoading } = useQuery({
+    queryKey: ['my-goals', 'list', isMock],
+    queryFn: async () => {
+      if (isMock) {
+        return initialTasks;
+      }
       const pageResponse = await goalsApi.listGoals(0, 50);
-      const mappedTasks = pageResponse.content.map(mapSummaryToTask);
-      setTasks(mappedTasks);
-    } catch {
-      appToast.error('Não foi possível carregar as metas do servidor.');
-      setTasks([]);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [isMock]);
+      return pageResponse.content.map(mapSummaryToTask);
+    },
+  });
 
   useEffect(() => {
-    loadGoals();
-  }, [loadGoals]);
+    if (serverGoals) {
+      setTasks(serverGoals);
+    }
+  }, [serverGoals]);
+
+  const isLoading = isQueryLoading && tasks.length === 0;
 
   useEffect(() => {
     const handleOpenModal = () => {
@@ -130,6 +125,8 @@ export const useMyGoals = () => {
       };
       setTasks([created, ...tasks]);
       setCurrentPage(1);
+      queryClient.invalidateQueries({ queryKey: ['my-goals'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
       appToast.success('Meta criada com sucesso!');
       return;
     }
@@ -165,6 +162,8 @@ export const useMyGoals = () => {
         ...prev,
       ]);
       setCurrentPage(1);
+      queryClient.invalidateQueries({ queryKey: ['my-goals'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
       appToast.success('Meta criada com sucesso!');
     } catch {
       appToast.error('Erro ao criar a meta no servidor.');
@@ -187,6 +186,8 @@ export const useMyGoals = () => {
       setIsDeleteModalOpen(false);
       setGoalToDeleteId(null);
       appToast.success('Meta excluída com sucesso!');
+      queryClient.invalidateQueries({ queryKey: ['my-goals'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
       return;
     }
 
@@ -197,6 +198,8 @@ export const useMyGoals = () => {
         setSelectedTaskId(null);
       }
       appToast.success('Meta excluída com sucesso!');
+      queryClient.invalidateQueries({ queryKey: ['my-goals'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
     } catch {
       appToast.error('Erro ao excluir a meta no servidor.');
     } finally {
@@ -209,6 +212,7 @@ export const useMyGoals = () => {
     setSelectedTaskId(task.id || null);
 
     if (!isMock && task.id) {
+      setIsDetailLoading(true);
       try {
         const [detail, taskList] = await Promise.all([
           goalsApi.getGoalById(task.id),
@@ -224,6 +228,8 @@ export const useMyGoals = () => {
           prev.map((t) => (t.id === task.id ? { ...t, ...detailedTask, subtasks, progress } : t))
         );
       } catch {
+      } finally {
+        setIsDetailLoading(false);
       }
     }
   };
@@ -377,6 +383,8 @@ export const useMyGoals = () => {
       setIsConfigModalOpen(false);
       setGoalForConfig(null);
       appToast.success('Meta excluída com sucesso!');
+      queryClient.invalidateQueries({ queryKey: ['my-goals'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
       return;
     }
 
@@ -387,6 +395,8 @@ export const useMyGoals = () => {
         setSelectedTaskId(null);
       }
       appToast.success('Meta excluída com sucesso!');
+      queryClient.invalidateQueries({ queryKey: ['my-goals'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
     } catch {
       appToast.error('Erro ao excluir a meta no servidor.');
     } finally {
@@ -586,6 +596,7 @@ export const useMyGoals = () => {
   return {
     tasks,
     isLoading,
+    isDetailLoading,
     errorMessage,
     currentPage,
     totalGoals,
