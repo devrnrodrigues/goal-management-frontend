@@ -1,4 +1,5 @@
-import { useState, useMemo, useEffect, useCallback } from 'react';
+import { useState, useMemo } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import {
   startOfMonth,
   endOfMonth,
@@ -189,39 +190,30 @@ export const useCalendar = () => {
   const { isMock } = useDevMode();
   const [currentMonthDate, setCurrentMonthDate] = useState<Date>(() => new Date());
   const [selectedDate, setSelectedDate] = useState<Date>(() => new Date());
-  const [realTasks, setRealTasks] = useState<CalendarTask[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(!isMock);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const loadRealCalendarTasks = useCallback(async () => {
-    if (isMock) return;
+  const year = currentMonthDate.getFullYear();
+  const month = currentMonthDate.getMonth() + 1;
 
-    setIsLoading(true);
-    setErrorMessage(null);
+  const { data: queryTasks, isLoading } = useQuery({
+    queryKey: ['calendar', 'tasks', year, month, isMock],
+    queryFn: async () => {
+      if (isMock) {
+        return buildMockTasks(currentMonthDate);
+      }
+      try {
+        return await calendarApi.getCalendarTasks(year, month);
+      } catch {
+        appToast.error('Não foi possível carregar as entregas no calendário.');
+        return [];
+      }
+    },
+  });
 
-    try {
-      const year = currentMonthDate.getFullYear();
-      const month = currentMonthDate.getMonth() + 1;
-      const tasks = await calendarApi.getCalendarTasks(year, month);
-      setRealTasks(tasks);
-    } catch {
-      appToast.error('Não foi possível carregar as entregas no calendário.');
-      setRealTasks([]);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [isMock, currentMonthDate]);
-
-  useEffect(() => {
-    loadRealCalendarTasks();
-  }, [loadRealCalendarTasks]);
+  const errorMessage = null;
 
   const activeTasks = useMemo(() => {
-    if (isMock) {
-      return buildMockTasks(currentMonthDate);
-    }
-    return realTasks;
-  }, [isMock, currentMonthDate, realTasks]);
+    return queryTasks ?? (isMock ? buildMockTasks(currentMonthDate) : []);
+  }, [queryTasks, isMock, currentMonthDate]);
 
   const tasksByDateKey = useMemo(() => {
     const map = new Map<string, CalendarTask[]>();
