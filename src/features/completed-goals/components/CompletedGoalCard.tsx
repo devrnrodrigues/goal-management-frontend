@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Target, CheckCircle2, Award, ChevronRight } from 'lucide-react';
+import { CheckCircle2, Award, ChevronRight } from 'lucide-react';
 import type { CompletedGoalItem } from '../types';
 import {
   Card,
@@ -60,7 +60,6 @@ export const CompletedGoalCard: React.FC<CompletedGoalCardProps> = ({
         <TitleCategoryGroup>
           <CategoryTag>{goal.category}</CategoryTag>
           <GoalNamePill>
-            <Target size={14} />
             <span>{goal.title}</span>
           </GoalNamePill>
         </TitleCategoryGroup>

@@ -1,4 +1,5 @@
-import { useState, useMemo, useEffect, useCallback } from 'react';
+import { useState, useMemo } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import type {
   CompletedGoalItem,
   CompletedGoalsFiltersState,
@@ -217,81 +218,72 @@ const INITIAL_COMPLETED_GOALS: CompletedGoalItem[] = [
 
 export const useCompletedGoals = () => {
   const { isMock } = useDevMode();
-  const [goals, setGoals] = useState<CompletedGoalItem[]>(isMock ? INITIAL_COMPLETED_GOALS : []);
   const [selectedGoal, setSelectedGoal] = useState<CompletedGoalItem | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(!isMock);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [filters, setFilters] = useState<CompletedGoalsFiltersState>({
     searchQuery: '',
     selectedCategory: 'all',
     sortBy: 'recent',
   });
 
-  const loadCompletedGoals = useCallback(async () => {
-    if (isMock) {
-      setGoals(INITIAL_COMPLETED_GOALS);
-      return;
-    }
+  const { data: serverGoals, isLoading } = useQuery({
+    queryKey: ['completed-goals', isMock],
+    queryFn: async () => {
+      if (isMock) {
+        return INITIAL_COMPLETED_GOALS;
+      }
+      try {
+        const pageRes = await goalsApi.listGoals(0, 50);
+        const completedGoals = pageRes.content.filter(
+          (g) => g.status === 'COMPLETED' || g.progress === 100
+        );
 
-    setIsLoading(true);
-    setErrorMessage(null);
+        const detailedPromises = completedGoals.map(async (g) => {
+          try {
+            const [tasks, members] = await Promise.all([
+              taskBoardApi.listTasks(g.id).catch(() => []),
+              goalsApi.listMembers(g.id).catch(() => []),
+            ]);
 
-    try {
-      const pageRes = await goalsApi.listGoals(0, 50);
-      const completedGoals = pageRes.content.filter(
-        (g) => g.status === 'COMPLETED' || g.progress === 100
-      );
+            const completedSubtasks: CompletedSubTask[] = tasks.map((t) => ({
+              id: t.id,
+              title: t.title,
+              completedAt: t.deadline ? formatDateToDisplay(t.deadline) : 'Concluído',
+              responsibleName: t.members?.[0]?.name,
+              responsibleAvatar: t.members?.[0]?.avatarUrl,
+            }));
 
-      const detailedPromises = completedGoals.map(async (g) => {
-        try {
-          const [tasks, members] = await Promise.all([
-            taskBoardApi.listTasks(g.id).catch(() => []),
-            goalsApi.listMembers(g.id).catch(() => []),
-          ]);
+            const item: CompletedGoalItem = {
+              id: g.id,
+              title: g.title,
+              category: g.category,
+              description: g.description || '',
+              completedDate: g.deadline ? formatDateToDisplay(g.deadline) : 'Recentemente',
+              initialDate: g.createdAt ? formatDateToDisplay(g.createdAt.slice(0, 10)) : '',
+              durationDays: 30,
+              totalSubtasks: tasks.length,
+              completedSubtasks: tasks.filter((t) => t.completed).length,
+              members: members.map(mapMemberToAvatar),
+              deliverablesSummary: g.description || 'Entregas finalizadas com sucesso.',
+              impactHighlight: 'Meta cumprida integralmente conforme o planejamento.',
+              subtasks: completedSubtasks,
+            };
+            return item;
+          } catch {
+            return null;
+          }
+        });
 
-          const completedSubtasks: CompletedSubTask[] = tasks.map((t) => ({
-            id: t.id,
-            title: t.title,
-            completedAt: t.deadline ? formatDateToDisplay(t.deadline) : 'Concluído',
-            responsibleName: t.members?.[0]?.name,
-            responsibleAvatar: t.members?.[0]?.avatarUrl,
-          }));
+        const resolved = await Promise.all(detailedPromises);
+        return resolved.filter((item): item is CompletedGoalItem => item !== null);
+      } catch {
+        appToast.error('Não foi possível carregar as metas concluídas.');
+        return [];
+      }
+    },
+  });
 
-          const item: CompletedGoalItem = {
-            id: g.id,
-            title: g.title,
-            category: g.category,
-            description: g.description || '',
-            completedDate: g.deadline ? formatDateToDisplay(g.deadline) : 'Recentemente',
-            initialDate: g.createdAt ? formatDateToDisplay(g.createdAt.slice(0, 10)) : '',
-            durationDays: 30,
-            totalSubtasks: tasks.length,
-            completedSubtasks: tasks.filter((t) => t.completed).length,
-            members: members.map(mapMemberToAvatar),
-            deliverablesSummary: g.description || 'Entregas finalizadas com sucesso.',
-            impactHighlight: 'Meta cumprida integralmente conforme o planejamento.',
-            subtasks: completedSubtasks,
-          };
-          return item;
-        } catch {
-          return null;
-        }
-      });
-
-      const resolved = await Promise.all(detailedPromises);
-      const valid = resolved.filter((item): item is CompletedGoalItem => item !== null);
-      setGoals(valid);
-    } catch {
-      appToast.error('Não foi possível carregar as metas concluídas.');
-      setGoals([]);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [isMock]);
-
-  useEffect(() => {
-    loadCompletedGoals();
-  }, [loadCompletedGoals]);
+  const goals = serverGoals ?? (isMock ? INITIAL_COMPLETED_GOALS : []);
+  const errorMessage = null;
 
   const availableCategories = useMemo(() => {
     const set = new Set<string>();
