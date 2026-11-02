@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { ThemeProvider } from 'styled-components';
+import { QueryClientProvider } from '@tanstack/react-query';
 import {
   theme,
   GlobalStyles,
@@ -10,6 +11,7 @@ import {
   isMockSession,
   clearAuthSession,
   ToastProvider,
+  queryClient,
 } from './features/shared';
 import { MainLayout } from './features/layout';
 import { MyGoals } from './features/my-goals';
@@ -97,23 +99,25 @@ export function App() {
   };
 
   return (
-    <ThemeProvider theme={theme}>
-      <GlobalStyles />
-      <ToastProvider>
-        {!isAuthenticated ? (
-          <AuthPage onLoginSuccess={handleLoginSuccess} />
-        ) : (
-          <MainLayout
-            activeNavItemId={activeTab}
-            onSelectNavItem={(id) => setActiveTab(id)}
-            onLogout={handleLogout}
-            onOpenAddGoal={handleOpenAddGoal}
-          >
-            {renderActivePage()}
-          </MainLayout>
-        )}
-      </ToastProvider>
-    </ThemeProvider>
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider theme={theme}>
+        <GlobalStyles />
+        <ToastProvider>
+          {!isAuthenticated ? (
+            <AuthPage onLoginSuccess={handleLoginSuccess} />
+          ) : (
+            <MainLayout
+              activeNavItemId={activeTab}
+              onSelectNavItem={(id) => setActiveTab(id)}
+              onLogout={handleLogout}
+              onOpenAddGoal={handleOpenAddGoal}
+            >
+              {renderActivePage()}
+            </MainLayout>
+          )}
+        </ToastProvider>
+      </ThemeProvider>
+    </QueryClientProvider>
   );
 }
 

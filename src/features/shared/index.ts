@@ -11,3 +11,4 @@ export * from './utils/avatarUtils';
 export * from './utils/goalPermissions';
 export * from './toast/toast.types';
 export { ToastProvider, useToast, appToast } from './toast/ToastContext';
+export { queryClient } from './queryClient';
