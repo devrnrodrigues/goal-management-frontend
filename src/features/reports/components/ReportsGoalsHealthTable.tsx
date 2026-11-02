@@ -1,5 +1,5 @@
-import React from 'react';
-import { Target } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import type { GoalHealthReportItem } from '../types';
 import {
   HealthCard,
@@ -15,6 +15,9 @@ import {
   MiniFill,
   ProgressText,
   HealthBadge,
+  TablePagination,
+  PaginationArrow,
+  PaginationText,
 } from '../styles/ReportsGoalsHealthTable.styles';
 
 interface ReportsGoalsHealthTableProps {
@@ -24,6 +27,19 @@ interface ReportsGoalsHealthTableProps {
 export const ReportsGoalsHealthTable: React.FC<ReportsGoalsHealthTableProps> = ({
   goals,
 }) => {
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 4;
+  const totalPages = Math.ceil(goals.length / itemsPerPage) || 1;
+
+  useEffect(() => {
+    if (currentPage > totalPages) {
+      setCurrentPage(totalPages);
+    }
+  }, [totalPages, currentPage]);
+
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const currentGoals = goals.slice(startIndex, startIndex + itemsPerPage);
+
   const getHealthBadgeLabel = (status: GoalHealthReportItem['healthStatus']) => {
     switch (status) {
       case 'completed':
@@ -43,6 +59,27 @@ export const ReportsGoalsHealthTable: React.FC<ReportsGoalsHealthTableProps> = (
     <HealthCard>
       <HealthHeader>
         <HealthTitle>Saúde e andamento das metas</HealthTitle>
+        {totalPages > 1 && (
+          <TablePagination>
+            <PaginationArrow
+              type="button"
+              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+              disabled={currentPage === 1}
+              aria-label="Página anterior"
+            >
+              <ChevronLeft size={14} />
+            </PaginationArrow>
+            <PaginationText>{currentPage} / {totalPages}</PaginationText>
+            <PaginationArrow
+              type="button"
+              onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+              disabled={currentPage === totalPages}
+              aria-label="Próxima página"
+            >
+              <ChevronRight size={14} />
+            </PaginationArrow>
+          </TablePagination>
+        )}
       </HealthHeader>
 
       <TableWrapper>
@@ -59,11 +96,10 @@ export const ReportsGoalsHealthTable: React.FC<ReportsGoalsHealthTableProps> = (
           </TableHead>
 
           <TableBody>
-            {goals.map((item) => (
+            {currentGoals.map((item) => (
               <tr key={item.id}>
                 <td>
                   <GoalNamePill title={item.goalTitle}>
-                    <Target size={11} />
                     {item.goalTitle}
                   </GoalNamePill>
                 </td>

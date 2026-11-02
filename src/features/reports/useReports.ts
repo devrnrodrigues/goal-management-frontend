@@ -1,4 +1,5 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import type {
   ReportPeriod,
   ReportFiltersState,
@@ -158,74 +159,73 @@ const DEFAULT_GOALS_HEALTH: GoalHealthReportItem[] = [
   },
 ];
 
+const mapReportResponseToData = (data: ReportApiResponse) => {
+  const mappedGoalsHealth: GoalHealthReportItem[] = data.goalsHealth.map((g) => ({
+    id: g.id,
+    goalTitle: g.goalTitle,
+    category: g.category,
+    progress: g.progress,
+    completedTasks: g.completedTasks,
+    totalTasks: g.totalTasks,
+    deadline: g.deadline,
+    healthStatus: (g.healthStatus === 'delayed'
+      ? 'delayed'
+      : g.healthStatus === 'at_risk'
+      ? 'at_risk'
+      : g.progress >= 100
+      ? 'completed'
+      : 'on_track') as GoalHealthReportItem['healthStatus'],
+  }));
+
+  return {
+    metrics: data.metrics,
+    velocityData: data.velocityData,
+    categoryDistribution: data.categoryDistribution,
+    priorityEfficiencies: data.priorityEfficiencies,
+    goalsHealth: mappedGoalsHealth,
+    availableCategories: data.availableCategories,
+  };
+};
+
 export const useReports = () => {
   const { isMock } = useDevMode();
   const [filters, setFilters] = useState<ReportFiltersState>(INITIAL_FILTERS);
-  const [isLoading, setIsLoading] = useState(!isMock);
 
-  const [metrics, setMetrics] = useState<ReportOverviewMetric[]>(isMock ? DEFAULT_METRICS : []);
-  const [velocityData, setVelocityData] = useState<MonthlyVelocityItem[]>(isMock ? DEFAULT_VELOCITY : []);
-  const [categoryDistribution, setCategoryDistribution] = useState<CategoryDistributionItem[]>(isMock ? DEFAULT_CATEGORIES : []);
-  const [priorityEfficiencies, setPriorityEfficiencies] = useState<PriorityEfficiencyItem[]>(isMock ? DEFAULT_PRIORITIES : []);
-  const [goalsHealth, setGoalsHealth] = useState<GoalHealthReportItem[]>(isMock ? DEFAULT_GOALS_HEALTH : []);
-  const [availableCategories, setAvailableCategories] = useState<string[]>([]);
+  const { data, isLoading, refetch } = useQuery({
+    queryKey: ['reports', 'overview', filters.period, filters.selectedCategory, isMock],
+    queryFn: async () => {
+      if (isMock) {
+        return {
+          metrics: DEFAULT_METRICS,
+          velocityData: DEFAULT_VELOCITY,
+          categoryDistribution: DEFAULT_CATEGORIES,
+          priorityEfficiencies: DEFAULT_PRIORITIES,
+          goalsHealth: DEFAULT_GOALS_HEALTH,
+          availableCategories: DEFAULT_CATEGORIES.map((c) => c.category),
+        };
+      }
+      try {
+        const response = await reportsApi.getReport(filters.period, filters.selectedCategory);
+        return mapReportResponseToData(response);
+      } catch {
+        return {
+          metrics: [],
+          velocityData: [],
+          categoryDistribution: [],
+          priorityEfficiencies: [],
+          goalsHealth: [],
+          availableCategories: [],
+        };
+      }
+    },
+  });
 
-  const mapApiResponseToState = (data: ReportApiResponse) => {
-    setMetrics(data.metrics);
-    setVelocityData(data.velocityData);
-    setCategoryDistribution(data.categoryDistribution);
-    setPriorityEfficiencies(data.priorityEfficiencies);
-    setAvailableCategories(data.availableCategories);
-
-    const mappedGoalsHealth: GoalHealthReportItem[] = data.goalsHealth.map((g) => ({
-      id: g.id,
-      goalTitle: g.goalTitle,
-      category: g.category,
-      progress: g.progress,
-      completedTasks: g.completedTasks,
-      totalTasks: g.totalTasks,
-      deadline: g.deadline,
-      healthStatus: (g.healthStatus === 'delayed'
-        ? 'delayed'
-        : g.healthStatus === 'at_risk'
-        ? 'at_risk'
-        : g.progress >= 100
-        ? 'completed'
-        : 'on_track') as GoalHealthReportItem['healthStatus'],
-    }));
-    setGoalsHealth(mappedGoalsHealth);
-  };
-
-  const loadReport = useCallback(async () => {
-    if (isMock) {
-      setMetrics(DEFAULT_METRICS);
-      setVelocityData(DEFAULT_VELOCITY);
-      setCategoryDistribution(DEFAULT_CATEGORIES);
-      setPriorityEfficiencies(DEFAULT_PRIORITIES);
-      setGoalsHealth(DEFAULT_GOALS_HEALTH);
-      setAvailableCategories(DEFAULT_CATEGORIES.map((c) => c.category));
-      return;
-    }
-
-    setIsLoading(true);
-    try {
-      const response = await reportsApi.getReport(filters.period, filters.selectedCategory);
-      mapApiResponseToState(response);
-    } catch {
-      setMetrics([]);
-      setVelocityData([]);
-      setCategoryDistribution([]);
-      setPriorityEfficiencies([]);
-      setGoalsHealth([]);
-      setAvailableCategories([]);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [isMock, filters.period, filters.selectedCategory]);
-
-  useEffect(() => {
-    loadReport();
-  }, [loadReport]);
+  const metrics = data?.metrics ?? (isMock ? DEFAULT_METRICS : []);
+  const velocityData = data?.velocityData ?? (isMock ? DEFAULT_VELOCITY : []);
+  const categoryDistribution = data?.categoryDistribution ?? (isMock ? DEFAULT_CATEGORIES : []);
+  const priorityEfficiencies = data?.priorityEfficiencies ?? (isMock ? DEFAULT_PRIORITIES : []);
+  const goalsHealth = data?.goalsHealth ?? (isMock ? DEFAULT_GOALS_HEALTH : []);
+  const availableCategories = data?.availableCategories ?? (isMock ? DEFAULT_CATEGORIES.map((c) => c.category) : []);
 
   const handlePeriodChange = (period: ReportPeriod) => {
     setFilters((prev) => ({ ...prev, period }));
@@ -264,7 +264,7 @@ export const useReports = () => {
     goalsHealth,
     availableCategories,
     isLoading,
-    refetch: loadReport,
+    refetch,
     handlePeriodChange,
     handleCategoryChange,
     handleExport,

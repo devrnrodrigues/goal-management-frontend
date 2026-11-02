@@ -5,3 +5,4 @@ export * from './ReportsCategoryDistribution';
 export * from './ReportsTeamPerformance';
 export * from './ReportsPriorityEfficiency';
 export * from './ReportsGoalsHealthTable';
+export * from './ReportsSkeleton';

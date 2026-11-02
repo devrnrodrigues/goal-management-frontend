@@ -153,3 +153,37 @@ export const HealthBadge = styled.span<{ $status: 'on_track' | 'at_risk' | 'dela
     }
   }};
 `;
+
+export const TablePagination = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 6px;
+`;
+
+export const PaginationArrow = styled.button`
+  background: transparent;
+  border: none;
+  padding: 2px 4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: ${({ theme }) => theme.colors.textSecondary};
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+
+  &:hover:not(:disabled) {
+    opacity: 0.7;
+  }
+
+  &:disabled {
+    opacity: 0.25;
+    cursor: not-allowed;
+  }
+`;
+
+export const PaginationText = styled.span`
+  font-size: 12px;
+  font-weight: 600;
+  color: ${({ theme }) => theme.colors.textMuted};
+  user-select: none;
+`;

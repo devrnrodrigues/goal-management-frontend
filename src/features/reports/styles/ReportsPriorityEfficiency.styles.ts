@@ -9,6 +9,7 @@ export const PriorityCard = styled.div`
   flex-direction: column;
   gap: 16px;
   width: 100%;
+  height: 100%;
   min-width: 0;
   box-sizing: border-box;
 
@@ -34,8 +35,10 @@ export const PriorityTitle = styled.h3`
 export const PriorityList = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  justify-content: center;
+  gap: 14px;
   width: 100%;
+  flex: 1;
 `;
 
 export const PriorityRow = styled.div`
