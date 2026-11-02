@@ -8,6 +8,7 @@ import {
   TaskBoardColumn,
   ColumnModal,
   TaskModal,
+  TaskBoardSkeleton,
 } from './components';
 import { ConfirmDeleteModal, getGoalPermissions } from '../shared';
 import {
@@ -15,6 +16,13 @@ import {
   BoardColumnsRow,
   EmptyBoardNotice,
 } from './TaskBoard.styles';
+import { MotionBoardContentWrapper } from './styles/TaskBoardSkeleton.styles';
+
+const fadeTransitionVariants = {
+  initial: { opacity: 0 },
+  animate: { opacity: 1 },
+  exit: { opacity: 0 },
+};
 
 export const TaskBoard: React.FC = () => {
   const {
@@ -125,42 +133,66 @@ export const TaskBoard: React.FC = () => {
         canManage={permissions.canManageTasks}
       />
 
-      {!isLoading && !activeGoal ? (
-        <EmptyBoardNotice>
-          <Target size={42} />
-          <h3>Nenhuma meta encontrada</h3>
-          <p>Crie uma meta primeiro na aba "Metas" para gerenciar tarefas no quadro.</p>
-        </EmptyBoardNotice>
-      ) : (
-        <BoardColumnsRow
-          axis="x"
-          values={columns}
-          onReorder={handleReorderColumns}
-        >
-          {columns.map((column) => (
-            <TaskBoardColumn
-              key={column.id}
-              column={column}
-              tasks={tasksByColumn[column.id] || []}
-              allColumns={columns}
-              canManage={permissions.canManageTasks}
-              draggedTaskId={draggedTaskId}
-              onColumnDragEnd={handleColumnDragEnd}
-              onAddTaskToColumn={handleOpenAddTask}
-              onEditColumn={handleOpenEditColumn}
-              onDeleteColumn={handleDeleteColumn}
-              onToggleComplete={handleToggleTaskComplete}
-              onEditTask={handleOpenEditTask}
-              onDeleteTask={handleRequestDeleteTask}
-              onMoveTask={handleMoveTask}
-              onDragStartTask={handleTaskDragStart}
-              onDragEndTask={handleTaskDragEnd}
-              onDropTaskOnTask={handleTaskDropOnTask}
-              onDropTaskOnColumn={handleTaskDropOnColumn}
-            />
-          ))}
-        </BoardColumnsRow>
-      )}
+      <AnimatePresence mode="wait">
+        {isLoading ? (
+          <MotionBoardContentWrapper
+            key="task-board-skeleton-view"
+            variants={fadeTransitionVariants}
+            initial="initial"
+            animate="animate"
+            exit="exit"
+            transition={{ duration: 0.16, ease: 'easeOut' }}
+          >
+            <TaskBoardSkeleton />
+          </MotionBoardContentWrapper>
+        ) : (
+          <MotionBoardContentWrapper
+            key="task-board-loaded-view"
+            variants={fadeTransitionVariants}
+            initial="initial"
+            animate="animate"
+            exit="exit"
+            transition={{ duration: 0.18, ease: 'easeOut' }}
+          >
+            {!activeGoal ? (
+              <EmptyBoardNotice>
+                <Target size={42} />
+                <h3>Nenhuma meta encontrada</h3>
+                <p>Crie uma meta primeiro na aba "Metas" para gerenciar tarefas no quadro.</p>
+              </EmptyBoardNotice>
+            ) : (
+              <BoardColumnsRow
+                axis="x"
+                values={columns}
+                onReorder={handleReorderColumns}
+              >
+                {columns.map((column) => (
+                  <TaskBoardColumn
+                    key={column.id}
+                    column={column}
+                    tasks={tasksByColumn[column.id] || []}
+                    allColumns={columns}
+                    canManage={permissions.canManageTasks}
+                    draggedTaskId={draggedTaskId}
+                    onColumnDragEnd={handleColumnDragEnd}
+                    onAddTaskToColumn={handleOpenAddTask}
+                    onEditColumn={handleOpenEditColumn}
+                    onDeleteColumn={handleDeleteColumn}
+                    onToggleComplete={handleToggleTaskComplete}
+                    onEditTask={handleOpenEditTask}
+                    onDeleteTask={handleRequestDeleteTask}
+                    onMoveTask={handleMoveTask}
+                    onDragStartTask={handleTaskDragStart}
+                    onDragEndTask={handleTaskDragEnd}
+                    onDropTaskOnTask={handleTaskDropOnTask}
+                    onDropTaskOnColumn={handleTaskDropOnColumn}
+                  />
+                ))}
+              </BoardColumnsRow>
+            )}
+          </MotionBoardContentWrapper>
+        )}
+      </AnimatePresence>
 
       <AnimatePresence>
         {isColumnModalOpen && (

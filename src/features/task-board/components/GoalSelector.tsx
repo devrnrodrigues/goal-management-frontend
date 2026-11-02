@@ -117,11 +117,16 @@ export const GoalSelector: React.FC<GoalSelectorProps> = ({
               </GoalOptionItem>
             )}
 
-            {filtered.map((g) => {
-              const isSelected = Boolean(activeGoal && (g.id === activeGoal.id || g.title === activeGoal.title));
+            {filtered.map((g, index) => {
+              const isSelected = Boolean(
+                activeGoal &&
+                  (activeGoal.id && g.id
+                    ? g.id === activeGoal.id
+                    : g.title === activeGoal.title)
+              );
               return (
                 <GoalOptionItem
-                  key={g.id || g.title}
+                  key={g.id || `${g.title}-${index}`}
                   type="button"
                   $isActive={isSelected}
                   onClick={() => handleSelect(g)}

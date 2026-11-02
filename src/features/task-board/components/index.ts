@@ -6,3 +6,4 @@ export { ColumnModal } from './ColumnModal';
 export { TaskModal } from './TaskModal';
 export { AddTaskModal } from './AddTaskModal';
 export { UpdateTaskModal } from './UpdateTaskModal';
+export { TaskBoardSkeleton } from './TaskBoardSkeleton';

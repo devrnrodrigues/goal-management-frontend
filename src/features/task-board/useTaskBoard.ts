@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect, useCallback, useRef } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import type { Task } from '../my-goals/types';
 import { initialTasks } from '../my-goals/constants/initialGoals';
 import { membersByTitle, defaultMembers } from '../my-goals/constants/members';
@@ -23,8 +24,8 @@ const defaultColumns: BoardColumn[] = [
 export const useTaskBoard = () => {
   const { isMock } = useDevMode();
   const [availableGoals, setAvailableGoals] = useState<Task[]>(isMock ? initialTasks : []);
-  const [isLoading, setIsLoading] = useState<boolean>(!isMock);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [isBoardLoading, setIsBoardLoading] = useState<boolean>(false);
+  const [errorMessage] = useState<string | null>(null);
 
   const [activeGoal, setActiveGoal] = useState<ActiveGoalInfo | null>(() => {
     if (!isMock) return null;
@@ -78,6 +79,7 @@ export const useTaskBoard = () => {
   const loadGoalBoard = useCallback(async (goalId: string) => {
     if (isMock) return;
 
+    setIsBoardLoading(true);
     try {
       const [colRes, taskRes] = await Promise.all([
         taskBoardApi.listColumns(goalId),
@@ -92,91 +94,73 @@ export const useTaskBoard = () => {
       appToast.error('Não foi possível carregar as colunas e tarefas do quadro.');
       setColumns([]);
       setTasks([]);
+    } finally {
+      setIsBoardLoading(false);
     }
   }, [isMock]);
 
-  const loadGoals = useCallback(async () => {
-    if (isMock) {
-      setAvailableGoals(initialTasks);
-      const first = initialTasks[0];
-      if (first) {
-        setActiveGoal({
-          id: first.id || 'goal-default',
-          title: first.title,
-          category: first.category,
-          deadline: first.deadline,
-          progress: first.progress,
-        });
-        setColumns(defaultColumns);
-        const firstColId = defaultColumns[0].id;
-        const goalMembers = membersByTitle[first.title] || defaultMembers;
-        setTasks(
-          (first.subtasks || []).map((st, index) => {
-            const priorities: TaskPriority[] = ['Alta', 'Média', 'Baixa'];
-            const p = priorities[index % priorities.length];
-            const memberSubset = goalMembers.slice(index % 2, (index % 2) + 2);
-
-            return {
-              id: `task-${st.id}`,
-              title: st.title.replace(/;$/, ''),
-              description: st.description,
-              completed: st.completed,
-              priority: p,
-              columnId: firstColId,
-              goalId: first.id,
-              deadline: first.deadline ? `${(index + 2) * 5} dias` : undefined,
-              attachmentsCount: (index * 3) % 8,
-              commentsCount: (index * 4) % 15,
-              members: memberSubset,
-            };
-          })
-        );
+  const { data: serverGoals, isLoading: isGoalsLoading } = useQuery({
+    queryKey: ['task-board', 'goals', isMock],
+    queryFn: async () => {
+      if (isMock) {
+        return initialTasks;
       }
-      setIsLoading(false);
-      return;
-    }
+      try {
+        const pageRes = await goalsApi.listGoals(0, 50);
+        return pageRes.content.map(mapSummaryToTask);
+      } catch {
+        appToast.error('Não foi possível carregar as metas.');
+        return [];
+      }
+    },
+  });
 
-    setIsLoading(true);
-    setErrorMessage(null);
-
-    try {
-      const pageRes = await goalsApi.listGoals(0, 50);
-      const mapped = pageRes.content.map(mapSummaryToTask);
-      setAvailableGoals(mapped);
-
-      if (mapped.length > 0) {
-        const first = mapped[0];
-        const newActive: ActiveGoalInfo = {
+  useEffect(() => {
+    if (serverGoals) {
+      setAvailableGoals(serverGoals);
+      if (!activeGoal && serverGoals.length > 0) {
+        const first = serverGoals[0];
+        setActiveGoal({
           id: first.id || '',
           title: first.title,
           category: first.category,
           deadline: first.deadline,
           progress: first.progress,
           userRole: first.userRole,
-        };
-        setActiveGoal(newActive);
-        if (first.id) {
-          await loadGoalBoard(first.id);
-        }
-      } else {
-        setActiveGoal(null);
-        setColumns([]);
-        setTasks([]);
-      }
-    } catch {
-      appToast.error('Não foi possível carregar as metas.');
-      setAvailableGoals([]);
-      setActiveGoal(null);
-      setColumns([]);
-      setTasks([]);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [isMock, loadGoalBoard]);
+        });
+        if (!isMock && first.id) {
+          loadGoalBoard(first.id);
+        } else if (isMock) {
+          setColumns(defaultColumns);
+          const firstColId = defaultColumns[0].id;
+          const goalMembers = membersByTitle[first.title] || defaultMembers;
+          setTasks(
+            (first.subtasks || []).map((st, index) => {
+              const priorities: TaskPriority[] = ['Alta', 'Média', 'Baixa'];
+              const p = priorities[index % priorities.length];
+              const memberSubset = goalMembers.slice(index % 2, (index % 2) + 2);
 
-  useEffect(() => {
-    loadGoals();
-  }, [loadGoals]);
+              return {
+                id: `task-${st.id}`,
+                title: st.title.replace(/;$/, ''),
+                description: st.description,
+                completed: st.completed,
+                priority: p,
+                columnId: firstColId,
+                goalId: first.id,
+                deadline: first.deadline ? `${(index + 2) * 5} dias` : undefined,
+                attachmentsCount: (index * 3) % 8,
+                commentsCount: (index * 4) % 15,
+                members: memberSubset,
+              };
+            })
+          );
+        }
+      }
+    }
+  }, [serverGoals, isMock, activeGoal, loadGoalBoard]);
+
+  const isLoading = (isGoalsLoading || isBoardLoading) && columns.length === 0;
 
   const handleSelectGoal = async (goalInput: string | Task) => {
     if (typeof goalInput === 'string') {
