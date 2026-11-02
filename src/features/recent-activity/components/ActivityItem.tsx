@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Clock, Target, ArrowRight } from 'lucide-react';
+import { Clock, ArrowRight } from 'lucide-react';
 import type { ActivityItem as ActivityItemType } from '../types';
 import {
   ItemCard,
@@ -128,7 +128,6 @@ export const ActivityItem: React.FC<ActivityItemProps> = ({ activity }) => {
           {activity.goalTitle && (
             <>
               <GoalContextPill>
-                <Target size={11} />
                 {activity.goalTitle}
               </GoalContextPill>
               <DotSeparator>•</DotSeparator>

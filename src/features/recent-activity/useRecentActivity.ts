@@ -1,4 +1,5 @@
-import { useState, useMemo, useEffect, useCallback } from 'react';
+import { useState, useMemo } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import type {
   ActivityItem,
   ActivityFiltersState,
@@ -268,50 +269,48 @@ const DATE_GROUPS: DateGroupLabel[] = ['Hoje', 'Ontem', 'Esta semana', 'Anterior
 
 export const useRecentActivity = () => {
   const { isMock } = useDevMode();
-  const [activities, setActivities] = useState<ActivityItem[]>(isMock ? INITIAL_ACTIVITIES : []);
-  const [goalOptions, setGoalOptions] = useState<GoalFilterOption[]>(isMock ? GOAL_OPTIONS : []);
-  const [isLoading, setIsLoading] = useState<boolean>(!isMock);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [filters, setFilters] = useState<ActivityFiltersState>(INITIAL_FILTERS);
 
-  const loadData = useCallback(async () => {
-    if (isMock) {
-      setActivities(INITIAL_ACTIVITIES);
-      setGoalOptions(GOAL_OPTIONS);
-      return;
-    }
+  const { data, isLoading } = useQuery({
+    queryKey: ['recent-activity', isMock],
+    queryFn: async () => {
+      if (isMock) {
+        return {
+          activities: INITIAL_ACTIVITIES,
+          goalOptions: GOAL_OPTIONS,
+        };
+      }
+      try {
+        const [actRes, goalsRes] = await Promise.all([
+          activityApi.listUserActivities(0, 50),
+          goalsApi.listGoals(0, 50),
+        ]);
 
-    setIsLoading(true);
-    setErrorMessage(null);
+        const items = actRes.content.map(mapActivityToItem);
+        const uniqueItems = items.filter(
+          (item, index, self) => index === self.findIndex((i) => i.id === item.id)
+        );
+        const options: GoalFilterOption[] = goalsRes.content.map((g) => ({
+          id: g.title,
+          title: g.title,
+        }));
+        return {
+          activities: uniqueItems,
+          goalOptions: options,
+        };
+      } catch {
+        appToast.error('Não foi possível carregar as atividades recentes.');
+        return {
+          activities: [],
+          goalOptions: [],
+        };
+      }
+    },
+  });
 
-    try {
-      const [actRes, goalsRes] = await Promise.all([
-        activityApi.listUserActivities(0, 50),
-        goalsApi.listGoals(0, 50),
-      ]);
-
-      const items = actRes.content.map(mapActivityToItem);
-      const uniqueItems = items.filter(
-        (item, index, self) => index === self.findIndex((i) => i.id === item.id)
-      );
-      setActivities(uniqueItems);
-      const options: GoalFilterOption[] = goalsRes.content.map((g) => ({
-        id: g.title,
-        title: g.title,
-      }));
-      setGoalOptions(options);
-    } catch {
-      appToast.error('Não foi possível carregar as atividades recentes.');
-      setActivities([]);
-      setGoalOptions([]);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [isMock]);
-
-  useEffect(() => {
-    loadData();
-  }, [loadData]);
+  const activities = data?.activities ?? (isMock ? INITIAL_ACTIVITIES : []);
+  const goalOptions = data?.goalOptions ?? (isMock ? GOAL_OPTIONS : []);
+  const errorMessage = null;
 
   const handleSearchChange = (search: string) => {
     setFilters((prev) => ({ ...prev, search }));
