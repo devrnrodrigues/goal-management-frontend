@@ -53,18 +53,6 @@ export const BrandContainer = styled.div`
   gap: 12px;
 `;
 
-export const BrandLogoWrapper = styled.div`
-  width: 44px;
-  height: 44px;
-  border-radius: ${({ theme }) => theme.radii.md};
-  background-color: rgba(255, 255, 255, 0.2);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: ${({ theme }) => theme.colors.sidebarText};
-  flex-shrink: 0;
-`;
-
 export const BrandTitle = styled.h1`
   font-size: 20px;
   font-weight: 700;

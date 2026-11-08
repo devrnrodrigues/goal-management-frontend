@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { Compass } from 'lucide-react';
 import type { SidebarProps } from './types';
 import { useSidebarNav } from './hooks/useSidebarNav';
 import { SidebarNavItem } from './SidebarNavItem';
@@ -8,7 +7,6 @@ import {
   SidebarOverlay,
   HeaderSection,
   BrandContainer,
-  BrandLogoWrapper,
   BrandTitle,
   SectionBadge,
   NavList,
@@ -42,9 +40,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
       <SidebarContainer $isOpen={isOpen}>
         <HeaderSection>
           <BrandContainer>
-            <BrandLogoWrapper>
-              <Compass size={24} />
-            </BrandLogoWrapper>
             <BrandTitle>Gestão de metas</BrandTitle>
           </BrandContainer>
           <SectionBadge>Painel de gestão</SectionBadge>
